@@ -8,14 +8,18 @@ public class Puzzle {
 	public static void main(String[] args) {
 		Puzzle p = new Puzzle(2,2,"aaaabbbaacccbddc");
 		Puzzle p2 = new Puzzle(2,2,"baaabbbaacccbddc");
-		Puzzle p3 = Puzzle.randomPuzzle(2, 2);
+		Puzzle p3 = Puzzle.randomPuzzle(4, 4);
+		Puzzle p4 = Puzzle.randomPuzzle(4, 4);
 		Wheel w1 = new Wheel("popi");
 		Wheel w2 = new Wheel("papi");
 		System.out.println(w1.equals(w2));
 		System.out.println(p3);
+		System.out.println("-----------");
+		System.out.println(p4);
 		System.out.println("p equals p2="+p.equals(p2));
 		System.out.println("p isResolved="+isResolved(p));
 		System.out.println("p2 isResolved="+isResolved(p2));
+		System.out.println("p3 equals p4="+p3.equals(p4));
 	}
 	static class Wheel{
 		private LinkedList<Character> ll = new LinkedList<Character>();
@@ -42,16 +46,16 @@ public class Puzzle {
 			}
 			this.offset = offset;
 		}
-		public Character readNorth(){
+		public char readNorth(){
 			return ll.get(offset);
 		}
-		public Character readEast(){
+		public char readEast(){
 			return ll.get((offset+1)%4);
 		}
-		public Character readSouth(){
+		public char readSouth(){
 			return ll.get((offset+2)%4);
 		}
-		public Character readWest(){
+		public char readWest(){
 			return ll.get((offset+3)%4);
 		}
 		private void setNorth(Character c){
@@ -80,7 +84,7 @@ public class Puzzle {
 			for(int i=0; i<4;i++){
 				w.rotate();
 				this.rotate();
-				if(w.readSouth() != w.readSouth()){
+				if(w.readSouth() != this.readSouth()){
 					eq=false;
 				}
 			}
@@ -130,7 +134,7 @@ public class Puzzle {
 	}
 	public static Puzzle randomPuzzle(int width,int height){
 		Wheel puzzle[][] = new Wheel[width][height];
-		Random rand = new Random(1);
+		Random rand = new Random();
 		for(int i = 0;i<width;i++){
 			for(int j = 0;j<height;j++){
 				puzzle[i][j]=new Wheel("aaaa");
@@ -207,16 +211,16 @@ public class Puzzle {
 		}
 		for(int i = 0;i<p.getWidth();i++){
 			for(int j = 0;j<p.getHeight();j++){
-				if(j+1<p.getHeight() && puzzle[i][j].readSouth() != puzzle[i][j+1].readNorth()){
+				if(j+1<p.getHeight() || puzzle[i][j].readSouth() != puzzle[i][j+1].readNorth()){
 					return false;
 				}
-				if(i+1<p.getWidth() && puzzle[i][j].readEast() != puzzle[i+1][j].readWest()){
+				if(i+1<p.getWidth() || puzzle[i][j].readEast() != puzzle[i+1][j].readWest()){
 					return false;
 				}
-				if(j-1>=0 && puzzle[i][j].readNorth() != puzzle[i][j-1].readSouth()){
+				if(j-1>=0 || puzzle[i][j].readNorth() != puzzle[i][j-1].readSouth()){
 					return false;
 				}
-				if(i-1>=0 && puzzle[i][j].readWest() != puzzle[i-1][j].readEast()){
+				if(i-1>=0 || puzzle[i][j].readWest() != puzzle[i-1][j].readEast()){
 					return false;
 				}
 			}
