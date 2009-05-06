@@ -6,7 +6,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.TCSMPCommandParser;
 import fr.umlv.tcsmp.states.TCSMPState;
-import fr.umlv.tcsmp.utils.ErrorReply;
+import fr.umlv.tcsmp.utils.ErrorReplies;
 
 public class TeloState implements TCSMPState {
 
@@ -16,7 +16,7 @@ public class TeloState implements TCSMPState {
 		String [] args = TCSMPCommandParser.parse(bb);
 		
 		if (args.length != 2 || args[0].equals("TELO") == false) {
-			return new Response(ErrorReply.unknowCommand("TELO", args[0]));
+			return new Response(ErrorReplies.unknowCommand("TELO", args[0]));
 		}
 
 		/**
