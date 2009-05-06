@@ -29,6 +29,12 @@ public class TeloState implements TCSMPState {
 		 */
 		proto.setState(new FromState());
 		
+		/** 
+		 * Change domain
+		 * XXX: check domain.
+		 */
+		proto.setDomain(args[1]);
+		
 		/**
 		 * Create response buffer.
 		 */
