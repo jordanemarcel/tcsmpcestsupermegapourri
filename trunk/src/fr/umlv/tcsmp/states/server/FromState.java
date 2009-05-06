@@ -21,7 +21,7 @@ public class FromState implements TCSMPState {
 		/**
 		 * Change state
 		 */
-		proto.setState(new FromState());
+		proto.setState(new RctpState());
 		
 		/** 
 		 * Set from
