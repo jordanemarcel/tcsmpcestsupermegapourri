@@ -16,6 +16,8 @@ public class Puzzle {
 		System.out.println(p3);
 		System.out.println("-----------");
 		System.out.println(p4);
+		System.out.println("-----------");
+		System.out.println(p);
 		System.out.println("p equals p2="+p.equals(p2));
 		System.out.println("p isResolved="+isResolved(p));
 		System.out.println("p2 isResolved="+isResolved(p2));
@@ -211,16 +213,24 @@ public class Puzzle {
 		}
 		for(int i = 0;i<p.getWidth();i++){
 			for(int j = 0;j<p.getHeight();j++){
-				if(j+1<p.getHeight() || puzzle[i][j].readSouth() != puzzle[i][j+1].readNorth()){
+				if(j+1<p.getHeight())
+					continue;
+				if(i+1<p.getWidth())
+					continue;
+				if(j-1>=0)
+					continue;
+				if(i-1>=0)
+					continue;
+				if( puzzle[i][j].readSouth() != puzzle[i][j+1].readNorth()){
 					return false;
 				}
-				if(i+1<p.getWidth() || puzzle[i][j].readEast() != puzzle[i+1][j].readWest()){
+				if( puzzle[i][j].readEast() != puzzle[i+1][j].readWest()){
 					return false;
 				}
-				if(j-1>=0 || puzzle[i][j].readNorth() != puzzle[i][j-1].readSouth()){
+				if( puzzle[i][j].readNorth() != puzzle[i][j-1].readSouth()){
 					return false;
 				}
-				if(i-1>=0 || puzzle[i][j].readWest() != puzzle[i-1][j].readEast()){
+				if(puzzle[i][j].readWest() != puzzle[i-1][j].readEast()){
 					return false;
 				}
 			}
