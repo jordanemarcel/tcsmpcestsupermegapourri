@@ -2,6 +2,7 @@ package fr.umlv.tcsmp.states.server;
 
 import java.nio.ByteBuffer;
 
+import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.TCSMPCommandParser;
 import fr.umlv.tcsmp.states.TCSMPState;
@@ -10,7 +11,7 @@ public class TeloState implements TCSMPState {
 
 	private static String banner = "Hello I'm the TCSMP server. Nice to meet you.";
 	
-	public Response processCommand(ByteBuffer bb) {
+	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		
 		String [] args = TCSMPCommandParser.parse(bb);
 		
@@ -31,7 +32,17 @@ public class TeloState implements TCSMPState {
 		 * va bien ?
 		 */
 		
+		/**
+		 * Change state
+		 */
+		proto.setState(new FromState());
+		
+		/**
+		 * Create response buffer.
+		 */
+		ByteBuffer response = ByteBuffer.wrap(new String("200-TCSMPv1\r\n200 OK " + banner + "\r\n").getBytes());
+		
 		System.out.println("ok");
-		return new Response();
+		return new Response(response);
 	}
 }

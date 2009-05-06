@@ -2,6 +2,7 @@ package fr.umlv.tcsmp.states;
 
 import java.nio.ByteBuffer;
 
+import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 
 /**
@@ -14,5 +15,5 @@ public interface TCSMPState {
 	 * return a Response englobbing several useful things
 	 * for the proto. handler.
 	 */
-	public Response processCommand(ByteBuffer bb);
+	public Response processCommand(Protocol proto, ByteBuffer bb);
 }
