@@ -1,4 +1,4 @@
-package fr.umlv.ir.rezo;
+package fr.umlv.tcsmp.puzzle;
 
 import java.util.LinkedList;
 import java.util.List;
