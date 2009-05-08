@@ -29,7 +29,7 @@ public class RctpState implements TCSMPState {
 		 *  
 		 */
 		
-		if (args.length != 2 || (args[0].equals("RCTP") == false && args[0].equals("APZL"))) {
+		if (args.length > 2 || (args[0].equals("RCPT") == false && args[0].equals("APZL") == false)) {
 			return new Response(ErrorReplies.unknowCommand("RCTP|APZL", args[0]));
 		}
 		

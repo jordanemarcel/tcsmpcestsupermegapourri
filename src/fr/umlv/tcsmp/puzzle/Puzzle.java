@@ -204,6 +204,21 @@ public class Puzzle {
 		}
 		return globalsb.toString();
 	}
+	
+	public String lineString() {
+		StringBuilder globalsb = new StringBuilder();
+		for(int j = 0;j<height;j++){
+			for(int i = 0;i<width;i++){
+				Wheel w = wheels.get(i+j*height);
+				globalsb.append(w.readNorth());
+				globalsb.append(w.readSouth());
+				globalsb.append(w.readWest());
+				globalsb.append(w.readEast());
+			}
+		}
+		return globalsb.toString();
+	}
+	
 	public static boolean isResolved(Puzzle p){
 		Wheel puzzle[][] = new Wheel[p.getWidth()][p.getHeight()];
 		for(int i = 0;i<p.getWidth();i++){
