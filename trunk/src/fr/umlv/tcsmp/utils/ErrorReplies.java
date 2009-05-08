@@ -5,6 +5,6 @@ import java.nio.ByteBuffer;
 public class ErrorReplies {
 
 	public static ByteBuffer unknowCommand(String expected, String received) {
-		return ByteBuffer.wrap(new String("500 Invalid command (Found is " + received + " but expected is " + expected).getBytes());
+		return ByteBuffer.wrap(new String("500 Invalid command (Found is " + received + " but expected is " + expected + ")\r\n").getBytes());
 	}
 }

@@ -11,7 +11,7 @@ public class ServerStateTest {
 
 	private static void printBB(Response res) {
 		if (res.hasDest()) {
-			System.out.print(res.getDest() + " -> " + new String(res.getResponse().array()));
+			System.out.println(res.getDest() + " -> " + new String(res.getResponse().array()));
 		}
 		else {
 			System.out.print(new String(res.getResponse().array()));
@@ -55,6 +55,22 @@ public class ServerStateTest {
 		String rcpt = "RCPT <foobar@biniou.com>";
 		System.out.println(rcpt);
 		bb = ByteBuffer.wrap(rcpt.getBytes());
+		printBB(p.doIt(bb));
+		
+		/**
+		 * APZL
+		 */
+		String apzl = "APZL";
+		System.out.println(apzl);
+		bb = ByteBuffer.wrap(apzl.getBytes());
+		printBB(p.doIt(bb));
+		
+		/**
+		 * MAIL
+		 */
+		String mail = "MAIL";
+		System.out.println(mail);
+		bb = ByteBuffer.wrap(mail.getBytes());
 		printBB(p.doIt(bb));
 	}
 }
