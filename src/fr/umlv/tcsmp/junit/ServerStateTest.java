@@ -10,24 +10,29 @@ import fr.umlv.tcsmp.states.server.TeloState;
 public class ServerStateTest {
 
 	private static void printBB(Response res) {
-		System.out.print(new String(res.getResponse().array()));
+		if (res.hasDest()) {
+			System.out.print(res.getDest() + " -> " + new String(res.getResponse().array()));
+		}
+		else {
+			System.out.print(new String(res.getResponse().array()));
+		}
 	}
-	
+
 	public static void main(String[] args) {
-		
+
 		ByteBuffer bb;
-		
+
 		/**
 		 * Assume that we have received a connection.
 		 */
-		
-		
+
+
 		/**
 		 * BANNER.
 		 */
 		Protocol p = new Protocol(new BannerState());
 		printBB(p.doIt(null));
-		
+
 		/**
 		 * TELO
 		 */
@@ -42,6 +47,14 @@ public class ServerStateTest {
 		String from = "FROM <foobar@clem1.be>";
 		System.out.println(from);
 		bb = ByteBuffer.wrap(from.getBytes());
+		printBB(p.doIt(bb));
+
+		/**
+		 * RCPT
+		 */
+		String rcpt = "RCPT <foobar@biniou.com>";
+		System.out.println(rcpt);
+		bb = ByteBuffer.wrap(rcpt.getBytes());
 		printBB(p.doIt(bb));
 	}
 }
