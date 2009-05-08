@@ -1,4 +1,4 @@
-package fr.umlv.tcsmp.proto;
+package fr.umlv.tcsmp.utils;
 
 import java.nio.ByteBuffer;
 import java.text.ParseException;
@@ -28,4 +28,16 @@ public class TCSMPParser {
 		
 		throw new ParseException(mail + " is not a valid email address", 0);
 	}
+	
+	/**
+	 * @return the user associated to the email address. 
+	 */
+	public static String parseUser(String mail) throws ParseException {
+		Matcher matcher = emailrx.matcher(mail);
+		if(matcher.matches())
+			return matcher.group(1);
+		
+		throw new ParseException(mail + " is not a valid email address", 0);
+	}
+	
 }

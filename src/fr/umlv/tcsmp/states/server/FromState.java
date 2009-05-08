@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
-import fr.umlv.tcsmp.proto.TCSMPParser;
 import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
+import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class FromState implements TCSMPState {
 
