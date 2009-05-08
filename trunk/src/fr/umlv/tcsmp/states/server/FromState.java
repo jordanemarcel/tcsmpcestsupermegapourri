@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
-import fr.umlv.tcsmp.proto.TCSMPCommandParser;
+import fr.umlv.tcsmp.proto.TCSMPParser;
 import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 
@@ -12,7 +12,7 @@ public class FromState implements TCSMPState {
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
-		String [] args = TCSMPCommandParser.parse(bb);
+		String [] args = TCSMPParser.parse(bb);
 
 		if (args.length != 2 || args[0].equals("FROM") == false) {
 			return new Response(ErrorReplies.unknowCommand("FROM", args[0]));
