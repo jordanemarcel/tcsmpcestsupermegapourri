@@ -72,5 +72,23 @@ public class ServerStateTest {
 		System.out.println(mail);
 		bb = ByteBuffer.wrap(mail.getBytes());
 		printBB(p.doIt(bb));
+		
+		/**
+		 * DATA
+		 */
+		String data = "TUPUDUKU SERVER TCSMP.\r\n.\r\n";
+		System.out.println(data);
+		bb = ByteBuffer.wrap(data.getBytes());
+		printBB(p.doIt(bb));
+		
+		/**
+		 * PKEY
+		 */
+		String pkey = "PKEY mydomain 20,20 MOULLLLEFRIIIITTTE\r\n";
+		System.out.println(pkey);
+		bb = ByteBuffer.wrap(pkey.getBytes());
+		printBB(p.doIt(bb));
+		
+		
 	}
 }

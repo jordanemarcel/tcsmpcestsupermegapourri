@@ -11,8 +11,11 @@ public class Protocol {
 	private String from;
 	private String domain;
 	
+	private final StringBuilder mail;
+	
 	public Protocol(TCSMPState defaultState) {
 		state = defaultState;
+		mail = new StringBuilder();
 	}
 	
 	public Response doIt(ByteBuffer bb) {
@@ -37,5 +40,9 @@ public class Protocol {
 	
 	public String getDomain() {
 		return domain;
+	}
+	
+	public void mail(String line) {
+		mail.append(line);
 	}
 }

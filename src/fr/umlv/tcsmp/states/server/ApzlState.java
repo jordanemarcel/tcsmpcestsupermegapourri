@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
+import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
@@ -38,7 +39,6 @@ public class ApzlState implements TCSMPState {
 
 		/* Forward command */
 		
-		/* XXX: ALL means forwarding to all domain RCPT'ed */
-		return new Response(bb, "ALL");
+		return new Response(bb, ResponseAction.RELAYALL);
 	}
 }
