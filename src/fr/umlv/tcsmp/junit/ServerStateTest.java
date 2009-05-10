@@ -11,7 +11,7 @@ public class ServerStateTest {
 
 	private static void printBB(Response res) {
 		if (res.hasDest()) {
-			System.out.println(res.getDest() + " -> " + new String(res.getResponse().array()));
+			System.out.print(res.getDest() + " -> " + new String(res.getResponse().array()));
 		}
 		else {
 			System.out.print(new String(res.getResponse().array()));

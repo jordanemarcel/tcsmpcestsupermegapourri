@@ -20,11 +20,6 @@ public class TeloServerState implements TCSMPState {
 		}
 
 		/**
-		 * XXX: Comment va-t-on faire pour changer de state ici ?
-		 * Faut passer le protocole en param ? (Ce que je fais la)
-		 */
-		
-		/**
 		 * Change state
 		 */
 		proto.setState(new FromServerState());
