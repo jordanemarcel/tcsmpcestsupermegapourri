@@ -10,7 +10,7 @@ import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
-public class ApzlState implements TCSMPState {
+public class ApzlServerState implements TCSMPState {
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
@@ -23,7 +23,7 @@ public class ApzlState implements TCSMPState {
 		/**
 		 * Change state
 		 */
-		proto.setState(new MailState());
+		proto.setState(new MailServerState());
 		
 		/**
 		 * Check on the domain.

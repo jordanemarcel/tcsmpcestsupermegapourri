@@ -8,7 +8,7 @@ import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
-public class TeloState implements TCSMPState {
+public class TeloServerState implements TCSMPState {
 
 	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
@@ -27,7 +27,7 @@ public class TeloState implements TCSMPState {
 		/**
 		 * Change state
 		 */
-		proto.setState(new FromState());
+		proto.setState(new FromServerState());
 		
 		/** 
 		 * Change domain

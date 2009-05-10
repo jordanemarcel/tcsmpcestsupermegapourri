@@ -9,7 +9,7 @@ import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
-public class RctpState implements TCSMPState {
+public class RctpServerState implements TCSMPState {
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
@@ -35,7 +35,7 @@ public class RctpState implements TCSMPState {
 		
 		if (args[0].equals("APZL")) {
 			/* bypass normal procedings */
-			TCSMPState apzlState = new ApzlState();
+			TCSMPState apzlState = new ApzlServerState();
 			proto.setState(apzlState);
 			return apzlState.processCommand(proto, bb);
 		}

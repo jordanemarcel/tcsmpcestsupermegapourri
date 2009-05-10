@@ -9,7 +9,7 @@ import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
-public class MailState implements TCSMPState {
+public class MailServerState implements TCSMPState {
 	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		String [] args = TCSMPParser.parse(bb);
@@ -21,7 +21,7 @@ public class MailState implements TCSMPState {
 		/**
 		 * Change state
 		 */
-		proto.setState(new DataState());
+		proto.setState(new DataServerState());
 		
 		/**
 		 * Check for forward or not

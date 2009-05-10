@@ -7,7 +7,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.states.TCSMPState;
 
-public class DataState implements TCSMPState {
+public class DataServerState implements TCSMPState {
 
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		
@@ -21,7 +21,7 @@ public class DataState implements TCSMPState {
 			String line = sc.nextLine();
 			proto.mail(line + "\r\n");
 			if (line.equals(".")) {
-				proto.setState(new PkeyState());
+				proto.setState(new PkeyServerState());
 				ByteBuffer response = ByteBuffer.wrap("250 OK\r\n".getBytes());
 				return new Response(response);
 			}
