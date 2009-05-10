@@ -8,7 +8,7 @@ import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
-public class FromState implements TCSMPState {
+public class FromServerState implements TCSMPState {
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
@@ -21,7 +21,7 @@ public class FromState implements TCSMPState {
 		/**
 		 * Change state
 		 */
-		proto.setState(new RctpState());
+		proto.setState(new RctpServerState());
 		
 		/** 
 		 * Set from
