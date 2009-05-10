@@ -34,7 +34,7 @@ public class RctpServerState implements TCSMPState {
 		}
 		
 		if (args[0].equals("APZL")) {
-			/* bypass normal procedings */
+			/* bypass normal proccessings */
 			TCSMPState apzlState = new ApzlServerState();
 			proto.setState(apzlState);
 			return apzlState.processCommand(proto, bb);
@@ -45,8 +45,19 @@ public class RctpServerState implements TCSMPState {
 		try {
 			dest = TCSMPParser.parseDomain(args[1]);
 		} catch (ParseException e) {
-			System.out.println(args[1] + " is invalid.");
-			/* XXX create an error reply for the client */
+			ByteBuffer response = ByteBuffer.wrap("501 Not a valid address.".getBytes());
+			return new Response(response);
+		}
+		
+		/**
+		 * XXX: Here we have to see if we have to forward
+		 * command or if we catch it. 
+		 */
+		
+		if (dest.equals("mydomain")) {
+			/** XXX: see if user exists here ? */
+			ByteBuffer response = ByteBuffer.wrap("250 OK".getBytes());
+			return new Response(response);
 		}
 		
 		/* bb will be forwarded to the dest domain */
