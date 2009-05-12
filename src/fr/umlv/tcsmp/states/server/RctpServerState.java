@@ -24,7 +24,7 @@ public class RctpServerState extends TCSMPState {
 		
 		send = true;
 		
-		String [] args = TCSMPParser.parse(bb);
+		String [] args = TCSMPParser.parseCommand(bb);
 		
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
