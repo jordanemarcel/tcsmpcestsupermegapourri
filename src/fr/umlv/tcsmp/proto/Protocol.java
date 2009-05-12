@@ -7,6 +7,8 @@ import fr.umlv.tcsmp.states.TCSMPState;
 public class Protocol {
 
 	private TCSMPState state;
+	private ProtocolMode protocolMode;
+	private int protocolPort = 26;
 	
 	private String from;
 	private String domain;
@@ -16,6 +18,23 @@ public class Protocol {
 	public Protocol(TCSMPState defaultState) {
 		state = defaultState;
 		mail = new StringBuilder();
+	}
+	
+	public Protocol(TCSMPState defaultState, int protocolPort) {
+		this(defaultState);
+		this.protocolPort = protocolPort;
+	}
+	
+	public int getProtocolPort() {
+		return protocolPort;
+	}
+	
+	public void setProtocolMode(ProtocolMode protocolMode) {
+		this.protocolMode = protocolMode;
+	}
+	
+	public ProtocolMode getProtocolMode() {
+		return protocolMode;
 	}
 	
 	public Response doIt(ByteBuffer bb) {
