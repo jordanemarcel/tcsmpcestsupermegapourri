@@ -16,6 +16,10 @@ public class Response {
 		this(bb, null, ResponseAction.REPLY);
 	}
 	
+	public Response(ResponseAction action) {
+		this(null, null, action);
+	}
+	
 	public Response(ByteBuffer bb, String dest) {
 		this(bb, dest, ResponseAction.RELAY);
 	}

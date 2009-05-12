@@ -10,5 +10,6 @@ public enum ResponseAction {
 	CLOSE,
 	/* relay the buffer to all dest servers */
 	RELAYALL,
-	
+	/* continue reading */
+	CONTINUEREAD,
 }

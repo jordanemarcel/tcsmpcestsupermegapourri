@@ -21,7 +21,14 @@ public abstract class TCSMPState {
 	/**
 	 * Return a new default state for a server.
 	 */
-	public TCSMPState newDefaultServerState() {
+	public static TCSMPState newDefaultServerState() {
 		return new BannerServerState();
+	}
+
+	/**
+	 * Return a new default state for a client 
+	 */
+	public static TCSMPState newDefaultClientState() {
+		return null;
 	}
 }
