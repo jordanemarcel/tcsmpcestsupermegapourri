@@ -6,6 +6,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
+import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class BannerServerState extends TCSMPState {
 
@@ -20,6 +21,9 @@ public class BannerServerState extends TCSMPState {
 		}
 		
 		send = true;
-		return new Response(ByteBuffer.wrap(banner.getBytes())); 
+		System.out.println(bb.limit());
+		bb.clear();
+		bb.put(TCSMPParser.encode(banner));
+		return new Response(ResponseAction.REPLY); 
 	}
 }

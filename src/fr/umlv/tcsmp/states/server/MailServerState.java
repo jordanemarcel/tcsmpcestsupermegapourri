@@ -32,19 +32,25 @@ public class MailServerState extends TCSMPState {
 		}
 		
 		if (args.length != 1 || args[0].equals("MAIL") == false) {
-			return new Response(ErrorReplies.unknowCommand("MAIL", args[0]));
+			bb.clear();
+			bb.put(ErrorReplies.unknowCommand("MAIL", args[0]));
+			return new Response(ResponseAction.REPLY);
 		}
 
 		/**
 		 * Check for forwarding or not
 		 */
 		if (proto.isRelay() == false) {
-			ByteBuffer response = ByteBuffer.wrap("354 Start mail input; end with <CRLF>.<CRLF>\r\n".getBytes());
-			return new Response(response);
+			bb.clear();
+			bb.put(TCSMPParser.encode("354 Start mail input; end with <CRLF>.<CRLF>\r\n"));
+			return new Response(ResponseAction.REPLY);
 		}
 		
+		/* relay the original message */
+		bb.flip();
+		
 		/* relay to all instead */
-		return new Response(bb, ResponseAction.RELAYALL);
+		return new Response(ResponseAction.RELAYALL);
 	}
 
 }

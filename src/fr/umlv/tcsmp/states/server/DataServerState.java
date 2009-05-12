@@ -5,12 +5,20 @@ import java.util.Scanner;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
+import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
+import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class DataServerState extends TCSMPState {
 
+	private boolean send = false;
+	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
-		
+	
+		if (send) {
+			proto.setState(new PkeyServerState());
+			return new Response(ResponseAction.READ);
+		}
 		/*
 		 * A fuking state \o/
 		 * Append data in string builder inside the proto ?
@@ -21,13 +29,14 @@ public class DataServerState extends TCSMPState {
 			String line = sc.nextLine();
 			proto.mail(line + "\r\n");
 			if (line.equals(".")) {
-				proto.setState(new PkeyServerState());
-				ByteBuffer response = ByteBuffer.wrap("250 OK\r\n".getBytes());
-				return new Response(response);
+				bb.clear();
+				bb.put(TCSMPParser.encode("250 OK\r\n"));
+				send = true;
+				return new Response(ResponseAction.REPLY);
 			}
 		}
 		
-		/* no data to send, return null */
-		return null;
+		/* no data to send, read more */
+		return new Response(ResponseAction.READ);
 	}
 }
