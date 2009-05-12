@@ -14,20 +14,12 @@ public class RctpServerState extends TCSMPState {
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		String [] args = TCSMPParser.parse(bb);
-
-		/**
-		 * ICI on va s'amuser puisque on ne switch pas forcement de
-		 * state.
-		 * 
-		 * Qu'est ce qu'on fait ?
-		 * 
-		 * 1 solution:
-		 * 
-		 * 	- on accept ici la commande APZL.
-		 *  - si on lit un APZL, on passe le state en APZL
-		 *  - on appelle processCommand du state APZL avec le bb qu'on a lu
-		 *  
-		 */
+		
+		if (args.length == 1 && args[0].equals("QUIT")) {
+			TCSMPState t = new QuitServerState();
+			proto.setState(t);
+			return t.processCommand(proto, bb);
+		}
 		
 		if (args.length > 2 || (args[0].equals("RCPT") == false && args[0].equals("APZL") == false)) {
 			return new Response(ErrorReplies.unknowCommand("RCTP|APZL", args[0]));

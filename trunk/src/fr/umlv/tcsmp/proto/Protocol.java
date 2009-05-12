@@ -52,6 +52,7 @@ public class Protocol {
 
 	public Protocol newProtocol() {
 		Protocol pr;
+		
 		switch (protocolMode) {
 		case CLIENT:
 			pr = new Protocol(TCSMPState.newDefaultClientState());
@@ -62,6 +63,7 @@ public class Protocol {
 		default:
 			return null;
 		}
+		
 		pr.domain = domain;
 		pr.from = from;
 		pr.mail.append(mail);

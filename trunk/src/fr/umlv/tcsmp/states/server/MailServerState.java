@@ -14,6 +14,12 @@ public class MailServerState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		String [] args = TCSMPParser.parse(bb);
 
+		if (args.length == 1 && args[0].equals("QUIT")) {
+			TCSMPState t = new QuitServerState();
+			proto.setState(t);
+			return t.processCommand(proto, bb);
+		}
+		
 		if (args.length != 1 || args[0].equals("MAIL") == false) {
 			return new Response(ErrorReplies.unknowCommand("MAIL", args[0]));
 		}

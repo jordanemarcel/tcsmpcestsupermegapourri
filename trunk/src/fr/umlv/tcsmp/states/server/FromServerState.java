@@ -14,6 +14,12 @@ public class FromServerState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		String [] args = TCSMPParser.parse(bb);
 
+		if (args.length == 1 && args[0].equals("QUIT")) {
+			TCSMPState t = new QuitServerState();
+			proto.setState(t);
+			return t.processCommand(proto, bb);
+		}
+		
 		if (args.length != 2 || args[0].equals("FROM") == false) {
 			return new Response(ErrorReplies.unknowCommand("FROM", args[0]));
 		}
