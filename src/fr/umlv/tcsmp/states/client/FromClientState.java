@@ -44,6 +44,7 @@ public class FromClientState extends TCSMPState {
 				proto.setState(new RctpClientState());
 				bb.clear();
 				return proto.doIt(bb);
+				// TODO RESPONSE CODES
 			default:
 				throw new AssertionError("Pouet");
 			}
