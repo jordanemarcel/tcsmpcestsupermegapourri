@@ -12,8 +12,18 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class ApzlServerState extends TCSMPState {
 
+	private boolean send = false;
+	
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
+		
+		if (send) {
+			proto.setState(new MailServerState());
+			return new Response(ResponseAction.READ);
+		}
+
+		send = true;
+		
 		String [] args = TCSMPParser.parse(bb);
 
 		if (args.length == 1 && args[0].equals("QUIT")) {
@@ -25,11 +35,6 @@ public class ApzlServerState extends TCSMPState {
 		if (args.length != 1 || args[0].equals("APZL") == false) {
 			return new Response(ErrorReplies.unknowCommand("APZL", args[0]));
 		}
-
-		/**
-		 * Change state
-		 */
-		proto.setState(new MailServerState());
 		
 		/**
 		 * Check on the domain.

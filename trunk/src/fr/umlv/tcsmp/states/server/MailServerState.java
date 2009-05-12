@@ -12,7 +12,17 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class MailServerState extends TCSMPState {
 	
+	private boolean send = false;
+	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
+		
+		if (send) {
+			proto.setState(new DataServerState());
+			return new Response(ResponseAction.READ);
+		}
+		
+		send = true;
+		
 		String [] args = TCSMPParser.parse(bb);
 
 		if (args.length == 1 && args[0].equals("QUIT")) {
@@ -25,11 +35,6 @@ public class MailServerState extends TCSMPState {
 			return new Response(ErrorReplies.unknowCommand("MAIL", args[0]));
 		}
 
-		/**
-		 * Change state
-		 */
-		proto.setState(new DataServerState());
-		
 		/**
 		 * Check for forwarding or not
 		 */

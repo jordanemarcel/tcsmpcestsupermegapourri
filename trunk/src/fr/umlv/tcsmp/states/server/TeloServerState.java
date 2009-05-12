@@ -4,14 +4,23 @@ import java.nio.ByteBuffer;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
+import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class TeloServerState extends TCSMPState {
 
+	private boolean send = false;
 	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
+		
+		if (send) {
+			proto.setState(new FromServerState());
+			return new Response(ResponseAction.READ);
+		}
+		
+		send = true;
 		
 		String [] args = TCSMPParser.parse(bb);
 		
@@ -31,14 +40,8 @@ public class TeloServerState extends TCSMPState {
 			return new Response(ErrorReplies.unknowCommand("TELO", args[0]));
 		}
 
-		/**
-		 * Change state
-		 */
-		proto.setState(new FromServerState());
-		
 		/** 
 		 * Change domain
-		 * XXX: check domain.
 		 */
 		proto.setClientDomain(args[1]);
 		
