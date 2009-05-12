@@ -1,27 +1,21 @@
 package fr.umlv.tcsmp.puzzle;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+
 public class Puzzle {
 	public static void main(String[] args) {
-		Puzzle p = new Puzzle(2,2,"aaaabbbaacccbddc");
-		Puzzle p2 = new Puzzle(2,2,"baaabbbaacccbddc");
-		Puzzle p3 = Puzzle.randomPuzzle(4, 4);
-		Puzzle p4 = Puzzle.randomPuzzle(4, 4);
-		Wheel w1 = new Wheel("popi");
-		Wheel w2 = new Wheel("papi");
-		System.out.println(w1.equals(w2));
-		System.out.println(p3);
-		System.out.println("-----------");
-		System.out.println(p4);
-		System.out.println("-----------");
+		Puzzle p = Puzzle.randomPuzzle(6, 6);
+		shuffle(p);
 		System.out.println(p);
-		System.out.println("p equals p2="+p.equals(p2));
-		System.out.println("p isResolved="+isResolved(p));
-		System.out.println("p2 isResolved="+isResolved(p2));
-		System.out.println("p3 equals p4="+p3.equals(p4));
+		resolve(p);
+		System.out.println(p);
 	}
 	static class Wheel{
 		private LinkedList<Character> ll = new LinkedList<Character>();
@@ -37,6 +31,12 @@ public class Puzzle {
 			offset++;
 			if(offset>3){
 				offset=0;
+			}
+		}
+		public void unrotate(){
+			offset--;
+			if(offset<0){
+				offset=3;
 			}
 		}
 		public int getOffset() {
@@ -96,9 +96,10 @@ public class Puzzle {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			for(int i=0;i<4;i++){
-				sb.append(ll.get(i));
-			}
+			sb.append(readNorth());
+			sb.append(readEast());
+			sb.append(readSouth());
+			sb.append(readWest());
 			return sb.toString();
 		}
 	}
@@ -115,9 +116,14 @@ public class Puzzle {
 			wheels.add(new Wheel(wheelVal.toString()));
 		}
 	}
+	public Puzzle(int width,int height,List<Wheel> wheelList){
+		wheels.addAll(wheelList);
+		this.width = width;
+		this.height = height;
+	}
 	public Puzzle(int width,int height,Wheel[][] wheels){
-		for(int i = 0;i<width;i++){
-			for(int j = 0;j<height;j++){
+		for(int j = 0;j<height;j++){
+			for(int i = 0;i<width;i++){
 				this.wheels.add(wheels[i][j]);
 			}
 		}
@@ -133,6 +139,21 @@ public class Puzzle {
 	}
 	public List<Wheel> getWheels() {
 		return wheels;
+	}
+	public void setWheels(LinkedList<Wheel> wheels) {
+		if(this.wheels.size()!=wheels.size())
+			return;
+		this.wheels = wheels;
+	}
+	public static void shuffle(Puzzle puzzle){
+		List<Wheel> wheels = puzzle.getWheels();
+		Random rand = new Random();
+		for (Wheel w : wheels){
+			int r = rand.nextInt(3);
+			for(int i = 0;i<r;i++)
+				w.rotate();
+		}
+		Collections.shuffle(wheels);
 	}
 	public static Puzzle randomPuzzle(int width,int height){
 		Wheel puzzle[][] = new Wheel[width][height];
@@ -150,17 +171,17 @@ public class Puzzle {
 		}
 		for(int i = 0;i<width;i++){
 			for(int j = 0;j<height;j++){
-				if(j+1<height && puzzle[i][j].readSouth() != puzzle[i][j+1].readNorth()){
+				if(j+1<height && puzzle[i][j].readSouth() != puzzle[i][j+1].readNorth()){					
 					puzzle[i][j+1].setNorth(puzzle[i][j].readSouth());
 				}
 				if(i+1<width && puzzle[i][j].readEast() != puzzle[i+1][j].readWest()){
-					puzzle[i+1][j].setWest(puzzle[i][j].readSouth());
+					puzzle[i+1][j].setWest(puzzle[i][j].readEast());
 				}
 				if(j-1>=0 && puzzle[i][j].readNorth() != puzzle[i][j-1].readSouth()){
-					puzzle[i][j-1].setSouth(puzzle[i][j].readSouth());
+					puzzle[i][j-1].setSouth(puzzle[i][j].readNorth());
 				}
 				if(i-1>=0 && puzzle[i][j].readWest() != puzzle[i-1][j].readEast()){
-					puzzle[i-1][j].setEast(puzzle[i][j].readSouth());
+					puzzle[i-1][j].setEast(puzzle[i][j].readWest());
 				}
 			}
 		}
@@ -175,20 +196,21 @@ public class Puzzle {
 	public String toString() {
 
 		StringBuilder globalsb = new StringBuilder();
-		for(int j = 0;j<height;j++){
+		for(int i = 0;i<height;i++){
 			StringBuilder sb[] = new StringBuilder[3];
 			for(int k = 0;k<3;k++){
 				sb[k] = new StringBuilder();
 			}
-			for(int i = 0;i<width;i++){
-				Wheel w = wheels.get(i+j*height);
+
+			for(int j = 0;j<width;j++){
+				Wheel w = wheels.get(j+i*height);
 				sb[0].append("       ");
 				sb[0].append(w.readNorth());
 				sb[2].append("       ");
 				sb[2].append(w.readSouth());
 
 				sb[1].append("   ");
-				if(i==0)
+				if(j==0)
 					sb[1].append("  ");
 				sb[1].append(w.readWest());
 				sb[1].append("   ");
@@ -221,31 +243,24 @@ public class Puzzle {
 	
 	public static boolean isResolved(Puzzle p){
 		Wheel puzzle[][] = new Wheel[p.getWidth()][p.getHeight()];
-		for(int i = 0;i<p.getWidth();i++){
-			for(int j = 0;j<p.getHeight();j++){
+		for(int j = 0;j<p.getHeight();j++){
+			for(int i = 0;i<p.getWidth();i++){
 				puzzle[i][j] = p.getWheels().get(i+j*p.getHeight());
 			}
 		}
-		for(int i = 0;i<p.getWidth();i++){
-			for(int j = 0;j<p.getHeight();j++){
-				if(j+1<p.getHeight())
-					continue;
-				if(i+1<p.getWidth())
-					continue;
-				if(j-1>=0)
-					continue;
-				if(i-1>=0)
-					continue;
-				if( puzzle[i][j].readSouth() != puzzle[i][j+1].readNorth()){
+
+		for(int j = 0;j<p.getHeight();j++){
+			for(int i = 0;i<p.getWidth();i++){
+				if(j!=p.getHeight()-1 && puzzle[i][j].readSouth() != puzzle[i][j+1].readNorth()){
 					return false;
 				}
-				if( puzzle[i][j].readEast() != puzzle[i+1][j].readWest()){
+				if( i!=p.getWidth()-1 && puzzle[i][j].readEast() != puzzle[i+1][j].readWest()){
 					return false;
 				}
-				if( puzzle[i][j].readNorth() != puzzle[i][j-1].readSouth()){
+				if(j!=0 && puzzle[i][j].readNorth() != puzzle[i][j-1].readSouth()){
 					return false;
 				}
-				if(puzzle[i][j].readWest() != puzzle[i-1][j].readEast()){
+				if(i!=0 && puzzle[i][j].readWest() != puzzle[i-1][j].readEast()){
 					return false;
 				}
 			}
@@ -265,14 +280,76 @@ public class Puzzle {
 					res.add(pW);
 					break;
 				}
-				
+
 			}
 		}
 		if(res.size()==wheels.size())
 			return true;
 		return false;
 	}
-	public static void resolve(){
-		//TODO resolution :'(
+	public static void resolve(Puzzle puzzle){
+		if(isResolved(puzzle))
+			return;
+		int width = puzzle.getWidth();
+		HashSet<Integer> usedWheelSet = new HashSet<Integer>();
+		ArrayList<Wheel> puzzleWheel = new ArrayList<Wheel>(puzzle.getWheels());
+		LinkedList<Wheel> resolv = new LinkedList<Wheel>();
+		int index = 0;
+		int nbWheel = puzzle.getWheels().size();
+		int wheelIndexArray[] = new int[nbWheel];
+		int rotateWheelIndex[] = new int[nbWheel];
+		Arrays.fill(wheelIndexArray, 0);
+		Arrays.fill(rotateWheelIndex, 0);
+		while(usedWheelSet.size()!=nbWheel){
+			if(usedWheelSet.contains(wheelIndexArray[index])){
+				wheelIndexArray[index]++;
+				continue;
+			}
+			if(wheelIndexArray[index]>=nbWheel){
+				wheelIndexArray[index]=0;
+				index--;
+				usedWheelSet.remove(wheelIndexArray[index]);
+				if(index<=0){
+					index=0;
+					puzzleWheel.get(wheelIndexArray[index]).rotate();
+					rotateWheelIndex[index]++;
+					if(rotateWheelIndex[index]>3){
+						rotateWheelIndex[index]=0;
+						wheelIndexArray[index]++;
+					}
+				}else{
+					wheelIndexArray[index]++;
+				}
+				continue;
+			}
+			usedWheelSet.add(wheelIndexArray[index]);
+			resolv.clear();
+			for(int i=0;i<=index;i++){
+				Wheel w = puzzleWheel.get(wheelIndexArray[i]);
+				resolv.add(w);
+			}
+			for(int i=0;i<4;i++){
+				if(checkWheelAtPos(resolv, width, index)){
+					index++;
+					break;
+				}else if(i==3){//Bad wheel
+					usedWheelSet.remove(wheelIndexArray[index]);
+					wheelIndexArray[index]++;
+				}
+				//Bad wheel
+				resolv.getLast().rotate();
+			}
+		}
+		puzzle.setWheels(resolv);
+	}
+	private static boolean checkWheelAtPos(LinkedList<Wheel> wheelList,int width,int pos){
+		Wheel chechedWheel = wheelList.get(pos);
+		if(pos-width>=0 && chechedWheel.readNorth() != wheelList.get(pos-width).readSouth()){
+			return false;
+		}
+		if(pos%width!=0 && pos-1>=0  && chechedWheel.readWest() != wheelList.get(pos-1).readEast()){
+			return false;
+		}
+		return true;
 	}
 }
