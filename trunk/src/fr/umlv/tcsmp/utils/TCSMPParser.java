@@ -54,8 +54,8 @@ public class TCSMPParser {
 	}
 	
 	/**
-	 * Decode an array of bytes into a String, using the good charset
-	 * @param bytes bytes array to decode
+	 * Decode a ByteBuffer into a String, using the good charset
+	 * @param ByteBuffer to decode
 	 * @return the decoded String
 	 */
 	public static String decode(ByteBuffer bb) {
