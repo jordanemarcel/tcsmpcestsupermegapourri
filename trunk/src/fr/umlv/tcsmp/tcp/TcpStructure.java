@@ -81,7 +81,7 @@ public class TcpStructure {
 		try {
 			SocketChannel socketChannel = serverSocketChannel.accept();
 			System.out.println("New connection from: " + socketChannel.socket().getRemoteSocketAddress());
-			Protocol newServerProtocol = newServerProtocol.newProtocol();
+			Protocol newServerProtocol = serverProtocol.newProtocol();
 			ByteBuffer byteBuffer = ByteBuffer.allocateDirect(TcpStructure.BUFFER_SIZE);
 			KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, newServerProtocol);
 			SocketData socketData = new SocketData(socketChannel);
