@@ -1,6 +1,7 @@
 package fr.umlv.tcsmp.utils;
 
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.List;
@@ -20,7 +21,7 @@ public class TCSMPParser {
 	 * Simply split command found in bytebuffer. 
 	 */
 	public static String[] parseCommand(ByteBuffer bb) {
-		return new String(bb.array()).split("\\s+");
+		return new String(TCSMPParser.decode(bb)).split("\\s+");
 	}
 
 	/**
@@ -50,6 +51,21 @@ public class TCSMPParser {
 	 */
 	public static String decode(byte[] bytes) {
 		return charset.decode(ByteBuffer.wrap(bytes)).toString();
+	}
+	
+	/**
+	 * Decode an array of bytes into a String, using the good charset
+	 * @param bytes bytes array to decode
+	 * @return the decoded String
+	 */
+	public static String decode(ByteBuffer bb) {
+		try {
+			byte[] bytes = new byte[bb.limit()];
+			bb.get(bytes);
+			return charset.decode(ByteBuffer.wrap(bytes)).toString();
+		} finally {
+			bb.flip();
+		}
 	}
 	
 	/**

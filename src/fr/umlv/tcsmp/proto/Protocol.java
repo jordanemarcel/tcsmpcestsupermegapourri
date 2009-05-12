@@ -8,6 +8,7 @@ import java.util.Map;
 
 import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
+import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class Protocol {
 
@@ -96,8 +97,8 @@ public class Protocol {
 
 	public Response doIt(ByteBuffer bb) {
 		/* check for end of command */
-		if (bb != null) {
-			if (new String(bb.array()).endsWith("\n") == false) {
+		if (bb != null && bb.position() != 0) {
+			if (TCSMPParser.decode(bb).endsWith("\n") == false) {
 				/* pos and limit have not been altered. */
 				return new Response(ResponseAction.CONTINUEREAD);
 			}

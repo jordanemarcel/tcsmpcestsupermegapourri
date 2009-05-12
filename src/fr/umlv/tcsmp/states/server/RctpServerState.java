@@ -35,6 +35,7 @@ public class RctpServerState extends TCSMPState {
 		
 		if (args.length > 2 || (args[0].equals("RCPT") == false && args[0].equals("APZL") == false)) {
 			bb.put(ErrorReplies.unknowCommand("RCPT|APZL", args[0]));
+			bb.flip();
 			return new Response(ResponseAction.REPLY);
 		}
 		
@@ -42,6 +43,9 @@ public class RctpServerState extends TCSMPState {
 			/* bypass normal proccessings */
 			TCSMPState apzlState = new ApzlServerState();
 			proto.setState(apzlState);
+			/* XXX: really need to recreate cmd ? */
+			bb.put(TCSMPParser.encode("APZL\r\n"));
+			bb.flip();
 			return apzlState.processCommand(proto, bb);
 		}
 		
@@ -50,6 +54,7 @@ public class RctpServerState extends TCSMPState {
 			dest = TCSMPParser.parseDomain(args[1]);
 		} catch (ParseException e) {
 			bb.put(TCSMPParser.encode("501 Not a valid address."));
+			bb.flip();
 			return new Response(ResponseAction.REPLY);
 		}
 		
@@ -61,11 +66,16 @@ public class RctpServerState extends TCSMPState {
 		
 		if (proto.isRelay(dest) == false) {
 			/** XXX: see if user exists here ? */
-			bb.put(TCSMPParser.encode("250 OK"));
+			bb.put(TCSMPParser.encode("250 OK\r\n"));
+			bb.flip();
 			return new Response(ResponseAction.REPLY);
 		}
 		
-		/* bb will be forwarded to the dest domain */
+		
+		/* XXX: really need to recreate cmd ? */
+		bb.put(TCSMPParser.encode("RCTP " + args[1] + "\r\n"));
+		bb.flip();
+		
 		return new Response(dest, ResponseAction.RELAY);
 	}
 }
