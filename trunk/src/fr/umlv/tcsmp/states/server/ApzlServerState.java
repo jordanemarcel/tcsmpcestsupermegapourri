@@ -35,6 +35,7 @@ public class ApzlServerState extends TCSMPState {
 		if (args.length != 1 || args[0].equals("APZL") == false) {
 			bb.clear();
 			bb.put(ErrorReplies.unknowCommand("APZL", args[0]));
+			bb.flip();
 			return new Response(ResponseAction.REPLY);
 		}
 		
@@ -47,6 +48,7 @@ public class ApzlServerState extends TCSMPState {
 			Puzzle p = Puzzle.randomPuzzle(2, 2);
 			bb.clear();
 			bb.put(TCSMPParser.encode("215 " + proto.getMyDomains().get(0) + " 4,4 " + p.lineString() + "\r\n"));
+			bb.flip();
 			return new Response(ResponseAction.REPLY);
 		}
 

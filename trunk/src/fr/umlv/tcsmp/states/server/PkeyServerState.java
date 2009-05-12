@@ -24,6 +24,7 @@ public class PkeyServerState extends TCSMPState {
 		
 		if (args.length != 4 || args[0].equals("PKEY") == false) {
 			bb.put(ErrorReplies.unknowCommand("PKEY", args[0]));
+			bb.flip();
 			return new Response(ResponseAction.REPLY);
 		}
 
@@ -36,6 +37,7 @@ public class PkeyServerState extends TCSMPState {
 			 * XXX: We are asuming that puzzle solution is right 
 			 */
 			bb.put(TCSMPParser.encode("216 Your mail has been kept !\r\n"));
+			bb.flip();
 			return new Response(ResponseAction.REPLY);
 		}
 		

@@ -31,6 +31,7 @@ public class DataServerState extends TCSMPState {
 			if (line.equals(".")) {
 				bb.clear();
 				bb.put(TCSMPParser.encode("250 OK\r\n"));
+				bb.flip();
 				send = true;
 				return new Response(ResponseAction.REPLY);
 			}

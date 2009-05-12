@@ -34,6 +34,7 @@ public class FromServerState extends TCSMPState {
 		if (args.length != 2 || args[0].equals("FROM") == false) {
 			bb.clear();
 			bb.put(ErrorReplies.unknowCommand("FROM", args[0]));
+			bb.flip();
 			return new Response(ResponseAction.REPLY);
 		}
 
@@ -47,6 +48,7 @@ public class FromServerState extends TCSMPState {
 		 * Create response buffer.
 		 */
 		bb.put(TCSMPParser.encode(new String("250 OK\r\n")));
+		bb.flip();
 		
 		return new Response(ResponseAction.REPLY);
 	}

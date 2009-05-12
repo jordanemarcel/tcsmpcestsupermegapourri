@@ -34,6 +34,7 @@ public class MailServerState extends TCSMPState {
 		if (args.length != 1 || args[0].equals("MAIL") == false) {
 			bb.clear();
 			bb.put(ErrorReplies.unknowCommand("MAIL", args[0]));
+			bb.flip();
 			return new Response(ResponseAction.REPLY);
 		}
 
@@ -43,6 +44,7 @@ public class MailServerState extends TCSMPState {
 		if (proto.isRelay() == false) {
 			bb.clear();
 			bb.put(TCSMPParser.encode("354 Start mail input; end with <CRLF>.<CRLF>\r\n"));
+			bb.flip();
 			return new Response(ResponseAction.REPLY);
 		}
 		
