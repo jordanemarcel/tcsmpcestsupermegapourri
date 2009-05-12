@@ -26,16 +26,24 @@ public class Protocol {
 	// TODO escape "." ?
 	private final StringBuilder mail;
 
-	public Protocol(TCSMPState defaultState) {
-		state = defaultState;
+	public Protocol(ProtocolMode mode) {
+		switch(mode) {
+		case CLIENT:
+			state = TCSMPState.newDefaultClientState();
+			break;
+		case SERVER:
+			state = TCSMPState.newDefaultServerState();
+			break;
+		}
 		mail = new StringBuilder();
 		myDomains = new ArrayList<String>();
 		rcpts = new ArrayList<String>();
 		puzzles = new HashMap<String, Puzzle>();
+		protocolMode = mode;
 	}
 	
-	public Protocol(TCSMPState defaultState, int protocolPort) {
-		this(defaultState);
+	public Protocol(ProtocolMode mode, int protocolPort) {
+		this(mode);
 		this.protocolPort = protocolPort;
 	}
 
@@ -55,6 +63,9 @@ public class Protocol {
 		return protocolMode;
 	}
 	
+	public TCSMPState getState() {
+		return state;
+	}
 	
 	public void addDomain(String domain) {
 		myDomains.add(domain);
@@ -109,22 +120,15 @@ public class Protocol {
 	}
 
 	public Protocol newProtocol() {
-		Protocol pr;
-		
-		switch (protocolMode) {
-		case CLIENT:
-			pr = new Protocol(TCSMPState.newDefaultClientState());
-			break;
-		case SERVER:
-			pr = new Protocol(TCSMPState.newDefaultServerState());
-			break;
-		default:
-			return null;
-		}
-		
+		Protocol pr = new Protocol(protocolMode);
 		pr.clientDomain = clientDomain;
 		pr.from = from;
 		pr.mail.append(mail);
+		for (String d : myDomains)
+			pr.myDomains.add(d);
+		for (String r : rcpts)
+			pr.rcpts.add(r);
+		/* XXX: ... */
 		return pr;
 	}
 

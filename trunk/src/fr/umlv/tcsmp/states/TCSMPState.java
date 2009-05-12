@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
+import fr.umlv.tcsmp.states.client.BannerClientState;
 import fr.umlv.tcsmp.states.server.BannerServerState;
 
 /**
@@ -29,6 +30,6 @@ public abstract class TCSMPState {
 	 * Return a new default state for a client 
 	 */
 	public static TCSMPState newDefaultClientState() {
-		return null;
+		return new BannerClientState();
 	}
 }
