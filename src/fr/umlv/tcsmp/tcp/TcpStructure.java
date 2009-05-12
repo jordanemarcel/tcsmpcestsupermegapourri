@@ -12,6 +12,8 @@ import java.util.Set;
 
 import fr.umlv.tcsmp.dns.TCSMPResolver;
 import fr.umlv.tcsmp.proto.Protocol;
+import fr.umlv.tcsmp.proto.Response;
+import fr.umlv.tcsmp.proto.ResponseAction;
 
 public class TcpStructure {
 	public static int BUFFER_SIZE = 1024;
@@ -19,8 +21,8 @@ public class TcpStructure {
 	private final Selector selector;
 	private final TCSMPResolver dnsResolver;
 	private Protocol serverProtocol;
-	private final HashMap<Protocol, HashMap<String, SocketChannel>> protocolDomainMap = 
-		new HashMap<Protocol, HashMap<String,SocketChannel>>();
+	private final HashMap<Protocol, SocketData> protocolDomainMap = 
+		new HashMap<Protocol, SocketData>();
 	
 	public TcpStructure() throws IOException {
 		this(new TCSMPResolver());
@@ -54,16 +56,23 @@ public class TcpStructure {
 	
 	public void handleSelector() throws IOException {
 		int nbKeysSelected;
-		do {
-			nbKeysSelected = selector.select();
-		} while(nbKeysSelected<1);
-		
-		Set<SelectionKey> selectionKeys = selector.keys();
-		for(SelectionKey key: selectionKeys) {
-			if(key.isAcceptable()) {
-				this.doAccept(key);
+		while(true) {
+			do {
+				nbKeysSelected = selector.select();
+			} while(nbKeysSelected<1);
+
+			Set<SelectionKey> selectionKeys = selector.selectedKeys();
+			for(SelectionKey key: selectionKeys) {
+				if(key.isAcceptable()) {
+					this.doAccept(key);
+				}
 			}
+			selectionKeys.clear();
 		}
+	}
+	
+	private void handleResponse(SelectionKey key, Response response) {
+		ResponseAction responseAction = response.getAction();
 		
 	}
 	
@@ -72,20 +81,23 @@ public class TcpStructure {
 		try {
 			SocketChannel socketChannel = serverSocketChannel.accept();
 			System.out.println("New connection from: " + socketChannel.socket().getRemoteSocketAddress());
-			//Protocol newServerProtocol = serverProtocol.getCopy();
-
+			Protocol newServerProtocol = newServerProtocol.newProtocol();
 			ByteBuffer byteBuffer = ByteBuffer.allocateDirect(TcpStructure.BUFFER_SIZE);
-			KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, serverProtocol.newProtocol());
-			HashMap<String, SocketChannel> domainSocketMap = new HashMap<String, SocketChannel>();
-			domainSocketMap.put("...", socketChannel);
-			protocolDomainMap.put(serverProtocol.newProtocol(), domainSocketMap);
+			KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, newServerProtocol);
+			SocketData socketData = new SocketData(socketChannel);
+			protocolDomainMap.put(newServerProtocol, socketData);
 			socketChannel.configureBlocking(false);
-			socketChannel.register(selector, SelectionKey.OP_READ, keyAttachment);
+			Response response = newServerProtocol.doIt(byteBuffer);
+			this.handleResponse(key, response);
 		} catch (IOException e) {
 			System.err.println("Could not accept a new connection");
 			System.err.println(e);
 			return;
 		}
+	}
+	
+	public void doRead(SelectionKey key) {
+		
 	}
 	
 }
