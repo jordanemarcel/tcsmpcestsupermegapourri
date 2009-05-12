@@ -6,7 +6,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.states.TCSMPState;
 
-public class BannerServerState implements TCSMPState {
+public class BannerServerState extends TCSMPState {
 
 	private static String banner = "200 Hello I'm the TCSMP server. Nice to meet you.\r\n";
 

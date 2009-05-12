@@ -8,7 +8,7 @@ import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
-public class TeloServerState implements TCSMPState {
+public class TeloServerState extends TCSMPState {
 
 	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
