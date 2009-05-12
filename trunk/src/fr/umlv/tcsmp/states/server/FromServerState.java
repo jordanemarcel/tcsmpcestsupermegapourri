@@ -8,7 +8,7 @@ import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
-public class FromServerState implements TCSMPState {
+public class FromServerState extends TCSMPState {
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {

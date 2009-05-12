@@ -9,7 +9,7 @@ import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
-public class MailServerState implements TCSMPState {
+public class MailServerState extends TCSMPState {
 	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		String [] args = TCSMPParser.parse(bb);

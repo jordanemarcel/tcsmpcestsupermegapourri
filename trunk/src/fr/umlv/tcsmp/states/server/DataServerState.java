@@ -7,7 +7,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.states.TCSMPState;
 
-public class DataServerState implements TCSMPState {
+public class DataServerState extends TCSMPState {
 
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		
