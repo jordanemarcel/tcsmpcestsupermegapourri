@@ -2,8 +2,11 @@ package fr.umlv.tcsmp.proto;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
 
 public class Protocol {
@@ -16,6 +19,8 @@ public class Protocol {
 	private final List<String> rcpts;
 	private String from;
 	private String clientDomain;
+	
+	private Map<String, Puzzle> puzzles;
 
 	private final StringBuilder mail;
 
@@ -24,6 +29,7 @@ public class Protocol {
 		mail = new StringBuilder();
 		myDomains = new ArrayList<String>();
 		rcpts = new ArrayList<String>();
+		puzzles = new HashMap<String, Puzzle>();
 	}
 	
 	public Protocol(TCSMPState defaultState, int protocolPort) {
@@ -33,6 +39,10 @@ public class Protocol {
 
 	public int getProtocolPort() {
 		return protocolPort;
+	}
+	
+	public List<String> getRecpts() {
+		return rcpts;
 	}
 
 	public void setProtocolMode(ProtocolMode protocolMode) {
@@ -58,6 +68,21 @@ public class Protocol {
 				return true;
 		}
 		return false;
+	}
+	
+	public Puzzle getPuzzleFor(String domain) {
+		Puzzle puzzle = puzzles.get(domain);
+		if (puzzle == null) {
+			throw new AssertionError("Unknown domain.");
+		}
+		
+		return puzzle;
+	}
+	
+	public void addPuzzleFor(String domain, Puzzle puzzle) {
+		if (puzzles.put(domain, puzzle) != null) {
+			throw new AssertionError("Already registered a puzzle for the given domain.");
+		}
 	}
 
 	public Response doIt(ByteBuffer bb) {
