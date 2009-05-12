@@ -15,12 +15,12 @@ import java.util.Scanner;
  * A fucking TCSMPClient for testing purpose only.
  */
 
-class Puzzle {
+class Puzzlez {
 	private final String domain;
 	private final String puzzle;
 	private final String size;
 	
-	public Puzzle(String domain, String puzzle, String size) {
+	public Puzzlez(String domain, String puzzle, String size) {
 		this.domain = domain;
 		this.puzzle = puzzle;
 		this.size = size;
@@ -101,23 +101,23 @@ public class TCSMPClient {
 		checkResponse();
 	}
 	
-	public List<Puzzle> apzl() throws IOException {
+	public List<Puzzlez> apzl() throws IOException {
 		out.write("APZL\r\n");
 		out.flush();
-		List<Puzzle> pzls = new ArrayList<Puzzle>();
+		List<Puzzlez> pzls = new ArrayList<Puzzlez>();
 		while (true) {
 			String line = in.readLine();
 			String[] args = line.split("\\s+");
 			if (args[0].startsWith("215-") == false) {
 				if (args[0].equals("215") == false || args.length != 4)
 					throw new IllegalStateException("ERROR:" + line);
-				pzls.add(new Puzzle(args[1], args[3], args[2]));
+				pzls.add(new Puzzlez(args[1], args[3], args[2]));
 				break;
 			}
 			else {
 				if (args.length != 3)
 					throw new IllegalStateException("ERROR:" + line);
-				pzls.add(new Puzzle(args[0].substring(4), args[2], args[1]));
+				pzls.add(new Puzzlez(args[0].substring(4), args[2], args[1]));
 			}
 		}
 		return pzls;
@@ -140,7 +140,7 @@ public class TCSMPClient {
 		checkResponse();
 	}
 	
-	public void pkey(Puzzle key) throws IOException {
+	public void pkey(Puzzlez key) throws IOException {
 		out.write("PKEY " + key + "\r\n");
 		out.flush();
 		checkResponse();
@@ -161,8 +161,8 @@ public class TCSMPClient {
 		client.telo("foo.be");
 		client.from("gni@clem1.be");
 		client.rcpt("bar@foo.be");
-		List<Puzzle> pzls = client.apzl();
-		for (Puzzle pzl : pzls)
+		List<Puzzlez> pzls = client.apzl();
+		for (Puzzlez pzl : pzls)
 			System.out.println("resolve this dude : " + pzl.getPuzzle());
 		client.mail();
 		client.pkey(pzls.get(0)); /* cheetah ! */
