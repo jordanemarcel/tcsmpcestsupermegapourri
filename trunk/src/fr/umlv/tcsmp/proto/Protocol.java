@@ -89,6 +89,7 @@ public class Protocol {
 		/* check for end of command */
 		if (bb != null) {
 			if (new String(bb.array()).endsWith("\n") == false) {
+				/* pos and limit have not been altered. */
 				return new Response(ResponseAction.CONTINUEREAD);
 			}
 		}

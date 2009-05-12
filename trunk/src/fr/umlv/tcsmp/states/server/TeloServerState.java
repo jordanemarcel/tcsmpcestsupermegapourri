@@ -23,13 +23,8 @@ public class TeloServerState extends TCSMPState {
 		send = true;
 		
 		String [] args = TCSMPParser.parseCommand(bb);
+		bb.clear();
 		
-		/**
-		 * le processCommand va etre appeler 2 fois une fois
-		 * quand le message sera lu et une fois quand le message
-		 * sera ecrit, on doit memoriser l'etat dans lequel
-		 * on est
-		 */
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);
@@ -37,7 +32,8 @@ public class TeloServerState extends TCSMPState {
 		}
 		
 		if (args.length != 2 || args[0].equals("TELO") == false) {
-			return new Response(ErrorReplies.unknowCommand("TELO", args[0]));
+			bb.put(ErrorReplies.unknowCommand("TELO", args[0]));
+			return new Response(ResponseAction.REPLY);
 		}
 
 		/** 
@@ -48,8 +44,9 @@ public class TeloServerState extends TCSMPState {
 		/**
 		 * Create response buffer.
 		 */
-		ByteBuffer response = ByteBuffer.wrap(new String("200 TCSMPv1\r\n200-OK greets " + args[1] + "\r\n").getBytes());
+		bb.clear();
+		bb.put(TCSMPParser.encode("200 TCSMPv1\r\n200-OK greets " + args[1] + "\r\n"));
 		
-		return new Response(response);
+		return new Response(ResponseAction.REPLY);
 	}
 }

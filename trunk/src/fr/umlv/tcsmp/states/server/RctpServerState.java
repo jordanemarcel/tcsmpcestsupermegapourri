@@ -25,6 +25,7 @@ public class RctpServerState extends TCSMPState {
 		send = true;
 		
 		String [] args = TCSMPParser.parseCommand(bb);
+		bb.clear();
 		
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
@@ -33,7 +34,8 @@ public class RctpServerState extends TCSMPState {
 		}
 		
 		if (args.length > 2 || (args[0].equals("RCPT") == false && args[0].equals("APZL") == false)) {
-			return new Response(ErrorReplies.unknowCommand("RCTP|APZL", args[0]));
+			bb.put(ErrorReplies.unknowCommand("RCPT|APZL", args[0]));
+			return new Response(ResponseAction.REPLY);
 		}
 		
 		if (args[0].equals("APZL")) {
@@ -47,8 +49,8 @@ public class RctpServerState extends TCSMPState {
 		try {
 			dest = TCSMPParser.parseDomain(args[1]);
 		} catch (ParseException e) {
-			ByteBuffer response = ByteBuffer.wrap("501 Not a valid address.".getBytes());
-			return new Response(response);
+			bb.put(TCSMPParser.encode("501 Not a valid address."));
+			return new Response(ResponseAction.REPLY);
 		}
 		
 		/**
@@ -57,13 +59,13 @@ public class RctpServerState extends TCSMPState {
 		 * On va faire des genres de sous state pour helo et tout ca... 
 		 */
 		
-		if (proto.isRelay(dest)) {
+		if (proto.isRelay(dest) == false) {
 			/** XXX: see if user exists here ? */
-			ByteBuffer response = ByteBuffer.wrap("250 OK".getBytes());
-			return new Response(response);
+			bb.put(TCSMPParser.encode("250 OK"));
+			return new Response(ResponseAction.REPLY);
 		}
 		
 		/* bb will be forwarded to the dest domain */
-		return new Response(bb, dest);
+		return new Response(dest, ResponseAction.RELAY);
 	}
 }

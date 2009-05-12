@@ -33,7 +33,9 @@ public class ApzlServerState extends TCSMPState {
 		}
 		
 		if (args.length != 1 || args[0].equals("APZL") == false) {
-			return new Response(ErrorReplies.unknowCommand("APZL", args[0]));
+			bb.clear();
+			bb.put(ErrorReplies.unknowCommand("APZL", args[0]));
+			return new Response(ResponseAction.REPLY);
 		}
 		
 		/**
@@ -43,11 +45,15 @@ public class ApzlServerState extends TCSMPState {
 		 */
 		if (proto.isRelay() == false) {
 			Puzzle p = Puzzle.randomPuzzle(2, 2);
-			ByteBuffer response = ByteBuffer.wrap(new String("215 " + proto.getMyDomains().get(0) + " 4,4 " + p.lineString() + "\r\n").getBytes());
-			return new Response(response);
+			bb.clear();
+			bb.put(TCSMPParser.encode("215 " + proto.getMyDomains().get(0) + " 4,4 " + p.lineString() + "\r\n"));
+			return new Response(ResponseAction.REPLY);
 		}
 
-		/* Forward command */
-		return new Response(bb, ResponseAction.RELAYALL);
+		/* Forward original command */
+		bb.flip();
+		
+		/* gni */
+		return new Response(ResponseAction.RELAYALL);
 	}
 }
