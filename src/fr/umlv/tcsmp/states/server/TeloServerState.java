@@ -15,6 +15,12 @@ public class TeloServerState extends TCSMPState {
 		
 		String [] args = TCSMPParser.parse(bb);
 		
+		if (args.length == 1 && args[0].equals("QUIT")) {
+			TCSMPState t = new QuitServerState();
+			proto.setState(t);
+			return t.processCommand(proto, bb);
+		}
+		
 		if (args.length != 2 || args[0].equals("TELO") == false) {
 			return new Response(ErrorReplies.unknowCommand("TELO", args[0]));
 		}

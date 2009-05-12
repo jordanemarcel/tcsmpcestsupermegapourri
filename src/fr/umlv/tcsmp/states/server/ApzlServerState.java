@@ -16,6 +16,12 @@ public class ApzlServerState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		String [] args = TCSMPParser.parse(bb);
 
+		if (args.length == 1 && args[0].equals("QUIT")) {
+			TCSMPState t = new QuitServerState();
+			proto.setState(t);
+			return t.processCommand(proto, bb);
+		}
+		
 		if (args.length != 1 || args[0].equals("APZL") == false) {
 			return new Response(ErrorReplies.unknowCommand("APZL", args[0]));
 		}

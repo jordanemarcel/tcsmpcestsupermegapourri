@@ -45,4 +45,8 @@ public class Response {
 	public String getDest() {
 		return dest;
 	}
+	
+	public ResponseAction getAction() {
+		return action;
+	}
 }
