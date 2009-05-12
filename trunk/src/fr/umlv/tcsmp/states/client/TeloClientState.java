@@ -26,26 +26,32 @@ public class TeloClientState extends TCSMPState {
 
 			return new Response(resp);
 		}
-		
+
 		if (resp == ResponseAction.REPLY) {
 			resp = ResponseAction.READ;
 			return new Response(resp);
 		}
-		
+
 		if (resp == ResponseAction.READ) {
 			ArrayList<String> list = new ArrayList<String>();
 			TCSMPParser.parseAnswer(bb, list);
 			switch(Integer.parseInt(list.get(0))) {
 			// States
-			case 200:
+			case 250:
 				proto.setState(new FromClientState());
 				bb.clear();
 				return proto.doIt(bb);
+			case 504:
+				// TODO
+				break;
+			case 550:
+				// TODO
+				break;
 			default:
 				throw new AssertionError("Pouet");
 			}
 		}
-		
+
 		return null;
 	}
 }
