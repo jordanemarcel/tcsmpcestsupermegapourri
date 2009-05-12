@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import fr.umlv.tcsmp.puzzle.Puzzle;
+
 
 
 public class TCSMPParser {
@@ -68,6 +70,13 @@ public class TCSMPParser {
 			return matcher.group(2);
 
 		throw new ParseException(mail + " is not a valid email address", 0);
+	}
+	
+	public static Puzzle parsePuzzleDesc(String dimensions, String description) {
+		int width = Integer.parseInt(dimensions.substring(0, dimensions.indexOf(',')));
+		int height = Integer.parseInt(dimensions.substring(dimensions.indexOf(',') + 1));
+		
+		return new Puzzle(width, height, description);
 	}
 
 	/**
