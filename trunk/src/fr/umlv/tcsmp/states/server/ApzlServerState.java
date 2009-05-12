@@ -36,15 +36,13 @@ public class ApzlServerState extends TCSMPState {
 		 * 		- create a puzzle if it's our domain
 		 * 		- forward command if domain is not know
 		 */
-		/* XXX */
-		if (proto.getDomain().equals("clem1.be")) {
+		if (proto.isRelay() == false) {
 			Puzzle p = Puzzle.randomPuzzle(2, 2);
-			ByteBuffer response = ByteBuffer.wrap(new String("215 " + proto.getDomain() + " 4,4 " + p.lineString() + "\r\n").getBytes());
+			ByteBuffer response = ByteBuffer.wrap(new String("215 " + proto.getMyDomains().get(0) + " 4,4 " + p.lineString() + "\r\n").getBytes());
 			return new Response(response);
 		}
 
 		/* Forward command */
-		
 		return new Response(bb, ResponseAction.RELAYALL);
 	}
 }

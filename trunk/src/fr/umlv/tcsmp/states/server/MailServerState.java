@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
+import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
@@ -30,15 +31,15 @@ public class MailServerState extends TCSMPState {
 		proto.setState(new DataServerState());
 		
 		/**
-		 * Check for forward or not
+		 * Check for forwarding or not
 		 */
-		if (proto.getDomain().equals("clem1.be")) {
+		if (proto.isRelay() == false) {
 			ByteBuffer response = ByteBuffer.wrap("354 Start mail input; end with <CRLF>.<CRLF>\r\n".getBytes());
 			return new Response(response);
 		}
 		
-		/* XXX: forward to all */
-		return new Response(bb, "ALL");
+		/* relay to all instead */
+		return new Response(bb, ResponseAction.RELAYALL);
 	}
 
 }

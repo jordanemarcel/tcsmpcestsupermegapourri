@@ -15,6 +15,12 @@ public class TeloServerState extends TCSMPState {
 		
 		String [] args = TCSMPParser.parse(bb);
 		
+		/**
+		 * le processCommand va etre appeler 2 fois une fois
+		 * quand le message sera lu et une fois quand le message
+		 * sera ecrit, on doit memoriser l'etat dans lequel
+		 * on est
+		 */
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);
@@ -34,7 +40,7 @@ public class TeloServerState extends TCSMPState {
 		 * Change domain
 		 * XXX: check domain.
 		 */
-		proto.setDomain(args[1]);
+		proto.setClientDomain(args[1]);
 		
 		/**
 		 * Create response buffer.

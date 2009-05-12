@@ -1,26 +1,31 @@
 package fr.umlv.tcsmp.proto;
 
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import fr.umlv.tcsmp.states.TCSMPState;
 
 public class Protocol {
 
+	private final List<String> myDomains; 
 	private TCSMPState state;
 	private ProtocolMode protocolMode;
 	private int protocolPort = 26;
 
+	private final List<String> rcpts;
 	private String from;
-	private String domain;
+	private String clientDomain;
 
 	private final StringBuilder mail;
 
 	public Protocol(TCSMPState defaultState) {
 		state = defaultState;
 		mail = new StringBuilder();
+		myDomains = new ArrayList<String>();
+		rcpts = new ArrayList<String>();
 	}
-
+	
 	public Protocol(TCSMPState defaultState, int protocolPort) {
 		this(defaultState);
 		this.protocolPort = protocolPort;
@@ -36,6 +41,23 @@ public class Protocol {
 
 	public ProtocolMode getProtocolMode() {
 		return protocolMode;
+	}
+	
+	
+	public void addDomain(String domain) {
+		myDomains.add(domain);
+	}
+	
+	public boolean isRelay(String domain) {
+		return myDomains.contains(domain) == false;
+	}
+	
+	public boolean isRelay() {
+		for (String rcpt: rcpts) {
+			if (isRelay(rcpt))
+				return true;
+		}
+		return false;
 	}
 
 	public Response doIt(ByteBuffer bb) {
@@ -64,7 +86,7 @@ public class Protocol {
 			return null;
 		}
 		
-		pr.domain = domain;
+		pr.clientDomain = clientDomain;
 		pr.from = from;
 		pr.mail.append(mail);
 		return pr;
@@ -82,12 +104,16 @@ public class Protocol {
 		return from;
 	}
 
-	public void setDomain(String domain) {
-		this.domain = domain;
+	public void setClientDomain(String domain) {
+		this.clientDomain = domain;
 	}
 
-	public String getDomain() {
-		return domain;
+	public String getClientDomain() {
+		return clientDomain;
+	}
+	
+	public List<String> getMyDomains() {
+		return myDomains;
 	}
 
 	public void mail(String line) {

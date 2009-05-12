@@ -89,7 +89,13 @@ public class ServerStateTest {
 		bb = ByteBuffer.wrap(pkey.getBytes());
 		printBB(p.doIt(bb));
 		
-		
+		/**
+		 * QUIT
+		 */
+		String quit = "QUIT\r\n";
+		System.out.print(quit);
+		bb = ByteBuffer.wrap(quit.getBytes());
+		printBB(p.doIt(bb));
 	}
 }
  
