@@ -22,6 +22,7 @@ public class Protocol {
 	
 	private Map<String, Puzzle> puzzles;
 
+	// TODO escape "." ?
 	private final StringBuilder mail;
 
 	public Protocol(TCSMPState defaultState) {
@@ -83,6 +84,14 @@ public class Protocol {
 		if (puzzles.put(domain, puzzle) != null) {
 			throw new AssertionError("Already registered a puzzle for the given domain.");
 		}
+	}
+	
+	public Map<String, Puzzle> getPuzzles() {
+		return puzzles;
+	}
+	
+	public StringBuilder getMail() {
+		return mail;
 	}
 
 	public Response doIt(ByteBuffer bb) {
