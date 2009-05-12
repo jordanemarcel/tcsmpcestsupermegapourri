@@ -20,7 +20,7 @@ public class FromClientState extends TCSMPState {
 			bb.put(TCSMPParser.encode("FROM <"));
 			// TODO the domain is the server's, not the client's
 			bb.put(TCSMPParser.encode(proto.getFrom()));
-			bb.put(TCSMPParser.encode("FROM >"));
+			bb.put(TCSMPParser.encode(">\r\n"));
 
 			bb.flip();
 			resp = ResponseAction.REPLY;
@@ -40,8 +40,9 @@ public class FromClientState extends TCSMPState {
 			TCSMPParser.parseAnswer(bb, list);
 			switch(Integer.parseInt(list.get(0))) {
 			// States
-			case 200:
+			case 250:
 				proto.setState(new RctpClientState());
+				bb.clear();
 				return proto.doIt(bb);
 			default:
 				throw new AssertionError("Pouet");

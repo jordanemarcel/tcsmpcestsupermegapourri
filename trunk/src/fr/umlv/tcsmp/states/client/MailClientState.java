@@ -17,7 +17,7 @@ public class MailClientState extends TCSMPState {
 	private PkeyClientState pkeyState = null;
 	private boolean sentRequest = false;
 
-	private byte[] encodedMail = null;
+	private ByteBuffer encodedMail = null;
 	private int offset = 0;
 
 	public MailClientState() {
@@ -31,7 +31,6 @@ public class MailClientState extends TCSMPState {
 		if (encodedMail == null) {
 			encodedMail = TCSMPParser.encode(proto.getMail().toString());
 		}
-
 		if (!sentRequest) {
 			// MAIL Request was not send yet
 			if (resp == null) {
@@ -58,8 +57,8 @@ public class MailClientState extends TCSMPState {
 				// States
 				case 354:
 					sentRequest = true;
-					resp = ResponseAction.REPLY;
-					proto.setState(new ApzlClientState());	
+					resp = null;
+					bb.clear();
 					return proto.doIt(bb);
 				default:
 					throw new AssertionError("Pouet");
@@ -71,19 +70,19 @@ public class MailClientState extends TCSMPState {
 			if (resp == null) {
 				// Mail has not yet been sent
 				bb.clear();
-				bb.put(encodedMail, offset, encodedMail.length - offset);
+				bb.put(encodedMail);
 				offset += bb.limit();
 				bb.flip();
-				resp = ResponseAction.REPLY;
+				if (0 == encodedMail.remaining()) {
+					// Data was sent, signify we want to get the reply
+					resp = ResponseAction.REPLY;
+				}
 
 				return new Response(resp);
 			}
 
 			if (resp == ResponseAction.REPLY) {
-				if (offset == encodedMail.length) {
-					// Data was sent, signify we want to get the reply
-					resp = ResponseAction.READ;
-				}
+				resp = ResponseAction.READ;
 				return new Response(resp);
 			}
 
@@ -93,13 +92,14 @@ public class MailClientState extends TCSMPState {
 				TCSMPParser.parseAnswer(bb, list);
 				switch(Integer.parseInt(list.get(0))) {
 				// States
-				case 354:
+				case 250:
 					sentRequest = true;
 					resp = ResponseAction.REPLY;
 					if (pkeyState != null) 
 						proto.setState(pkeyState);	
 					else
 						proto.setState(new PkeyClientState());
+					bb.clear();
 					return proto.doIt(bb);
 				default:
 					throw new AssertionError("Pouet");

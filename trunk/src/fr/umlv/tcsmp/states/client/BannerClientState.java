@@ -1,6 +1,7 @@
 package fr.umlv.tcsmp.states.client;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class BannerClientState extends TCSMPState {
 			// Multiline ended
 			// TODO: check response codes
 			proto.setState(new TeloClientState());
+			bb.clear();
 			return proto.doIt(bb);
 		}
 		

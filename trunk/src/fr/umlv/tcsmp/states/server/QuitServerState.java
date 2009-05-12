@@ -34,7 +34,10 @@ public class QuitServerState extends TCSMPState {
 		 */
 		if (proto.isRelay() == false) {
 			//return new Response("200 OK\r\n".getBytes(), ResponseAction.RELAYALL);
-			return null;
+//			return null;
+			bb.put(TCSMPParser.encode("250 See you next time~~~~!\r\n"));
+			bb.flip();
+			return new Response(ResponseAction.REPLY);
 		}
 		
 		/**
