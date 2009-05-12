@@ -22,7 +22,7 @@ public class TeloServerState extends TCSMPState {
 		
 		send = true;
 		
-		String [] args = TCSMPParser.parse(bb);
+		String [] args = TCSMPParser.parseCommand(bb);
 		
 		/**
 		 * le processCommand va etre appeler 2 fois une fois
