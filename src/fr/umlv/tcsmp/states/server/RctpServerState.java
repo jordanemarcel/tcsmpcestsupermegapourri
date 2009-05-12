@@ -43,7 +43,8 @@ public class RctpServerState extends TCSMPState {
 		
 		/**
 		 * XXX: Here we have to see if we have to forward
-		 * command or if we catch it. 
+		 * command or if we catch it.
+		 * On va faire des genres de sous state pour helo et tout ca... 
 		 */
 		
 		if (dest.equals("mydomain")) {
