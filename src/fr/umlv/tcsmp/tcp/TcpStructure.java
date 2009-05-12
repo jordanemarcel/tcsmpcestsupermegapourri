@@ -75,10 +75,10 @@ public class TcpStructure {
 			//Protocol newServerProtocol = serverProtocol.getCopy();
 
 			ByteBuffer byteBuffer = ByteBuffer.allocateDirect(TcpStructure.BUFFER_SIZE);
-			KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, newServerProtocol);
+			KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, serverProtocol.newProtocol());
 			HashMap<String, SocketChannel> domainSocketMap = new HashMap<String, SocketChannel>();
 			domainSocketMap.put("...", socketChannel);
-			protocolDomainMap.put(newServerProtocol, domainSocketMap);
+			protocolDomainMap.put(serverProtocol.newProtocol(), domainSocketMap);
 			socketChannel.configureBlocking(false);
 			socketChannel.register(selector, SelectionKey.OP_READ, keyAttachment);
 		} catch (IOException e) {
