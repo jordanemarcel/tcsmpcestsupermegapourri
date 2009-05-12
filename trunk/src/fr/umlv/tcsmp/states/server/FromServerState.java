@@ -12,7 +12,7 @@ public class FromServerState extends TCSMPState {
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
-		String [] args = TCSMPParser.parse(bb);
+		String [] args = TCSMPParser.parseCommand(bb);
 
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
