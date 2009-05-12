@@ -58,14 +58,7 @@ public class RctpServerState extends TCSMPState {
 			return new Response(ResponseAction.REPLY);
 		}
 		
-		/**
-		 * XXX: Here we have to see if we have to forward
-		 * command or if we catch it.
-		 * On va faire des genres de sous state pour helo et tout ca... 
-		 */
-		
 		if (proto.isRelay(dest) == false) {
-			/** XXX: see if user exists here ? */
 			bb.put(TCSMPParser.encode("250 OK\r\n"));
 			bb.flip();
 			return new Response(ResponseAction.REPLY);
