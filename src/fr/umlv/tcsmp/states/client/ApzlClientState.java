@@ -39,13 +39,14 @@ public class ApzlClientState extends TCSMPState {
 
 			boolean parseResult = TCSMPParser.parseAnswer(bb, list);
 
-			for(int i=0; i<list.size(); i+=4) {
+			for(int i=0; i<list.size(); i+=2) {
 				switch(Integer.parseInt(list.get(i))) {
 				// States
-				case 200:
-					String domain = list.get(i+1);
-					String dims = list.get(i+2);
-					String desc = list.get(i+3);
+				case 215:
+					String[] strings = list.get(i+1).split(" ");
+					String domain = strings[0];
+					String dims = strings[1];
+					String desc = strings[2];
 					Puzzle puzzle = TCSMPParser.parsePuzzleDesc(dims, desc);
 					proto.addPuzzleFor(domain, puzzle);
 					break;
@@ -57,6 +58,7 @@ public class ApzlClientState extends TCSMPState {
 			if (parseResult) {
 				proto.setState(new MailClientState());		
 				resp = null;
+				bb.clear();
 				return proto.doIt(bb);
 			}
 

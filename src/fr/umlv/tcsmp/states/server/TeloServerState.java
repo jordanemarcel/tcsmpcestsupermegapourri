@@ -45,7 +45,7 @@ public class TeloServerState extends TCSMPState {
 		/**
 		 * Create response buffer.
 		 */
-		bb.put(TCSMPParser.encode("200 TCSMPv1\r\n200-OK greets " + args[1] + "\r\n"));
+		bb.put(TCSMPParser.encode("200-TCSMPv1\r\n200 OK greets " + args[1] + "\r\n"));
 		bb.flip();
 		
 		return new Response(ResponseAction.REPLY);

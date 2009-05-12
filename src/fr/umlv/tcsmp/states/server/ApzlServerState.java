@@ -45,7 +45,7 @@ public class ApzlServerState extends TCSMPState {
 		 * 		- forward command if domain is not know
 		 */
 		if (proto.isRelay() == false) {
-			Puzzle p = Puzzle.randomPuzzle(2, 2);
+			Puzzle p = Puzzle.randomPuzzle(4, 4);
 			bb.clear();
 			bb.put(TCSMPParser.encode("215 " + proto.getMyDomains().get(0) + " 4,4 " + p.lineString() + "\r\n"));
 			bb.flip();

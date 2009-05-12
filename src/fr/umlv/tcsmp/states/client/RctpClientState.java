@@ -42,7 +42,7 @@ public class RctpClientState extends TCSMPState {
 			TCSMPParser.parseAnswer(bb, list);
 			switch(Integer.parseInt(list.get(0))) {
 			// States
-			case 200:
+			case 250:
 				index++;
 				if (index >= proto.getRecpts().size()) {
 					proto.setState(new ApzlClientState());			
@@ -50,6 +50,7 @@ public class RctpClientState extends TCSMPState {
 				else {
 					resp = null;
 				}
+				bb.clear();
 				return proto.doIt(bb);
 			default:
 				throw new AssertionError("Pouet");

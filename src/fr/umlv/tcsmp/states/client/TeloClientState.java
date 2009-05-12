@@ -18,7 +18,8 @@ public class TeloClientState extends TCSMPState {
 			bb.clear();
 			bb.put(TCSMPParser.encode("TELO "));
 			// TODO the domain is the server's, not the client's
-			bb.put(TCSMPParser.encode(proto.getMyDomains().get(0)));
+			bb.put(TCSMPParser.encode(proto.getClientDomain()));
+			bb.put(TCSMPParser.encode("\r\n"));
 
 			bb.flip();
 			resp = ResponseAction.REPLY;
@@ -38,6 +39,7 @@ public class TeloClientState extends TCSMPState {
 			// States
 			case 200:
 				proto.setState(new FromClientState());
+				bb.clear();
 				return proto.doIt(bb);
 			default:
 				throw new AssertionError("Pouet");

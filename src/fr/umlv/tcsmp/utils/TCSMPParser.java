@@ -28,20 +28,26 @@ public class TCSMPParser {
 	 * Split multiline answer found in bytebuffer. 
 	 */
 	public static boolean parseAnswer(ByteBuffer bb, List<String> list) {
-		String[] stringArray = new String(bb.array()).split("\\s+");
+		String[] stringArray = new String(charset.decode(bb).toString()).split("\r\n");
 		for(String string: stringArray) {
-			list.add(string);
+			if (string.charAt(3) == '-') {
+				list.add(string.substring(0, 3));
+				list.add(string.substring(4));
+			}
+			else {
+				list.add(string);
+			}
 		}
-
-		String lastString = list.get(list.size() -1); 
+				
+		String lastString = list.get(list.size() -1);
 		if (lastString.charAt(3) != '-') {
-			return false;
+			list.remove(lastString);
+			list.add(lastString.substring(0, 3));
+			list.add(lastString.substring(4));
+			return true;
 		}
-
-		list.remove(list.size() - 1);
-		list.add(lastString.substring(0, 3));
-		list.add(lastString.substring(3));
-		return true;
+		
+		return false;
 	}
 	
 	/**
@@ -71,10 +77,10 @@ public class TCSMPParser {
 	/**
 	 * Encode a String into an array of bytes, using the good charset
 	 * @param the String to encode
-	 * @return bytes the encoded bytes array
+	 * @return the encoded byte buffer
 	 */
-	public static byte[] encode(String victim) {
-		return charset.encode(victim).array();
+	public static ByteBuffer encode(String victim) {
+		return charset.encode(victim);
 	}
 
 	/**
@@ -91,7 +97,6 @@ public class TCSMPParser {
 	public static Puzzle parsePuzzleDesc(String dimensions, String description) {
 		int width = Integer.parseInt(dimensions.substring(0, dimensions.indexOf(',')));
 		int height = Integer.parseInt(dimensions.substring(dimensions.indexOf(',') + 1));
-		
 		return new Puzzle(width, height, description);
 	}
 

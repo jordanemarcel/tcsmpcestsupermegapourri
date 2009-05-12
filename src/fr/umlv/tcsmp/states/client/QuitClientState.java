@@ -1,6 +1,7 @@
 package fr.umlv.tcsmp.states.client;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
@@ -10,40 +11,39 @@ import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class QuitClientState extends TCSMPState {
-private boolean send = false;
-	
+	ResponseAction resp = null;
+
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
-		
-		if (send) {
-			/* XXX: create an exit state ? */
-			return new Response(ResponseAction.CLOSE);
+		if (resp == null) {
+			// Request has not yet been sent
+			bb.clear();
+			bb.put(TCSMPParser.encode("QUIT\r\n"));
+			bb.flip();
+			resp = ResponseAction.REPLY;
+
+			return new Response(resp);
 		}
-		
-		String [] args = TCSMPParser.parseCommand(bb);
-		bb.clear();
-		
-		if (args.length != 1 || args[0].equals("QUIT") == false) {
-			bb.put(ErrorReplies.unknowCommand("QUIT", args[0]));
-			return new Response(ResponseAction.REPLY);
+
+		if (resp == ResponseAction.REPLY) {
+			resp = ResponseAction.READ;
+			return new Response(resp);
 		}
-		
-		/**
-		 * Check if we have to forward the command.
-		 */
-		if (proto.isRelay() == false) {
-			//return new Response("200 OK\r\n".getBytes(), ResponseAction.RELAYALL);
-			return null;
+
+		if (resp == ResponseAction.READ) {
+			ArrayList<String> list = new ArrayList<String>();
+			TCSMPParser.parseAnswer(bb, list);
+			
+			switch(Integer.parseInt(list.get(0))) {
+			// States
+			case 250:
+				proto.setState(null);
+				bb.clear();
+				return null;
+			default:
+				throw new AssertionError("Pouet");
+			}
 		}
-		
-		/**
-		 * Check to see if we have to forward the message ?
-		 * 
-		 * XXX: on devrait faire une methode dans le proto
-		 * qui dit si on est relay ou non d'un domaine. Comme
-		 * ca c'est le proto qui connait le domaine sur lequel
-		 * on ecoute?
-		 */
-		
+
 		return null;
 	}	
 }
