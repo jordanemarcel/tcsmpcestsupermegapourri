@@ -39,7 +39,7 @@ public class PkeyClientState extends TCSMPState {
 				}
 				puzzle = entry.getValue();
 					// XXX Booya
-				puzzle.resolve();
+				//puzzle.resolve();
 				currentDomain = entry.getKey();
 				break;
 			}

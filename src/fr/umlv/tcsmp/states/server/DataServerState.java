@@ -19,10 +19,6 @@ public class DataServerState extends TCSMPState {
 			proto.setState(new PkeyServerState());
 			return new Response(ResponseAction.READ);
 		}
-		/*
-		 * A fuking state \o/
-		 * Append data in string builder inside the proto ?
-		 */
 		
 		Scanner sc = new Scanner(new String(bb.array()));
 		while (sc.hasNextLine()) {

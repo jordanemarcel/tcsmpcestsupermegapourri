@@ -52,8 +52,8 @@ public class ApzlServerState extends TCSMPState {
 			return new Response(ResponseAction.REPLY);
 		}
 
-		/* Forward original command */
-		bb.flip();
+		/* reset cmd */
+		bb.position(0);
 		
 		/* gni */
 		return new Response(ResponseAction.RELAYALL);

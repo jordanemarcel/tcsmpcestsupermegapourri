@@ -49,7 +49,7 @@ public class MailServerState extends TCSMPState {
 		}
 		
 		/* relay the original message */
-		bb.flip();
+		bb.position(0);
 		
 		/* relay to all instead */
 		return new Response(ResponseAction.RELAYALL);

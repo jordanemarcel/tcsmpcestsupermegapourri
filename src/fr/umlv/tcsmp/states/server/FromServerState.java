@@ -1,6 +1,7 @@
 package fr.umlv.tcsmp.states.server;
 
 import java.nio.ByteBuffer;
+import java.text.ParseException;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
@@ -12,25 +13,25 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 public class FromServerState extends TCSMPState {
 
 	private boolean send = false;
-	
+
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (send) {
 			proto.setState(new RctpServerState());
 			return new Response(ResponseAction.READ);
 		}
-		
+
 		send = true;
-		
+
 		String [] args = TCSMPParser.parseCommand(bb);
 		bb.clear();
-		
+
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);
 			return t.processCommand(proto, bb);
 		}
-		
+
 		if (args.length != 2 || args[0].equals("FROM") == false) {
 			bb.clear();
 			bb.put(ErrorReplies.unknowCommand("FROM", args[0]));
@@ -40,16 +41,23 @@ public class FromServerState extends TCSMPState {
 
 		/** 
 		 * Set from
-		 * XXX: Here we have to check if from is a real address.
 		 */
-		proto.setFrom(args[1]);
+		try {
+			String domain = TCSMPParser.parseDomain(args[1]);
+			String user = TCSMPParser.parseUser(args[1]);
+			proto.setFrom(user + "@" + domain);
+		} catch (ParseException e) {
+			bb.put(TCSMPParser.encode(new String("500 Invalid from.\r\n")));
+			bb.flip();
+			return new Response(ResponseAction.REPLY);
+		}
 		
 		/**
 		 * Create response buffer.
 		 */
 		bb.put(TCSMPParser.encode(new String("250 OK\r\n")));
 		bb.flip();
-		
+
 		return new Response(ResponseAction.REPLY);
 	}
 }

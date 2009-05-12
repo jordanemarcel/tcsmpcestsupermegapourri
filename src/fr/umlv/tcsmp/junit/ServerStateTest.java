@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import fr.umlv.tcsmp.proto.Protocol;
+import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.states.client.BannerClientState;
 import fr.umlv.tcsmp.states.server.BannerServerState;
@@ -33,10 +34,10 @@ public class ServerStateTest {
 		ByteBuffer bb = ByteBuffer.allocate(1024);
 		
 		/* SERVER */
-		Protocol serverProtocol = new Protocol(new BannerServerState());
+		Protocol serverProtocol = new Protocol(ProtocolMode.SERVER);
 		serverProtocol.addDomain("biniou.com");
 		/* CLIENT */
-		Protocol clientProtocol = new Protocol(new BannerClientState());
+		Protocol clientProtocol = new Protocol(ProtocolMode.CLIENT);
 		clientProtocol.setFrom("toto@titi.com");
 		clientProtocol.setClientDomain("titi.com");
 		clientProtocol.getRecpts().add("billou@biniou.com");
