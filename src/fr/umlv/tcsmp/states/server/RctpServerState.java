@@ -5,14 +5,25 @@ import java.text.ParseException;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
+import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class RctpServerState extends TCSMPState {
 
+	private boolean send = false;
+	
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
+		
+		if (send) {
+			send = false;
+			return new Response(ResponseAction.READ);
+		}
+		
+		send = true;
+		
 		String [] args = TCSMPParser.parse(bb);
 		
 		if (args.length == 1 && args[0].equals("QUIT")) {
@@ -32,7 +43,6 @@ public class RctpServerState extends TCSMPState {
 			return apzlState.processCommand(proto, bb);
 		}
 		
-		
 		String dest = null;
 		try {
 			dest = TCSMPParser.parseDomain(args[1]);
@@ -47,7 +57,7 @@ public class RctpServerState extends TCSMPState {
 		 * On va faire des genres de sous state pour helo et tout ca... 
 		 */
 		
-		if (dest.equals("mydomain")) {
+		if (proto.isRelay(dest)) {
 			/** XXX: see if user exists here ? */
 			ByteBuffer response = ByteBuffer.wrap("250 OK".getBytes());
 			return new Response(response);

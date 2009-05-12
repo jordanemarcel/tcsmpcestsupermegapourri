@@ -11,7 +11,14 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class QuitServerState extends TCSMPState {
 	
+	private boolean send = false;
+	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
+		
+		if (send) {
+			/* XXX: create an exit state ? */
+			return new Response(ResponseAction.CLOSE);
+		}
 		
 		String [] args = TCSMPParser.parse(bb);
 		
