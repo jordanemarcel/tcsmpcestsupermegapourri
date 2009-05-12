@@ -10,7 +10,7 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class BannerServerState extends TCSMPState {
 
-	private static String banner = "200 Hello I'm the TCSMP server. Nice to meet you.\r\n";
+	private static String banner = "220 Hello I'm the TCSMP server. Nice to meet you.\r\n";
 	private boolean send = false;
 	
 	@Override

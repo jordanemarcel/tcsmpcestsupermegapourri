@@ -14,7 +14,7 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 public class BannerClientState extends TCSMPState {
 
 	private final List<String> commandArgs;
-	
+
 	public BannerClientState() {
 		commandArgs = new ArrayList<String>();
 	}
@@ -23,12 +23,24 @@ public class BannerClientState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (TCSMPParser.parseAnswer(bb, commandArgs)) {
 			// Multiline ended
-			// TODO: check response codes
+
+			for(int i=0; i<commandArgs.size(); i+=2) {
+				switch (Integer.parseInt(commandArgs.get(i))) {
+				case 220:
+					// NOOP
+					break;
+				case 554:
+					// TODO QUIT correctement.
+					break;
+				default:
+					throw new AssertionError("I don't know about this response code: " + commandArgs.get(i) + " for connection establishment.");
+				}
+			}
 			proto.setState(new TeloClientState());
 			bb.clear();
 			return proto.doIt(bb);
 		}
-		
+
 		return new Response(ResponseAction.READ);
 	}
 }
