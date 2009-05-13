@@ -1,8 +1,6 @@
 package fr.umlv.tcsmp.tcp;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
@@ -15,6 +13,12 @@ public class KeyAttachment {
 	public KeyAttachment(ByteBuffer byteBuffer, Protocol protocol) {
 		this.byteBuffer = byteBuffer;
 		this.protocol = protocol;
+	}
+	
+	public KeyAttachment(KeyAttachment keyAttachment) {
+		this.byteBuffer = keyAttachment.getByteBuffer().duplicate();
+		this.protocol = keyAttachment.getProtocol();
+		this.currentResponse = keyAttachment.currentResponse;
 	}
 	
 	public ByteBuffer getByteBuffer() {
