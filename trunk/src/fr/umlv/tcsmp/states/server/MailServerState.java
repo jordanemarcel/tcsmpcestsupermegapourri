@@ -22,6 +22,7 @@ public class MailServerState extends TCSMPState {
 				proto.setState(new DataServerState());
 			else
 				send = error = false;
+			bb.clear();
 			return new Response(ResponseAction.READ);
 		}
 

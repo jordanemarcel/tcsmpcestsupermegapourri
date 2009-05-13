@@ -22,6 +22,7 @@ public class FromServerState extends TCSMPState {
 				proto.setState(new RctpServerState());
 			else
 				send = error = false;
+			bb.clear();
 			return new Response(ResponseAction.READ);
 		}
 

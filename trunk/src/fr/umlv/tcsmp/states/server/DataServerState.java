@@ -17,6 +17,7 @@ public class DataServerState extends TCSMPState {
 	
 		if (send) {
 			proto.setState(new PkeyServerState());
+			bb.clear();
 			return new Response(ResponseAction.READ);
 		}
 		

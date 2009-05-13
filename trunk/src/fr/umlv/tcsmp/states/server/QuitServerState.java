@@ -16,6 +16,7 @@ public class QuitServerState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		
 		if (send) {
+			bb.clear();
 			return new Response(ResponseAction.CLOSE);
 		}
 		

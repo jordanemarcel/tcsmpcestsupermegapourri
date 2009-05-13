@@ -36,6 +36,7 @@ public class ApzlServerState extends TCSMPState {
 				proto.setState(new MailServerState());
 			else
 				send = error = false;
+			bb.clear();
 			return new Response(ResponseAction.READ);
 		}
 

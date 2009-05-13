@@ -17,6 +17,7 @@ public class BannerServerState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (send) {
 			proto.setState(new TeloServerState());
+			bb.clear();
 			return new Response(ResponseAction.READ);
 		}
 		
