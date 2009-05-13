@@ -161,7 +161,7 @@ public class TcpStructure {
 			}
 		} catch(IllegalArgumentException iae) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			iae.printStackTrace();
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
