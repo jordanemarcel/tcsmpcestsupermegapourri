@@ -77,7 +77,8 @@ public class TcpStructure {
 			do {
 				nbKeysSelected = selector.select();
 			} while(nbKeysSelected<1);
-
+			System.out.println("* TcpStructure: Selector has detected a socket!");
+			
 			Set<SelectionKey> selectionKeys = selector.selectedKeys();
 			for(SelectionKey key: selectionKeys) {
 				if(key.isValid() && key.isAcceptable()) {
@@ -192,7 +193,7 @@ public class TcpStructure {
 		ServerSocketChannel serverSocketChannel = (ServerSocketChannel)key.channel();
 		try {
 			SocketChannel socketChannel = serverSocketChannel.accept();
-			System.out.println("New connection from: " + socketChannel.socket().getRemoteSocketAddress());
+			System.out.println("* TcpStructure: New connection from: " + socketChannel.socket().getRemoteSocketAddress());
 			Protocol newServerProtocol = givenProtocol.newProtocol();
 			ByteBuffer byteBuffer = ByteBuffer.allocateDirect(TcpStructure.BUFFER_SIZE);
 			KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, newServerProtocol);
@@ -200,12 +201,11 @@ public class TcpStructure {
 			protocolDomainMap.put(newServerProtocol, socketData);
 			socketChannel.configureBlocking(false);
 			Response response = newServerProtocol.doIt(byteBuffer);
-			switch (response.getAction()) {
-			case READ:
-				socketChannel.register(selector, SelectionKey.OP_READ, keyAttachment);
-				break;
-			case REPLY:
-				socketChannel.register(selector, SelectionKey.OP_WRITE, keyAttachment);
+			ResponseAction responseAction = response.getAction();
+			System.out.println("* TcpStructure: Response from Protocol: " + responseAction);
+			switch (responseAction) {
+			case READ: case WRITE: 
+				socketChannel.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
 				break;
 			case CLOSE:
 				socketChannel.close();
@@ -256,7 +256,7 @@ public class TcpStructure {
 	private void doConnect(SelectionKey key) {
 		SocketChannel socketChannel = (SocketChannel)key.channel();
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
-		System.out.println("* TcpStructure: Closing " + socketChannel.socket().getRemoteSocketAddress());
+		System.out.println("* TcpStructure: Connecting to " + socketChannel.socket().getRemoteSocketAddress());
 		try {
 			if(!socketChannel.finishConnect()) {
 				socketChannel.close();
