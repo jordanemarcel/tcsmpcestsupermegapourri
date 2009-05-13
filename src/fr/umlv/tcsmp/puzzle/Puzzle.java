@@ -12,10 +12,13 @@ import java.util.Random;
 public class Puzzle {
 	public static void main(String[] args) {
 		Puzzle p = Puzzle.randomPuzzle(6, 6);
+		Puzzle p2 = new Puzzle(6, 6, p.lineString());
 		shuffle(p);
 		System.out.println(p);
+		System.out.println(p.equals(p2));
 		resolve(p);
 		System.out.println(p);
+		System.out.println(p.equals(p2));
 		
 		
 		// My test
