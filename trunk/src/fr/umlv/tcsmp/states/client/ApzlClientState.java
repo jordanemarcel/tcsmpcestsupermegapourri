@@ -49,7 +49,9 @@ public class ApzlClientState extends TCSMPState {
 					Puzzle puzzle = TCSMPParser.parsePuzzleDesc(dims, desc);
 					proto.addPuzzleFor(domain, puzzle);
 					break;
-					// TODO resp codes
+				case 515:
+					// NOOP TODO maybe record error msg?
+					break;
 				default:
 					throw new AssertionError("Pouet");
 				}

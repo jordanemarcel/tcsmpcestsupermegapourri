@@ -34,7 +34,7 @@ public class QuitClientState extends TCSMPState {
 
 			switch(Integer.parseInt(list.get(0))) {
 			// States
-			case 250:
+			case 221:
 				break;
 			default:
 				throw new AssertionError("Pouet");
