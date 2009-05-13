@@ -70,6 +70,9 @@ public class TcpStructure {
 				if(key.isValid() && key.isAcceptable()) {
 					this.doAccept(key);
 				}
+				if(key.isValid() && key.isConnectable()) {
+					this.doConnect(key);
+				}
 				if(key.isValid() && key.isReadable()) {
 					this.doRead(key);
 				}
@@ -86,52 +89,51 @@ public class TcpStructure {
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		Protocol protocol = keyAttachment.getProtocol();
 		SocketData socketData = protocolDomainMap.get(protocol);
-		
+		String domain = response.getDest();
+		SocketChannel originalClient = socketData.getOriginalClient();
+		ResponseAction responseAction = response.getAction();
 		try {
-			switch (response.getAction()) {
-			case READ:
-				// TODO domain == null
-				key.interestOps(SelectionKey.OP_READ);
-				break;
-			case REPLY:
-				SocketChannel originalClient = socketData.getOriginalClient();
-				if(socketChannel==originalClient) {
-					key.interestOps(SelectionKey.OP_WRITE);
-				} else {
-					key.cancel();
-					originalClient.register(selector, SelectionKey.OP_WRITE, keyAttachment);
-				}
-				break;
-			case RELAY:
-				String domain = response.getDest();
-				SocketChannel domainClient = socketData.getSocket(domain);
-				if(domainClient!=null) {
-					if(socketChannel==domainClient) {
-						key.interestOps(SelectionKey.OP_WRITE);
+			switch (responseAction) {
+			case READ: case WRITE:
+				if(domain==null) {
+					if(socketChannel==originalClient) {
+						key.interestOps(TcpStructure.getResponseOps(responseAction));
+						return;
 					} else {
 						key.cancel();
-						domainClient.register(selector, SelectionKey.OP_WRITE, keyAttachment);
+						originalClient.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
+						return;
 					}
 				} else {
-					key.cancel();
-					keyAttachment.setCurrentResponse(response);
-					this.connectNewClient(domain, keyAttachment);
+					SocketChannel client = socketData.getSocket(domain);
+					if(socketChannel==client) {
+						key.interestOps(TcpStructure.getResponseOps(responseAction));
+						return;
+					} else {
+						key.cancel();
+						if(client==null) {
+							keyAttachment.setCurrentResponse(response);
+							this.connectNewClient(domain, keyAttachment);
+							return;
+						} else {
+							client.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
+							return;
+						}
+					}
 				}
-				break;
 			case RELAYALL:
 				Collection<SocketChannel> allClient = protocolDomainMap.get(protocol).getClients();
 				for(SocketChannel client: allClient) {
 					if(client==socketChannel) {
 						key.interestOps(SelectionKey.OP_WRITE);
 					} else {
-						ByteBuffer byteBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
-						client.register(selector, SelectionKey.OP_WRITE, new KeyAttachment(byteBuffer, protocol));
+						client.register(selector, TcpStructure.getResponseOps(responseAction), new KeyAttachment(keyAttachment));
 					}
 				}
 				if(socketChannel==socketData.getOriginalClient()) {
 					key.cancel();
 				}
-				break;
+				return;
 			case CLOSE:
 				socketChannel.close();
 				return;
@@ -143,7 +145,6 @@ public class TcpStructure {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	private void connectNewClient(String domain, KeyAttachment keyAttachment) {
@@ -155,7 +156,7 @@ public class TcpStructure {
 			Response currentResponse = keyAttachment.getCurrentResponse();
 			client.configureBlocking(false);
 			if(client.connect(remoteIsa)) {
-				client.register(selector, this.getResponseOps(currentResponse.getAction()), keyAttachment);
+				client.register(selector, TcpStructure.getResponseOps(currentResponse.getAction()), keyAttachment);
 			} else {
 				client.register(selector, SelectionKey.OP_CONNECT, keyAttachment);
 			}
@@ -168,21 +169,6 @@ public class TcpStructure {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-	}
-	
-	public int getResponseOps(ResponseAction responseAction) {
-		switch (responseAction) {
-		case READ:
-			return SelectionKey.OP_READ;
-		case REPLY:
-			return SelectionKey.OP_WRITE;
-		case RELAY:
-			return SelectionKey.OP_WRITE;
-		case RELAYALL:
-			return SelectionKey.OP_WRITE;
-		default:
-			throw new IllegalArgumentException("No Ops for " + responseAction.name());
 		}
 	}
 
@@ -232,11 +218,48 @@ public class TcpStructure {
 	}
 
 	public void doWrite(SelectionKey key) {
-
+		SocketChannel socketChannel = (SocketChannel)key.channel();
+		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
+		ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
+		Protocol protocol = keyAttachment.getProtocol();
+		try {
+			while(byteBuffer.hasRemaining()) {
+				socketChannel.write(byteBuffer);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		byteBuffer.clear();
+		Response response = protocol.doIt(byteBuffer);
+		this.handleResponse(key, response);
 	}
-	
-	public void doConnect(SelectionKey key) {
 
+	public void doConnect(SelectionKey key) {
+		SocketChannel socketChannel = (SocketChannel)key.channel();
+		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
+		try {
+			if(!socketChannel.finishConnect()) {
+				socketChannel.close();
+			}
+			key.interestOps(TcpStructure.getResponseOps(keyAttachment.getCurrentResponse().getAction()));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static int getResponseOps(ResponseAction responseAction) {
+		switch (responseAction) {
+		case READ:
+			return SelectionKey.OP_READ;
+		case WRITE:
+			return SelectionKey.OP_WRITE;
+		case RELAYALL:
+			return SelectionKey.OP_WRITE;
+		default:
+			throw new IllegalArgumentException("No Ops for " + responseAction.name());
+		}
 	}
 
 }

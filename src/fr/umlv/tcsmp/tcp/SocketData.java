@@ -3,7 +3,6 @@ package fr.umlv.tcsmp.tcp;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public class SocketData {
 	private final SocketChannel originalClient;
