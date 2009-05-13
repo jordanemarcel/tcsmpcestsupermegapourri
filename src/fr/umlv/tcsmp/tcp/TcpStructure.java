@@ -24,7 +24,7 @@ public class TcpStructure {
 
 	private final Selector selector;
 	private final TCSMPResolver dnsResolver;
-	private Protocol serverProtocol;
+	private Protocol givenProtocol;
 	private final HashMap<Protocol, SocketData> protocolDomainMap = 
 		new HashMap<Protocol, SocketData>();
 
@@ -38,15 +38,28 @@ public class TcpStructure {
 	}
 
 	public void processProtocol(Protocol protocol) throws IOException {
+		this.givenProtocol = protocol;
 		switch (protocol.getProtocolMode()) {
 		case CLIENT:
-
+			System.out.println("* TcpStructure: CLIENT Mode");
+			this.startClient(protocol.getProtocolPort());
 			break;
 		case SERVER:
-			this.serverProtocol = protocol;
+			System.out.println("* TcpStructure: SERVER Mode");
 			this.startServer(protocol.getProtocolPort());
 			break;
 		}
+	}
+	
+	public void startClient(int port) throws IOException {
+		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(TcpStructure.BUFFER_SIZE);
+		KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, givenProtocol);
+		Response response = givenProtocol.doIt(byteBuffer);
+		keyAttachment.setCurrentResponse(response);
+		String domain = response.getDest();
+		this.connectNewClient(domain, keyAttachment);
+		this.handleSelector();
+		System.out.println("* TcpStructure: End of Transmission");
 	}
 
 	public void startServer(int port) throws IOException {
@@ -57,7 +70,7 @@ public class TcpStructure {
 		serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 		this.handleSelector();
 	}
-
+	
 	public void handleSelector() throws IOException {
 		int nbKeysSelected;
 		while(true) {
@@ -148,6 +161,9 @@ public class TcpStructure {
 	}
 
 	private void connectNewClient(String domain, KeyAttachment keyAttachment) {
+		if(domain==null) {
+			throw new IllegalArgumentException("Can't establish a connection with a null client :-(");
+		}
 		Protocol protocol = keyAttachment.getProtocol();
 		try {
 			InetAddress domainAddress = dnsResolver.resolv(domain);
@@ -177,7 +193,7 @@ public class TcpStructure {
 		try {
 			SocketChannel socketChannel = serverSocketChannel.accept();
 			System.out.println("New connection from: " + socketChannel.socket().getRemoteSocketAddress());
-			Protocol newServerProtocol = serverProtocol.newProtocol();
+			Protocol newServerProtocol = givenProtocol.newProtocol();
 			ByteBuffer byteBuffer = ByteBuffer.allocateDirect(TcpStructure.BUFFER_SIZE);
 			KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, newServerProtocol);
 			SocketData socketData = new SocketData(socketChannel);
@@ -207,6 +223,7 @@ public class TcpStructure {
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 		Protocol protocol = keyAttachment.getProtocol();
+		System.out.println("* TcpStructure: Reading from " + socketChannel.socket().getRemoteSocketAddress());
 		try {
 			socketChannel.read(byteBuffer);
 			Response response = protocol.doIt(byteBuffer);
@@ -222,6 +239,7 @@ public class TcpStructure {
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 		Protocol protocol = keyAttachment.getProtocol();
+		System.out.println("* TcpStructure: Writing to " + socketChannel.socket().getRemoteSocketAddress());
 		try {
 			while(byteBuffer.hasRemaining()) {
 				socketChannel.write(byteBuffer);
@@ -238,6 +256,7 @@ public class TcpStructure {
 	public void doConnect(SelectionKey key) {
 		SocketChannel socketChannel = (SocketChannel)key.channel();
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
+		System.out.println("* TcpStructure: Closing " + socketChannel.socket().getRemoteSocketAddress());
 		try {
 			if(!socketChannel.finishConnect()) {
 				socketChannel.close();
