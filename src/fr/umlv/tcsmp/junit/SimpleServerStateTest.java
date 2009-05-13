@@ -6,6 +6,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
+import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.server.BannerServerState;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
@@ -92,6 +93,9 @@ public class SimpleServerStateTest {
 		bb.put(TCSMPParser.encode(apzl));
 		bb.flip();
 		res = p.doIt(bb);
+		String a[] = TCSMPParser.parseCommand(bb);
+		// create the original puzzle
+		Puzzle puzz = TCSMPParser.parsePuzzleDesc(a[2], a[3]);
 		printBB(res, bb);
 		p.doIt(bb);
 
@@ -120,7 +124,7 @@ public class SimpleServerStateTest {
 		p.doIt(bb);
 
 		/**
-		 * PKEY
+		 * FALSE PKEY
 		 */
 		String pkey = "PKEY foobar.com 4,4 ci1k31p09puqouplkyvb0vw5qwvblv4pbftf5tewbeoypoocf4m4wmvbyv6tc65j\r\n";
 		System.out.print(pkey);
@@ -130,7 +134,21 @@ public class SimpleServerStateTest {
 		res = p.doIt(bb);
 		printBB(res, bb);
 		p.doIt(bb);
-
+		
+		/**
+		 * GOOD PKEY
+		 */
+//		System.out.println(puzz.lineString());
+//		Puzzle.resolve(puzz);
+//		pkey = "PKEY foobar.com 4,4 " + puzz.lineString() + "\r\n";
+//		System.out.print(pkey);
+//		bb.clear();
+//		bb.put(TCSMPParser.encode(pkey));
+//		bb.flip();
+//		res = p.doIt(bb);
+//		printBB(res, bb);
+//		p.doIt(bb);
+		
 		/**
 		 * QUIT
 		 */
