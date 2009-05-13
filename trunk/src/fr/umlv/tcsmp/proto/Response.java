@@ -12,7 +12,7 @@ public class Response {
 	private final ResponseAction action;
 	
 	public Response() {
-		this(null, ResponseAction.REPLY);
+		this(null, ResponseAction.WRITE);
 	}
 	
 	public Response(ResponseAction action) {
@@ -20,7 +20,7 @@ public class Response {
 	}
 	
 	public Response(String dest) {
-		this(dest, ResponseAction.RELAY);
+		this(dest, ResponseAction.WRITE);
 	}
 	
 	public Response(String dest, ResponseAction action) {

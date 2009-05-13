@@ -24,6 +24,6 @@ public class BannerServerState extends TCSMPState {
 		bb.clear();
 		bb.put(TCSMPParser.encode(banner));
 		bb.flip();
-		return new Response(ResponseAction.REPLY); 
+		return new Response(ResponseAction.WRITE); 
 	}
 }

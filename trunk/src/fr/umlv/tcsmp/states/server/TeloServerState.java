@@ -34,7 +34,7 @@ public class TeloServerState extends TCSMPState {
 		if (args.length != 2 || args[0].equals("TELO") == false) {
 			bb.put(ErrorReplies.unknowCommand("TELO", args[0]));
 			bb.flip();
-			return new Response(ResponseAction.REPLY);
+			return new Response(ResponseAction.WRITE);
 		}
 
 		/** 
@@ -48,6 +48,6 @@ public class TeloServerState extends TCSMPState {
 		bb.put(TCSMPParser.encode("250-TCSMPv1\r\n250 OK greets " + args[1] + "\r\n"));
 		bb.flip();
 		
-		return new Response(ResponseAction.REPLY);
+		return new Response(ResponseAction.WRITE);
 	}
 }
