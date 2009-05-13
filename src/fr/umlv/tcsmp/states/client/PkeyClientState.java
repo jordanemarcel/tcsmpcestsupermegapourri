@@ -49,12 +49,12 @@ public class PkeyClientState extends TCSMPState {
 			bb.put(TCSMPParser.encode(s));
 
 			bb.flip();
-			resp = ResponseAction.REPLY;
+			resp = ResponseAction.WRITE;
 
 			return new Response(resp);
 		}
 
-		if (resp == ResponseAction.REPLY) {
+		if (resp == ResponseAction.WRITE) {
 			// Request was sent, signify we want to get the reply
 			resp = ResponseAction.READ;
 			return new Response(resp);
@@ -78,11 +78,13 @@ public class PkeyClientState extends TCSMPState {
 				else {
 					proto.setState(this);
 				}
-				bb.clear();
-				return proto.doIt(bb);
+				break;
+				//TODO resp codes
 			default:
 				throw new AssertionError("Pouet");
 			}
+			bb.clear();
+			return proto.doIt(bb);
 		}
 
 		return null;

@@ -18,16 +18,15 @@ public class ApzlClientState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (resp == null) {
 			// Request has not yet been sent
-			bb.clear();
 			bb.put(TCSMPParser.encode("APZL\r\n"));
 
 			bb.flip();
-			resp = ResponseAction.REPLY;
+			resp = ResponseAction.WRITE;
 
 			return new Response(resp);
 		}
 
-		if (resp == ResponseAction.REPLY) {
+		if (resp == ResponseAction.WRITE) {
 			// Request was sent, signify we want to get the replies
 			resp = ResponseAction.READ;
 			return new Response(resp);
@@ -50,6 +49,7 @@ public class ApzlClientState extends TCSMPState {
 					Puzzle puzzle = TCSMPParser.parsePuzzleDesc(dims, desc);
 					proto.addPuzzleFor(domain, puzzle);
 					break;
+					// TODO resp codes
 				default:
 					throw new AssertionError("Pouet");
 				}

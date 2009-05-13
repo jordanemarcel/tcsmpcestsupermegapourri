@@ -16,19 +16,18 @@ public class FromClientState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (resp == null) {
 			// Request has not yet been sent
-			bb.clear();
 			bb.put(TCSMPParser.encode("FROM <"));
 			// TODO the domain is the server's, not the client's
 			bb.put(TCSMPParser.encode(proto.getFrom()));
 			bb.put(TCSMPParser.encode(">\r\n"));
 
 			bb.flip();
-			resp = ResponseAction.REPLY;
+			resp = ResponseAction.WRITE;
 
 			return new Response(resp);
 		}
 		
-		if (resp == ResponseAction.REPLY) {
+		if (resp == ResponseAction.WRITE) {
 			// Request was sent, signify we want to get the reply
 			resp = ResponseAction.READ;
 			return new Response(resp);
@@ -42,12 +41,14 @@ public class FromClientState extends TCSMPState {
 			// States
 			case 250:
 				proto.setState(new RctpClientState());
-				bb.clear();
-				return proto.doIt(bb);
+				break;
 				// TODO RESPONSE CODES
 			default:
 				throw new AssertionError("Pouet");
 			}
+			
+			bb.clear();
+			return proto.doIt(bb);
 		}
 		
 		return null;

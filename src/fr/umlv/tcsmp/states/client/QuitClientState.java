@@ -16,15 +16,14 @@ public class QuitClientState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (resp == null) {
 			// Request has not yet been sent
-			bb.clear();
 			bb.put(TCSMPParser.encode("QUIT\r\n"));
 			bb.flip();
-			resp = ResponseAction.REPLY;
+			resp = ResponseAction.WRITE;
 
 			return new Response(resp);
 		}
 
-		if (resp == ResponseAction.REPLY) {
+		if (resp == ResponseAction.WRITE) {
 			resp = ResponseAction.READ;
 			return new Response(resp);
 		}
@@ -32,16 +31,17 @@ public class QuitClientState extends TCSMPState {
 		if (resp == ResponseAction.READ) {
 			ArrayList<String> list = new ArrayList<String>();
 			TCSMPParser.parseAnswer(bb, list);
-			
+
 			switch(Integer.parseInt(list.get(0))) {
 			// States
 			case 250:
-				proto.setState(null);
-				bb.clear();
-				return null;
+				break;
 			default:
 				throw new AssertionError("Pouet");
 			}
+			proto.setState(null);
+			bb.clear();
+			return null;
 		}
 
 		return null;
