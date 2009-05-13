@@ -80,26 +80,11 @@ public class RctpServerState extends TCSMPState {
 			return apzlState.processCommand(proto, bb);
 		}
 		
-		String dest = null;
-		try {
-			dest = TCSMPParser.parseDomain(args[1]);
-		} catch (ParseException e) {
-			bb.put(TCSMPParser.encode("501 Not a valid address."));
-			bb.flip();
-			return new Response(ResponseAction.WRITE);
-		}
 		
-		if (proto.isRelay(dest) == false) {
-			bb.put(TCSMPParser.encode("250 OK\r\n"));
-			bb.flip();
-			return new Response(ResponseAction.WRITE);
-		}
-		
-		/**
-		 * Check address
-		 */
+		// Check address and add it to the rctps array
+		String domain;
 		try {
-			String domain = TCSMPParser.parseDomain(args[1]);
+			domain = TCSMPParser.parseDomain(args[1]);
 			String user = TCSMPParser.parseUser(args[1]);
 			proto.getRecpts().add(user + "@" + domain);
 		} catch (ParseException e) {
@@ -108,12 +93,17 @@ public class RctpServerState extends TCSMPState {
 			return new Response(ResponseAction.WRITE);
 		}
 		
-		/**
-		 * Create a fakeProto
-		 */
+		if (proto.isRelay(domain) == false) {
+			bb.put(TCSMPParser.encode("250 OK\r\n"));
+			bb.flip();
+			return new Response(ResponseAction.WRITE);
+		}
+
+		
+		// Create a fakeProto for our client states
 		fakeProto = proto.newProtocol();
 		fakeProto.setState(new TeloClientState());
-		currentRCPTDomain = dest;
+		currentRCPTDomain = domain;
 		Response res = fakeProto.doIt(bb);
 		if (res.getAction() != ResponseAction.READ)
 			return new Response(currentRCPTDomain, ResponseAction.WRITE);

@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,7 +17,8 @@ public class TCSMPParser {
 
 	private static final Charset charset = Charset.forName("ASCII");
 	private static Pattern emailrx = Pattern.compile("<(\\w+)@(\\w+\\.\\p{Alpha}{2,3})>");
-
+	private static Pattern emailrx2 = Pattern.compile("(\\w+)@(\\w+\\.\\p{Alpha}{2,3})");
+	
 	/**
 	 * Simply split command found in bytebuffer. 
 	 */
@@ -91,6 +93,10 @@ public class TCSMPParser {
 		if(matcher.matches())
 			return matcher.group(2);
 
+		matcher = emailrx2.matcher(mail);
+		if(matcher.matches())
+			return matcher.group(2);
+		
 		throw new ParseException(mail + " is not a valid email address", 0);
 	}
 	
@@ -107,8 +113,23 @@ public class TCSMPParser {
 		Matcher matcher = emailrx.matcher(mail);
 		if(matcher.matches())
 			return matcher.group(1);
+		
+		matcher = emailrx2.matcher(mail);
+		if(matcher.matches())
+			return matcher.group(1);
 
 		throw new ParseException(mail + " is not a valid email address", 0);
+	}
+
+	/**
+	 * Create a multi line response with the responses found in responses
+	 */
+	public static void multilinize(ArrayList<String> responses) {
+		for (int i = 0; i < responses.size() - 1; i++) {
+			String res = responses.get(i);
+			responses.set(i, res.replaceFirst("\\s", "-"));
+		}
+		// last response should contains the space after code.
 	}
 
 }
