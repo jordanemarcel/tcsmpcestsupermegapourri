@@ -35,15 +35,14 @@ public class MailClientState extends TCSMPState {
 			// MAIL Request was not send yet
 			if (resp == null) {
 				// Mail has not yet been sent
-				bb.clear();
 				bb.put(TCSMPParser.encode("MAIL\r\n"));
 				bb.flip();
-				resp = ResponseAction.REPLY;
+				resp = ResponseAction.WRITE;
 
 				return new Response(resp);
 			}
 
-			if (resp == ResponseAction.REPLY) {
+			if (resp == ResponseAction.WRITE) {
 				// Request was sent, signify we want to get the reply
 				resp = ResponseAction.READ;
 				return new Response(resp);
@@ -58,18 +57,19 @@ public class MailClientState extends TCSMPState {
 				case 354:
 					sentRequest = true;
 					resp = null;
-					bb.clear();
-					return proto.doIt(bb);
+					break;
+					//TODO resp codes
 				default:
 					throw new AssertionError("Pouet");
 				}
+				bb.clear();
+				return proto.doIt(bb);
 			}
 		}
 		else {
 			// MAIL request was sent
 			if (resp == null) {
 				// Mail has not yet been sent
-				bb.clear();
 				bb.put(encodedMail);
 				offset += bb.limit();
 				bb.flip();
@@ -99,11 +99,13 @@ public class MailClientState extends TCSMPState {
 						proto.setState(pkeyState);	
 					else
 						proto.setState(new PkeyClientState());
-					bb.clear();
-					return proto.doIt(bb);
+					break;
+					//TODO resp codes
 				default:
 					throw new AssertionError("Pouet");
 				}
+				bb.clear();
+				return proto.doIt(bb);
 			}
 		}
 

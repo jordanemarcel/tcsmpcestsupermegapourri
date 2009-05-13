@@ -23,24 +23,23 @@ public class BannerClientState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (TCSMPParser.parseAnswer(bb, commandArgs)) {
 			// Multiline ended
-
 			for(int i=0; i<commandArgs.size(); i+=2) {
 				switch (Integer.parseInt(commandArgs.get(i))) {
 				case 220:
-					// NOOP
+					proto.setState(new TeloClientState());
 					break;
 				case 554:
-					// TODO QUIT correctement.
+					proto.setState(new QuitClientState());
 					break;
 				default:
 					throw new AssertionError("I don't know about this response code: " + commandArgs.get(i) + " for connection establishment.");
 				}
 			}
-			proto.setState(new TeloClientState());
 			bb.clear();
 			return proto.doIt(bb);
 		}
-
+		bb.clear();
+		// Multiline didn't end, read next lines
 		return new Response(ResponseAction.READ);
 	}
 }

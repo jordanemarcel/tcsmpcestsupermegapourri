@@ -15,19 +15,18 @@ public class TeloClientState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (resp == null) {
 			// Request has not yet been sent
-			bb.clear();
 			bb.put(TCSMPParser.encode("TELO "));
 			// TODO the domain is the server's, not the client's
 			bb.put(TCSMPParser.encode(proto.getClientDomain()));
 			bb.put(TCSMPParser.encode("\r\n"));
 
 			bb.flip();
-			resp = ResponseAction.REPLY;
+			resp = ResponseAction.WRITE;
 
 			return new Response(resp);
 		}
 
-		if (resp == ResponseAction.REPLY) {
+		if (resp == ResponseAction.WRITE) {
 			resp = ResponseAction.READ;
 			return new Response(resp);
 		}
@@ -39,8 +38,7 @@ public class TeloClientState extends TCSMPState {
 			// States
 			case 250:
 				proto.setState(new FromClientState());
-				bb.clear();
-				return proto.doIt(bb);
+				break;
 			case 504:
 				// TODO
 				break;
@@ -50,6 +48,8 @@ public class TeloClientState extends TCSMPState {
 			default:
 				throw new AssertionError("Pouet");
 			}
+			bb.clear();
+			return proto.doIt(bb);
 		}
 
 		return null;
