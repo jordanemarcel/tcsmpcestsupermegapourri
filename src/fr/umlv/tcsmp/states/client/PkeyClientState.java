@@ -71,18 +71,24 @@ public class PkeyClientState extends TCSMPState {
 			case 216:
 				resp = null;
 				processedDomains.put(currentDomain, true);
-				if (processedDomains.size() == proto.getPuzzles().size()) {
-					// Done processing puzzles
-					proto.setState(new QuitClientState());
-				}
-				else {
-					proto.setState(this);
-				}
 				break;
-				//TODO resp codes
+			case 516:
+			case 517:
+				// TODO record msg?
+				processedDomains.put(currentDomain, true);
+				resp = null;
 			default:
 				throw new AssertionError("Pouet");
 			}
+			
+			if (processedDomains.size() == proto.getPuzzles().size()) {
+				// Done processing puzzles
+				proto.setState(new QuitClientState());
+			}
+			else {
+				proto.setState(this);
+			}
+			
 			bb.clear();
 			return proto.doIt(bb);
 		}

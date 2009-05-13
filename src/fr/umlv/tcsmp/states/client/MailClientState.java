@@ -8,6 +8,7 @@ import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
+import fr.umlv.tcsmp.states.server.QuitServerState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
@@ -100,7 +101,11 @@ public class MailClientState extends TCSMPState {
 					else
 						proto.setState(new PkeyClientState());
 					break;
-					//TODO resp codes
+				case 451:
+				case 503:
+				case 554:
+					// TODO error msg?
+					proto.setState(new QuitClientState());
 				default:
 					throw new AssertionError("Pouet");
 				}
