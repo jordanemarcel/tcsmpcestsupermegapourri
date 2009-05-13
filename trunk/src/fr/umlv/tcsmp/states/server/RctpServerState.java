@@ -27,17 +27,22 @@ public class RctpServerState extends TCSMPState {
 		 */
 		if (fakeProto != null) {
 			
-			/* last state, we have to reply the response to the client */
-			if (fakeProto.getState().getClass().equals(RctpClientState.class)) {
+			Response res = fakeProto.doIt(bb);
+		
+			if (res.getAction() == ResponseAction.READ && send == false) {
 				fakeProto = null;
-				send = false;
+				bb.position(0);
 				return new Response(ResponseAction.REPLY);
 			}
 			
-			Response res = fakeProto.doIt(bb);
+			/* last state, we have to tell to reply the response to the client */
+			if (fakeProto.getState().getClass().equals(RctpClientState.class)) {
+				send = false;
+			}
 			
-			if (res.getAction() != ResponseAction.READ)
+			if (res.getAction() != ResponseAction.READ) {	
 				return new Response(currentRCPTDomain, ResponseAction.RELAY);
+			}
 			return res;
 		}
 		
