@@ -12,7 +12,7 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 /**
  * Just because I was to tired to resolv conflicts \o/
  */
-public class ClemServerStateTest {
+public class RelayServerStateTest {
 
 	private static void printBB(Response res, ByteBuffer bb) {
 		if (res == null)
@@ -23,7 +23,7 @@ public class ClemServerStateTest {
 			if (res.getDest() != null)
 				System.out.print(res.getDest() + " -> " + TCSMPParser.decode(bb));
 			else
-				System.out.println(TCSMPParser.decode(bb));
+				System.out.print(TCSMPParser.decode(bb));
 			break;
 		case RELAYALL:
 			System.out.print("ALL" + " -> " + TCSMPParser.decode(bb));
@@ -36,7 +36,7 @@ public class ClemServerStateTest {
 
 		ByteBuffer bb = ByteBuffer.allocate(1024);
 		Protocol p = new Protocol(ProtocolMode.SERVER);
-		p.addDomain("biniou.com");
+		p.addDomain("foobar.com");
 		
 		/**
 		 * BANNER.
@@ -78,36 +78,38 @@ public class ClemServerStateTest {
 		bb.put(TCSMPParser.encode(rcpt));
 		bb.flip();
 		res = p.doIt(bb);
+		printBB(res, bb);
+		p.doIt(bb);
 		
 		/**
 		 * HERE WE SWITCH IN A CLIENT MODE
 		 */
 		// TELO
-		String OK = "250 OK\r\n";
-		printBB(res, bb);
-		p.doIt(bb);						// send
-		bb.clear();						// reply
-		bb.put(TCSMPParser.encode(OK));
-		bb.flip();
-		
-		// FROM
-		res = p.doIt(bb);				// send
-		printBB(res, bb);
-		p.doIt(bb);
-		bb.clear();						// reply
-		bb.put(TCSMPParser.encode(OK));
-		bb.flip();
-		
-		// RCPT
-		res = p.doIt(bb);				// send
-		printBB(res, bb);
-		res = p.doIt(bb);
-		bb.clear();						// reply
-		bb.put(TCSMPParser.encode(OK));
-		bb.flip();
-		
-		// reply to client
-		printBB(res, bb);
+//		String OK = "250 OK\r\n";
+//		printBB(res, bb);
+//		p.doIt(bb);						// send
+//		bb.clear();						// reply
+//		bb.put(TCSMPParser.encode(OK));
+//		bb.flip();
+//		
+//		// FROM
+//		res = p.doIt(bb);				// send
+//		printBB(res, bb);
+//		p.doIt(bb);
+//		bb.clear();						// reply
+//		bb.put(TCSMPParser.encode(OK));
+//		bb.flip();
+//		
+//		// RCPT
+//		res = p.doIt(bb);				// send
+//		printBB(res, bb);
+//		res = p.doIt(bb);
+//		bb.clear();						// reply
+//		bb.put(TCSMPParser.encode(OK));
+//		bb.flip();
+//		
+//		// reply to client
+//		printBB(res, bb);
 		
 		/**
 		 * APZL
@@ -154,31 +156,33 @@ public class ClemServerStateTest {
 		bb.put(TCSMPParser.encode(pkey));
 		bb.flip();
 		res = p.doIt(bb);
-		
-		// OK TO THE MAIL CMD
-		String DATA = "354 OK";
-		printBB(res, bb);
-		p.doIt(bb);						// send
-		bb.clear();						// reply
-		bb.put(TCSMPParser.encode(DATA));
-		bb.flip();
-		
-		// MAIL
-		res = p.doIt(bb);				// send
 		printBB(res, bb);
 		p.doIt(bb);
-		bb.clear();						// reply
-		bb.put(TCSMPParser.encode(OK));
-		bb.flip();
 		
-		// PKEY
-		res = p.doIt(bb);				// send
-		printBB(res, bb);
-		res = p.doIt(bb);
-		bb.clear();						// reply
-		bb.put(TCSMPParser.encode(OK));
-		bb.flip();
-		printBB(res, bb);
+//		// OK TO THE MAIL CMD
+//		String DATA = "354 OK";
+//		printBB(res, bb);
+//		p.doIt(bb);						// send
+//		bb.clear();						// reply
+//		bb.put(TCSMPParser.encode(DATA));
+//		bb.flip();
+//		
+//		// MAIL
+//		res = p.doIt(bb);				// send
+//		printBB(res, bb);
+//		p.doIt(bb);
+//		bb.clear();						// reply
+//		bb.put(TCSMPParser.encode(OK));
+//		bb.flip();
+//		
+//		// PKEY
+//		res = p.doIt(bb);				// send
+//		printBB(res, bb);
+//		res = p.doIt(bb);
+//		bb.clear();						// reply
+//		bb.put(TCSMPParser.encode(OK));
+//		bb.flip();
+//		printBB(res, bb);
 		
 
 		/**

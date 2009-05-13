@@ -1,6 +1,7 @@
 package fr.umlv.tcsmp.proto;
 
 import java.nio.ByteBuffer;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,7 @@ public class Protocol {
 	private final List<String> rcpts;
 	private String from;
 	private String clientDomain;
-	
+
 	private Map<String, Puzzle> puzzles;
 
 	// TODO escape "." ?
@@ -43,7 +44,7 @@ public class Protocol {
 		puzzles = new HashMap<String, Puzzle>();
 		protocolMode = mode;
 	}
-	
+
 	public Protocol(ProtocolMode mode, int protocolPort) {
 		this(mode);
 		this.protocolPort = protocolPort;
@@ -52,7 +53,7 @@ public class Protocol {
 	public int getProtocolPort() {
 		return protocolPort;
 	}
-	
+
 	public List<String> getRecpts() {
 		return rcpts;
 	}
@@ -64,46 +65,49 @@ public class Protocol {
 	public ProtocolMode getProtocolMode() {
 		return protocolMode;
 	}
-	
+
 	public TCSMPState getState() {
 		return state;
 	}
-	
+
 	public void addDomain(String domain) {
 		myDomains.add(domain);
 	}
-	
+
 	public boolean isRelay(String domain) {
 		return myDomains.contains(domain) == false;
 	}
-	
+
 	public boolean isRelay() {
-		for (String rcpt: rcpts) {
-			if (isRelay(rcpt))
-				return true;
+		try {
+			for (String rcpt: rcpts) {
+				if (isRelay(TCSMPParser.parseDomain(rcpt)))
+					return true;
+			}
+		} catch (ParseException e) {
 		}
 		return false;
 	}
-	
+
 	public Puzzle getPuzzleFor(String domain) {
 		Puzzle puzzle = puzzles.get(domain);
 		if (puzzle == null) {
 			throw new AssertionError("Unknown domain.");
 		}
-		
+
 		return puzzle;
 	}
-	
+
 	public void addPuzzleFor(String domain, Puzzle puzzle) {
 		if (puzzles.put(domain, puzzle) != null) {
 			throw new AssertionError("Already registered a puzzle for the given domain.");
 		}
 	}
-	
+
 	public Map<String, Puzzle> getPuzzles() {
 		return puzzles;
 	}
-	
+
 	public StringBuilder getMail() {
 		return mail;
 	}
@@ -156,7 +160,7 @@ public class Protocol {
 	public String getClientDomain() {
 		return clientDomain;
 	}
-	
+
 	public List<String> getMyDomains() {
 		return myDomains;
 	}
