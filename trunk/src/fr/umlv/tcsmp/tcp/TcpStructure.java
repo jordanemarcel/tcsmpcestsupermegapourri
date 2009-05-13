@@ -197,7 +197,7 @@ public class TcpStructure {
 			key.cancel();
 			System.err.println(e);
 		} catch (IOException e) {
-			if(!socketChannel.isConnected()) {
+			if(socketChannel.isConnected()) {
 				try {
 					socketChannel.close();
 				} catch (IOException e1) {
@@ -292,7 +292,7 @@ public class TcpStructure {
 			this.handleResponse(key, response);
 		} catch (IOException e) {
 			System.err.println(e);
-			if(!socketChannel.isConnected()) {
+			if(socketChannel.isConnected()) {
 				try {
 					socketChannel.close();
 				} catch (IOException e1) {
@@ -317,9 +317,12 @@ public class TcpStructure {
 			while(byteBuffer.hasRemaining()) {
 				socketChannel.write(byteBuffer);
 			}
+			byteBuffer.clear();
+			Response response = protocol.doIt(byteBuffer);
+			this.handleResponse(key, response);
 		} catch (IOException e) {
 			System.err.println(e);
-			if(!socketChannel.isConnected()) {
+			if(socketChannel.isConnected()) {
 				try {
 					socketChannel.close();
 				} catch (IOException e1) {
@@ -328,9 +331,6 @@ public class TcpStructure {
 			}
 			key.cancel();
 		}
-		byteBuffer.clear();
-		Response response = protocol.doIt(byteBuffer);
-		this.handleResponse(key, response);
 	}
 
 	/**
@@ -342,13 +342,13 @@ public class TcpStructure {
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		System.out.println("* TcpStructure: Connecting to " + socketChannel.socket().getRemoteSocketAddress());
 		try {
-			if(!socketChannel.finishConnect()) {
+			if(socketChannel.finishConnect()) {
 				socketChannel.close();
 			}
 			key.interestOps(TcpStructure.getResponseOps(keyAttachment.getCurrentResponse().getAction()));
 		} catch (IOException e) {
 			System.out.println(e);
-			if(!socketChannel.isConnected()) {
+			if(socketChannel.isConnected()) {
 				try {
 					socketChannel.close();
 				} catch (IOException e1) {
