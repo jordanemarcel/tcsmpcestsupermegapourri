@@ -36,7 +36,7 @@ public class RelayServerStateTest {
 
 		ByteBuffer bb = ByteBuffer.allocate(1024);
 		Protocol p = new Protocol(ProtocolMode.SERVER);
-		p.addDomain("foobar.com");
+		p.addDomain("foobar.be");
 		
 		/**
 		 * BANNER.
@@ -78,38 +78,48 @@ public class RelayServerStateTest {
 		bb.put(TCSMPParser.encode(rcpt));
 		bb.flip();
 		res = p.doIt(bb);
+		
+		if (res.getDest() == null)
+			throw new AssertionError("gni");
+		
+		// RELAY TELO
+		System.out.print("\t");
 		printBB(res, bb);
 		p.doIt(bb);
+		String OK = "250 OK\r\n";
+		System.out.print("\t");
+		System.out.print(OK);
+		bb.clear();						// reply
+		bb.put(TCSMPParser.encode(OK));
+		bb.flip();
 		
-		/**
-		 * HERE WE SWITCH IN A CLIENT MODE
-		 */
-		// TELO
-//		String OK = "250 OK\r\n";
-//		printBB(res, bb);
-//		p.doIt(bb);						// send
-//		bb.clear();						// reply
-//		bb.put(TCSMPParser.encode(OK));
-//		bb.flip();
-//		
-//		// FROM
-//		res = p.doIt(bb);				// send
-//		printBB(res, bb);
-//		p.doIt(bb);
-//		bb.clear();						// reply
-//		bb.put(TCSMPParser.encode(OK));
-//		bb.flip();
-//		
-//		// RCPT
-//		res = p.doIt(bb);				// send
-//		printBB(res, bb);
-//		res = p.doIt(bb);
-//		bb.clear();						// reply
-//		bb.put(TCSMPParser.encode(OK));
-//		bb.flip();
-//		
-//		// reply to client
-//		printBB(res, bb);
+		// RELAY FROM
+		System.out.print("\t");
+		printBB(p.doIt(bb), bb);
+		p.doIt(bb);
+		System.out.print("\t");
+		System.out.print(OK);
+		bb.clear();						// reply
+		bb.put(TCSMPParser.encode(OK));
+		bb.flip();
+		
+		// RELAY RCTP
+		System.out.print("\t");
+		printBB(p.doIt(bb), bb);
+		p.doIt(bb);
+		System.out.print("\t");
+		System.out.print(OK);
+		bb.clear();						// reply
+		bb.put(TCSMPParser.encode(OK));
+		bb.flip();
+		
+		res = p.doIt(bb);
+		
+		if (res.getDest() != null)
+			throw new AssertionError("gnou");
+		
+		printBB(res, bb);
+		
 		
 		/**
 		 * APZL
@@ -120,44 +130,58 @@ public class RelayServerStateTest {
 		bb.put(TCSMPParser.encode(apzl));
 		bb.flip();
 		res = p.doIt(bb);
+		
+		System.out.print("\t");
 		printBB(res, bb);
-		p.doIt(bb);
-
-		/**
-		 * MAIL
-		 */
-		String mail = "MAIL\r\n";
-		System.out.print(mail);
-		bb.clear();
-		bb.put(TCSMPParser.encode(mail));
+		
+		res = p.doIt(bb);
+		
+		if (res.getAction() != ResponseAction.READ)
+			throw new AssertionError("Coin");
+		
+		String PZL = "215 foobar.com 4,4 2isxausiba9umd4assuksdrs90nd49v0uyn2rfyynewfvglenwyuy1sww2m1l652\r\n";
+		bb.clear();						// reply
+		bb.put(TCSMPParser.encode(PZL));
 		bb.flip();
+		System.out.print("\t" + PZL);
 		res = p.doIt(bb);
 		printBB(res, bb);
-		p.doIt(bb);
 
-		/**
-		 * DATA
-		 */
-		String data = "TUPUDUKU SERVER TCSMP.\r\n.\r\n";
-		System.out.print(data);
-		bb.clear();
-		bb.put(TCSMPParser.encode(data));
-		bb.flip();
-		res = p.doIt(bb);
-		printBB(res, bb);
-		p.doIt(bb);
-
-		/**
-		 * PKEY
-		 */
-		String pkey = "PKEY foobar.com 4,4 ci1k31p09puqouplkyvb0vw5qwvblv4pbftf5tewbeoypoocf4m4wmvbyv6tc65j\r\n";
-		System.out.print(pkey);
-		bb.clear();
-		bb.put(TCSMPParser.encode(pkey));
-		bb.flip();
-		res = p.doIt(bb);
-		printBB(res, bb);
-		p.doIt(bb);
+//		/**
+//		 * MAIL
+//		 */
+//		String mail = "MAIL\r\n";
+//		System.out.print(mail);
+//		bb.clear();
+//		bb.put(TCSMPParser.encode(mail));
+//		bb.flip();
+//		res = p.doIt(bb);
+//		printBB(res, bb);
+//		p.doIt(bb);
+//
+//		/**
+//		 * DATA
+//		 */
+//		String data = "TUPUDUKU SERVER TCSMP.\r\n.\r\n";
+//		System.out.print(data);
+//		bb.clear();
+//		bb.put(TCSMPParser.encode(data));
+//		bb.flip();
+//		res = p.doIt(bb);
+//		printBB(res, bb);
+//		p.doIt(bb);
+//
+//		/**
+//		 * PKEY
+//		 */
+//		String pkey = "PKEY foobar.com 4,4 ci1k31p09puqouplkyvb0vw5qwvblv4pbftf5tewbeoypoocf4m4wmvbyv6tc65j\r\n";
+//		System.out.print(pkey);
+//		bb.clear();
+//		bb.put(TCSMPParser.encode(pkey));
+//		bb.flip();
+//		res = p.doIt(bb);
+//		printBB(res, bb);
+//		p.doIt(bb);
 		
 //		// OK TO THE MAIL CMD
 //		String DATA = "354 OK";
@@ -185,16 +209,16 @@ public class RelayServerStateTest {
 //		printBB(res, bb);
 		
 
-		/**
-		 * QUIT
-		 */
-		String quit = "QUIT\r\n";
-		System.out.print(quit);
-		bb.clear();
-		bb.put(TCSMPParser.encode(quit));
-		bb.flip();
-		res = p.doIt(bb);
-		printBB(res, bb);
-		p.doIt(bb);
+//		/**
+//		 * QUIT
+//		 */
+//		String quit = "QUIT\r\n";
+//		System.out.print(quit);
+//		bb.clear();
+//		bb.put(TCSMPParser.encode(quit));
+//		bb.flip();
+//		res = p.doIt(bb);
+//		printBB(res, bb);
+//		p.doIt(bb);
 	}
 }
