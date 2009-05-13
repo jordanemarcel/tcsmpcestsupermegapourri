@@ -17,52 +17,59 @@ public class PkeyServerState extends TCSMPState {
 	private boolean send = false;
 	private boolean error = false;
 	private int pkeyTry = 0;
-	
+
 	private Protocol fakeProto;
 	private String currentDomain;
-	
+
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 
-		// state was in error need READ
-		if (error) {
-			error = false;
+		if (send) {
+			// state was in error, just need need READ
+			if (error == false) {
+				proto.setState(new QuitServerState());
+			} else {	
+				error = false;
+				send = false;
+			}
+
 			return new Response(ResponseAction.READ);
 		}
-		
+
 		// we are in a relaying mode
 		if (fakeProto != null) {
-			
+
 			Response res = fakeProto.doIt(bb);
-			
+
 			// We can reply the code to the client
 			if (res.getAction() == ResponseAction.READ && send == false) {
 				fakeProto = null;
 				bb.position(0);
 				// XXX: check the response to see if soluce is good or not
+				// in order to see if we can switch state
 				proto.setState(new QuitServerState());
 				return new Response(ResponseAction.WRITE);
 			}
-			
+
 			// last state, we have to tell to reply the response to the client
 			if (fakeProto.getState().getClass().equals(PkeyClientState.class)) {
 				send = false;
 			}
-			
+
 			if (res.getAction() != ResponseAction.READ)
 				return new Response(currentDomain, ResponseAction.WRITE);
-			
+
 			return new Response(currentDomain, ResponseAction.READ);
 		}
-		
+
 		String [] args = TCSMPParser.parseCommand(bb);
 		bb.clear();
-		
+
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);
 			return t.processCommand(proto, bb);
 		}
-		
+
 		if (args.length != 4 || args[0].equals("PKEY") == false) {
 			bb.put(ErrorReplies.unknowCommand("PKEY", args[0]));
 			bb.flip();
@@ -70,30 +77,35 @@ public class PkeyServerState extends TCSMPState {
 			return new Response(ResponseAction.WRITE);
 		}
 
-		/**
-		 * check to see if it's a solution for us or not
-		 * XXX: foo
-		 */
-		if (proto.isRelay(args[1]) == false) {
-			/*
-			 * XXX: We are asuming that puzzle solution is right 
-			 */
-			bb.put(TCSMPParser.encode("216 Your mail has been kept !\r\n"));
-			bb.flip();
-			return new Response(ResponseAction.WRITE);
-		}
-		
+
 		/**
 		 * Add the puzzle in the proto
 		 */
 		String dims = args[2];
 		String desc = args[3];
 		Puzzle puzzle = TCSMPParser.parsePuzzleDesc(dims, desc);
-		proto.addPuzzleFor(args[1], puzzle);
-		
+
 		/**
-		 * Create a fakeProto
+		 * check to see if it's a solution for us or not
+		 * XXX: foo
 		 */
+		if (proto.isRelay(args[1]) == false) {
+			Puzzle p = proto.getPuzzleFor(proto.getClientDomain());
+			if (puzzle.equals(p)) {
+				bb.put(TCSMPParser.encode("216 Your mail has been kept !\r\n"));
+			}
+			else {
+				pkeyTry++;
+				bb.put(TCSMPParser.encode("516 Ahah dude... you FAIL.\r\n"));
+				error = true;
+			}
+			bb.flip();
+			send = true;
+			return new Response(ResponseAction.WRITE);
+		}
+
+
+		// fake proto for client state
 		fakeProto = proto.newProtocol();
 		fakeProto.setState(new MailClientState());
 		send = true;

@@ -104,7 +104,7 @@ public class ApzlServerState extends TCSMPState {
 			Puzzle p = Puzzle.randomPuzzle(4, 4);
 			proto.addPuzzleFor(proto.getClientDomain(), p);
 			bb.clear();
-			bb.put(TCSMPParser.encode("215 " + proto.getMyDomains().get(0) + "4,4 " + p.lineString() + "\r\n"));
+			bb.put(TCSMPParser.encode("215 " + proto.getMyDomains().get(0) + " 4,4 " + p.lineString() + "\r\n"));
 			bb.flip();
 			send = true;
 			return new Response(ResponseAction.WRITE);
