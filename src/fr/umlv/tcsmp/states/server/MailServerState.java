@@ -13,11 +13,15 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 public class MailServerState extends TCSMPState {
 
 	private boolean send = false;
+	private boolean error = false;
 
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
-
+		
 		if (send) {
-			proto.setState(new DataServerState());
+			if (error == false)
+				proto.setState(new DataServerState());
+			else
+				send = error = false;
 			return new Response(ResponseAction.READ);
 		}
 
@@ -35,12 +39,13 @@ public class MailServerState extends TCSMPState {
 			bb.clear();
 			bb.put(ErrorReplies.unknowCommand("MAIL", args[0]));
 			bb.flip();
-			return new Response(ResponseAction.REPLY);
+			error = true;
+			return new Response(ResponseAction.WRITE);
 		}
 
 		bb.clear();
 		bb.put(TCSMPParser.encode("354 Start mail input; end with <CRLF>.<CRLF>\r\n"));
 		bb.flip();
-		return new Response(ResponseAction.REPLY);
+		return new Response(ResponseAction.WRITE);
 	}
 }

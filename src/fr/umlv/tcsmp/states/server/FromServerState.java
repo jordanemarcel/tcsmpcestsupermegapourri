@@ -13,11 +13,15 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 public class FromServerState extends TCSMPState {
 
 	private boolean send = false;
+	private boolean error = false;
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (send) {
-			proto.setState(new RctpServerState());
+			if (error == false)
+				proto.setState(new RctpServerState());
+			else
+				send = error = false;
 			return new Response(ResponseAction.READ);
 		}
 
@@ -36,7 +40,8 @@ public class FromServerState extends TCSMPState {
 			bb.clear();
 			bb.put(ErrorReplies.unknowCommand("FROM", args[0]));
 			bb.flip();
-			return new Response(ResponseAction.REPLY);
+			error = true;
+			return new Response(ResponseAction.WRITE);
 		}
 
 		/** 
@@ -49,7 +54,7 @@ public class FromServerState extends TCSMPState {
 		} catch (ParseException e) {
 			bb.put(TCSMPParser.encode(new String("500 Invalid from.\r\n")));
 			bb.flip();
-			return new Response(ResponseAction.REPLY);
+			return new Response(ResponseAction.WRITE);
 		}
 		
 		/**
@@ -58,6 +63,6 @@ public class FromServerState extends TCSMPState {
 		bb.put(TCSMPParser.encode(new String("250 OK\r\n")));
 		bb.flip();
 
-		return new Response(ResponseAction.REPLY);
+		return new Response(ResponseAction.WRITE);
 	}
 }

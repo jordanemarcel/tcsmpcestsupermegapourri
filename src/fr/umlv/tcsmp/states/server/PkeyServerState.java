@@ -15,32 +15,43 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 public class PkeyServerState extends TCSMPState {
 
 	private boolean send = false;
+	private boolean error = false;
+	private int pkeyTry = 0;
 	
 	private Protocol fakeProto;
 	private String currentDomain;
 	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 
-		/** we are in a relaying mode
-		 */
+		// state was in error need READ
+		if (error) {
+			error = false;
+			return new Response(ResponseAction.READ);
+		}
+		
+		// we are in a relaying mode
 		if (fakeProto != null) {
 			
 			Response res = fakeProto.doIt(bb);
 			
+			// We can reply the code to the client
 			if (res.getAction() == ResponseAction.READ && send == false) {
 				fakeProto = null;
 				bb.position(0);
-				return new Response(ResponseAction.REPLY);
+				// XXX: check the response to see if soluce is good or not
+				proto.setState(new QuitServerState());
+				return new Response(ResponseAction.WRITE);
 			}
 			
-			/* last state, we have to tell to reply the response to the client */
+			// last state, we have to tell to reply the response to the client
 			if (fakeProto.getState().getClass().equals(PkeyClientState.class)) {
 				send = false;
 			}
 			
 			if (res.getAction() != ResponseAction.READ)
-				return new Response(currentDomain, ResponseAction.RELAY);
-			return res;
+				return new Response(currentDomain, ResponseAction.WRITE);
+			
+			return new Response(currentDomain, ResponseAction.READ);
 		}
 		
 		String [] args = TCSMPParser.parseCommand(bb);
@@ -55,7 +66,8 @@ public class PkeyServerState extends TCSMPState {
 		if (args.length != 4 || args[0].equals("PKEY") == false) {
 			bb.put(ErrorReplies.unknowCommand("PKEY", args[0]));
 			bb.flip();
-			return new Response(ResponseAction.REPLY);
+			error = true;
+			return new Response(ResponseAction.WRITE);
 		}
 
 		/**
@@ -68,19 +80,8 @@ public class PkeyServerState extends TCSMPState {
 			 */
 			bb.put(TCSMPParser.encode("216 Your mail has been kept !\r\n"));
 			bb.flip();
-			return new Response(ResponseAction.REPLY);
+			return new Response(ResponseAction.WRITE);
 		}
-		
-		/**
-		 * XXX: check if domain is a valid one
-		 */
-		
-		
-		
-		/**
-		 * We have to forward the MAIL to the server before
-		 * sending the PKEY command.
-		 */
 		
 		/**
 		 * Add the puzzle in the proto
@@ -97,11 +98,10 @@ public class PkeyServerState extends TCSMPState {
 		fakeProto.setState(new MailClientState());
 		send = true;
 		currentDomain = args[1];
-		
 		Response res = fakeProto.doIt(bb);
 		if (res.getAction() != ResponseAction.READ)
-			return new Response(currentDomain, ResponseAction.RELAY);
-		return res;
+			return new Response(currentDomain, ResponseAction.WRITE);
+		return new Response(currentDomain, ResponseAction.READ);
 	}
 
 }

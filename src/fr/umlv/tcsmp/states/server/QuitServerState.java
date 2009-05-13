@@ -16,7 +16,6 @@ public class QuitServerState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		
 		if (send) {
-			/* XXX: create an exit state ? */
 			return new Response(ResponseAction.CLOSE);
 		}
 		
@@ -26,30 +25,18 @@ public class QuitServerState extends TCSMPState {
 		if (args[0].equals("QUIT") == false) {
 			bb.put(ErrorReplies.unknowCommand("QUIT", args[0]));
 			bb.flip();
-			return new Response(ResponseAction.REPLY);
+			return new Response(ResponseAction.WRITE);
 		}
 		
-		/**
-		 * Check if we have to forward the command.
-		 */
+		// Check if we have to forward the command.
 		if (proto.isRelay() == false) {
-			//return new Response("200 OK\r\n".getBytes(), ResponseAction.RELAYALL);
-//			return null;
 			bb.put(TCSMPParser.encode("250 See you next time~~~~!\r\n"));
 			bb.flip();
-			return new Response(ResponseAction.REPLY);
+			return new Response(ResponseAction.WRITE);
 		}
 		
-		/**
-		 * Check to see if we have to forward the message ?
-		 * 
-		 * XXX: on devrait faire une methode dans le proto
-		 * qui dit si on est relay ou non d'un domaine. Comme
-		 * ca c'est le proto qui connait le domaine sur lequel
-		 * on ecoute?
-		 */
-		
-		return null;
+		// Reset command and forward
+		return new Response(ResponseAction.RELAYALL);
 	}
 	
 }

@@ -17,11 +17,11 @@ public class ServerStateTest {
 			return;
 		
 		switch (res.getAction()) {
-		case REPLY:
-			System.out.print(TCSMPParser.decode(bb));
-			break;
-		case RELAY:
-			System.out.print(res.getDest() + " -> " + TCSMPParser.decode(bb));
+		case WRITE:
+			if (res.getDest() != null)
+				System.out.print(res.getDest() + " -> " + TCSMPParser.decode(bb));
+			else
+				System.out.println(TCSMPParser.decode(bb));
 			break;
 		case RELAYALL:
 			System.out.print("ALL" + " -> " + TCSMPParser.decode(bb));
