@@ -27,11 +27,30 @@ public class ServerStateTest {
 			System.out.print("ALL" + " -> " + TCSMPParser.decode(bb));
 			break;
 		}
-//		bb.flip(); /* assume bb has been consumed */
+// Don't clear buffer in this case because the other end uses it
+//		bb.clear(); /* assume bb has been consumed */
+	}
+	
+	private static void writeReadwrite(Protocol serverProtocol, ByteBuffer serverBB, Protocol clientProtocol, ByteBuffer clientBB) {
+		// WRITE
+		printBB(serverProtocol.doIt(serverBB), serverBB);
+		clientBB.put(serverBB);
+		serverBB.clear();
+		clientBB.flip();
+		serverProtocol.doIt(serverBB);
+		
+		// READ
+		printBB(clientProtocol.doIt(clientBB), clientBB);
+		// WRITE
+		clientProtocol.doIt(clientBB);
+		serverBB.put(clientBB);
+		clientBB.clear();
+		serverBB.flip();
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		ByteBuffer bb = ByteBuffer.allocate(1024);
+		ByteBuffer serverBB = ByteBuffer.allocate(1024);
+		ByteBuffer clientBB = ByteBuffer.allocate(1024);
 		
 		/* SERVER */
 		Protocol serverProtocol = new Protocol(ProtocolMode.SERVER);
@@ -47,128 +66,47 @@ public class ServerStateTest {
 		/**
 		 * BANNER.
 		 */
-		Response res = serverProtocol.doIt(bb);
-		printBB(res, bb);
-		serverProtocol.doIt(bb);
-		
-		printBB(clientProtocol.doIt(bb), bb);
-		clientProtocol.doIt(bb);
+		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
 
 		/**
 		 * TELO
 		 */
-//		String telo = "TELO clem1.be\r\n";
-//		System.out.print(telo);
-//		bb.clear();
-		res = serverProtocol.doIt(bb);
-		printBB(res, bb);
-		serverProtocol.doIt(bb);
-		
-		printBB(clientProtocol.doIt(bb), bb);
-		clientProtocol.doIt(bb);
+		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
 
 		/**
 		 * FROM
 		 */
-//		String from = "FROM <foobar@clem1.be>\r\n";
-//		System.out.print(from);
-//		bb.clear();
-//		bb.put(TCSMPParser.encode(from));
-//		bb.flip();
-		res = serverProtocol.doIt(bb);
-		printBB(res, bb);
-		serverProtocol.doIt(bb);
-	
-		printBB(clientProtocol.doIt(bb), bb);
-		clientProtocol.doIt(bb);
+		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
 
 		/**
 		 * RCPT
 		 */
-//		String rcpt = "RCPT <foobar@biniou.com>\r\n";
-//		System.out.print(rcpt);
-//		bb.clear();
-//		bb.put(TCSMPParser.encode(rcpt));
-//		bb.flip();
-		res = serverProtocol.doIt(bb);
-		printBB(res, bb);
-		serverProtocol.doIt(bb);
-		
-		printBB(clientProtocol.doIt(bb), bb);
-		clientProtocol.doIt(bb);
+		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
 
 		/**
 		 * APZL
 		 */
-//		String apzl = "APZL\r\n";
-//		System.out.print(apzl);
-//		bb.clear();
-//		bb.put(TCSMPParser.encode(apzl));
-//		bb.flip();
-		res = serverProtocol.doIt(bb);
-		printBB(res, bb);
-		serverProtocol.doIt(bb);
-		
-		printBB(clientProtocol.doIt(bb), bb);
-		clientProtocol.doIt(bb);
+		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
 
 		/**
 		 * MAIL
 		 */
-//		String mail = "MAIL\r\n";
-//		System.out.print(mail);
-//		bb.clear();
-//		bb.put(TCSMPParser.encode(mail));
-//		bb.flip();
-		res = serverProtocol.doIt(bb);
-		printBB(res, bb);
-		serverProtocol.doIt(bb);
-
-		printBB(clientProtocol.doIt(bb), bb);
-		clientProtocol.doIt(bb);
+		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
 		
 		/**
 		 * DATA
 		 */
-//		String data = "TUPUDUKU SERVER TCSMP.\r\n.\r\n";
-//		System.out.print(data);
-//		bb.clear();
-//		bb.put(TCSMPParser.encode(data));
-//		bb.flip();
-		res = serverProtocol.doIt(bb);
-		printBB(res, bb);
-		serverProtocol.doIt(bb);
-
-		printBB(clientProtocol.doIt(bb), bb);
-		clientProtocol.doIt(bb);
+		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
 
 		/**
 		 * PKEY
 		 */
-//		String pkey = "PKEY mydomain 20,20 MOULLLLEFRIIIITTTE\r\n";
-//		System.out.print(pkey);
-//		bb.clear();
-//		bb.put(TCSMPParser.encode(pkey));
-//		bb.flip();
-		res = serverProtocol.doIt(bb);
-		printBB(res, bb);
-//		p.doIt(bb);
-
-		printBB(clientProtocol.doIt(bb), bb);
-		clientProtocol.doIt(bb);
+		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
 		
 		/**
 		 * QUIT
 		 */
-//		String quit = "QUIT\r\n";
-//		System.out.print(quit);
-//		bb.clear();
-//		bb.put(TCSMPParser.encode(quit));
-//		bb.flip();
-		res = serverProtocol.doIt(bb);
-		printBB(res, bb);
-//		p.doIt(bb);
+		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
 		
-		printBB(clientProtocol.doIt(bb), bb);
 	}
 }
