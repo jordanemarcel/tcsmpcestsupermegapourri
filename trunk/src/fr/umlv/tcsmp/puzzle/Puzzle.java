@@ -16,6 +16,13 @@ public class Puzzle {
 		System.out.println(p);
 		resolve(p);
 		System.out.println(p);
+		
+		
+		// My test
+		Puzzle puz = new Puzzle(4, 4, "ntct41thdjhmiom6t6v7157ojqolocl866vr5triq0iuceut67chtphk0fk2e92f");
+		System.out.println("ntct41thdjhmiom6t6v7157ojqolocl866vr5triq0iuceut67chtphk0fk2e92f");
+		System.out.println("vs");
+		System.out.println(puz.lineString());
 	}
 	static class Wheel{
 		private LinkedList<Character> ll = new LinkedList<Character>();
@@ -233,9 +240,9 @@ public class Puzzle {
 			for(int i = 0;i<width;i++){
 				Wheel w = wheels.get(i+j*height);
 				globalsb.append(w.readNorth());
+				globalsb.append(w.readEast());
 				globalsb.append(w.readSouth());
 				globalsb.append(w.readWest());
-				globalsb.append(w.readEast());
 			}
 		}
 		return globalsb.toString();
