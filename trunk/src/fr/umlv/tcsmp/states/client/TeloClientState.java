@@ -7,6 +7,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
+import fr.umlv.tcsmp.states.server.QuitServerState;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class TeloClientState extends TCSMPState {
@@ -40,10 +41,8 @@ public class TeloClientState extends TCSMPState {
 				proto.setState(new FromClientState());
 				break;
 			case 504:
-				// TODO
-				break;
 			case 550:
-				// TODO
+				proto.setState(new QuitServerState());
 				break;
 			default:
 				throw new AssertionError("Pouet");

@@ -7,6 +7,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
+import fr.umlv.tcsmp.states.server.QuitServerState;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class RctpClientState extends TCSMPState {
@@ -43,17 +44,28 @@ public class RctpClientState extends TCSMPState {
 			// States
 			case 250:
 				index++;
-				if (index >= proto.getRecpts().size()) {
-					proto.setState(new ApzlClientState());			
-				}
-				else {
-					resp = null;
-				}
 				break;
-				//TODO Resp codes
+			case 450:
+			case 451:
+			case 452:
+			case 503:
+			case 550:
+			case 551:
+			case 552:
+			case 553://TODO check? + record error somewhere maybe
+				proto.getRecpts().remove(index);
+				break;
 			default:
 				throw new AssertionError("Pouet");
 			}
+			
+			if (index >= proto.getRecpts().size()) {
+				proto.setState(new ApzlClientState());			
+			}
+			else {
+				resp = null;
+			}
+			
 			bb.clear();
 			return proto.doIt(bb);
 		}
