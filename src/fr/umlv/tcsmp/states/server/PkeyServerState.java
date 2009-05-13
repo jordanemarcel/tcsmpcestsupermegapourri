@@ -5,9 +5,10 @@ import java.nio.ByteBuffer;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
+import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.states.client.MailClientState;
-import fr.umlv.tcsmp.states.client.RctpClientState;
+import fr.umlv.tcsmp.states.client.PkeyClientState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
@@ -24,14 +25,18 @@ public class PkeyServerState extends TCSMPState {
 		 */
 		if (fakeProto != null) {
 			
-			/* last state, we have to reply the response to the client */
-			if (fakeProto.getState().getClass().equals(PkeyServerState.class)) {
+			Response res = fakeProto.doIt(bb);
+			
+			if (res.getAction() == ResponseAction.READ && send == false) {
 				fakeProto = null;
-				send = false;
+				bb.position(0);
 				return new Response(ResponseAction.REPLY);
 			}
 			
-			Response res = fakeProto.doIt(bb);
+			/* last state, we have to tell to reply the response to the client */
+			if (fakeProto.getState().getClass().equals(PkeyClientState.class)) {
+				send = false;
+			}
 			
 			if (res.getAction() != ResponseAction.READ)
 				return new Response(currentDomain, ResponseAction.RELAY);
@@ -78,11 +83,21 @@ public class PkeyServerState extends TCSMPState {
 		 */
 		
 		/**
+		 * Add the puzzle in the proto
+		 */
+		String dims = args[2];
+		String desc = args[3];
+		Puzzle puzzle = TCSMPParser.parsePuzzleDesc(dims, desc);
+		proto.addPuzzleFor(args[1], puzzle);
+		
+		/**
 		 * Create a fakeProto
 		 */
 		fakeProto = proto.newProtocol();
 		fakeProto.setState(new MailClientState());
+		send = true;
 		currentDomain = args[1];
+		
 		Response res = fakeProto.doIt(bb);
 		if (res.getAction() != ResponseAction.READ)
 			return new Response(currentDomain, ResponseAction.RELAY);

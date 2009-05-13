@@ -11,18 +11,18 @@ import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class MailServerState extends TCSMPState {
-	
+
 	private boolean send = false;
-	
+
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
-		
+
 		if (send) {
 			proto.setState(new DataServerState());
 			return new Response(ResponseAction.READ);
 		}
-		
+
 		send = true;
-		
+
 		String [] args = TCSMPParser.parseCommand(bb);
 
 		if (args.length == 1 && args[0].equals("QUIT")) {
@@ -30,7 +30,7 @@ public class MailServerState extends TCSMPState {
 			proto.setState(t);
 			return t.processCommand(proto, bb);
 		}
-		
+
 		if (args.length != 1 || args[0].equals("MAIL") == false) {
 			bb.clear();
 			bb.put(ErrorReplies.unknowCommand("MAIL", args[0]));
@@ -38,21 +38,9 @@ public class MailServerState extends TCSMPState {
 			return new Response(ResponseAction.REPLY);
 		}
 
-		/**
-		 * Check for forwarding or not
-		 */
-		if (proto.isRelay() == false) {
-			bb.clear();
-			bb.put(TCSMPParser.encode("354 Start mail input; end with <CRLF>.<CRLF>\r\n"));
-			bb.flip();
-			return new Response(ResponseAction.REPLY);
-		}
-		
-		/* relay the original message */
-		bb.position(0);
-		
-		/* relay to all instead */
-		return new Response(ResponseAction.RELAYALL);
+		bb.clear();
+		bb.put(TCSMPParser.encode("354 Start mail input; end with <CRLF>.<CRLF>\r\n"));
+		bb.flip();
+		return new Response(ResponseAction.REPLY);
 	}
-
 }

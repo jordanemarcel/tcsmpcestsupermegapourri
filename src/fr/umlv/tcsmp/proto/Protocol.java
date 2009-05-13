@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
@@ -128,6 +130,9 @@ public class Protocol {
 			pr.myDomains.add(d);
 		for (String r : rcpts)
 			pr.rcpts.add(r);
+		for (Entry<String, Puzzle> p : puzzles.entrySet()) {
+			pr.puzzles.put(p.getKey(), p.getValue());
+		}
 		/* XXX: ... */
 		return pr;
 	}

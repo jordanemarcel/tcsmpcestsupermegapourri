@@ -86,10 +86,9 @@ public class ClemServerStateTest {
 		 * HERE WE SWITCH IN A CLIENT MODE
 		 */
 		// TELO
-		String OK = "200 OK\r\n";
+		String OK = "250 OK\r\n";
 		printBB(res, bb);
 		p.doIt(bb);						// send
-		System.out.println("");			// XXX: no \n\r in client cmd.
 		bb.clear();						// reply
 		bb.put(TCSMPParser.encode(OK));
 		bb.flip();
@@ -98,7 +97,6 @@ public class ClemServerStateTest {
 		res = p.doIt(bb);				// send
 		printBB(res, bb);
 		p.doIt(bb);
-		System.out.println("");			// XXX: no \n\r in client cmd.
 		bb.clear();						// reply
 		bb.put(TCSMPParser.encode(OK));
 		bb.flip();
@@ -106,12 +104,14 @@ public class ClemServerStateTest {
 		// RCPT
 		res = p.doIt(bb);				// send
 		printBB(res, bb);
-		p.doIt(bb);
+		res = p.doIt(bb);
 		bb.clear();						// reply
 		bb.put(TCSMPParser.encode(OK));
 		bb.flip();
 		
-
+		// reply to client
+		printBB(res, bb);
+		
 		/**
 		 * APZL
 		 */
@@ -151,7 +151,7 @@ public class ClemServerStateTest {
 		/**
 		 * PKEY
 		 */
-		String pkey = "PKEY foobar.com 20,20 MOULLLLEFRIIIITTTE\r\n";
+		String pkey = "PKEY foobar.com 4,4 ci1k31p09puqouplkyvb0vw5qwvblv4pbftf5tewbeoypoocf4m4wmvbyv6tc65j\r\n";
 		System.out.print(pkey);
 		bb.clear();
 		bb.put(TCSMPParser.encode(pkey));
@@ -162,33 +162,38 @@ public class ClemServerStateTest {
 		String DATA = "354 OK";
 		printBB(res, bb);
 		p.doIt(bb);						// send
-		System.out.println("");			// XXX: no \n\r in client cmd.
 		bb.clear();						// reply
 		bb.put(TCSMPParser.encode(DATA));
 		bb.flip();
 		
+		// MAIL
 		res = p.doIt(bb);				// send
 		printBB(res, bb);
 		p.doIt(bb);
-		System.out.println("");			// XXX: no \n\r in client cmd.
 		bb.clear();						// reply
 		bb.put(TCSMPParser.encode(OK));
 		bb.flip();
 		
+		// PKEY
 		res = p.doIt(bb);				// send
 		printBB(res, bb);
+		res = p.doIt(bb);
+		bb.clear();						// reply
+		bb.put(TCSMPParser.encode(OK));
+		bb.flip();
+		printBB(res, bb);
 		
-//
-//		/**
-//		 * QUIT
-//		 */
-//		String quit = "QUIT\r\n";
-//		System.out.print(quit);
-//		bb.clear();
-//		bb.put(TCSMPParser.encode(quit));
-//		bb.flip();
-//		res = p.doIt(bb);
-//		printBB(res, bb);
-//		p.doIt(bb);
+
+		/**
+		 * QUIT
+		 */
+		String quit = "QUIT\r\n";
+		System.out.print(quit);
+		bb.clear();
+		bb.put(TCSMPParser.encode(quit));
+		bb.flip();
+		res = p.doIt(bb);
+		printBB(res, bb);
+		p.doIt(bb);
 	}
 }
