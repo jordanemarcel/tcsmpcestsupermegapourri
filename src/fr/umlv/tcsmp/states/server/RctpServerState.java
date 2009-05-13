@@ -45,6 +45,8 @@ public class RctpServerState extends TCSMPState {
 			if (res.getAction() != ResponseAction.READ) {	
 				return new Response(currentRCPTDomain, ResponseAction.WRITE);
 			}
+			
+			bb.clear();
 			return new Response(currentRCPTDomain, ResponseAction.READ);
 		}
 		
@@ -107,6 +109,8 @@ public class RctpServerState extends TCSMPState {
 		Response res = fakeProto.doIt(bb);
 		if (res.getAction() != ResponseAction.READ)
 			return new Response(currentRCPTDomain, ResponseAction.WRITE);
-		return res;
+		
+		bb.clear();
+		return new Response(currentRCPTDomain, ResponseAction.READ);
 	}
 }

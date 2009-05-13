@@ -17,6 +17,7 @@ public class TeloServerState extends TCSMPState {
 		
 		if (send) {
 			proto.setState(new FromServerState());
+			bb.clear();
 			return new Response(ResponseAction.READ);
 		}
 		

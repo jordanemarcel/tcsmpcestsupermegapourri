@@ -31,6 +31,8 @@ public class PkeyServerState extends TCSMPState {
 				error = false;
 				send = false;
 			}
+			
+			bb.clear();
 
 			return new Response(ResponseAction.READ);
 		}
@@ -58,6 +60,7 @@ public class PkeyServerState extends TCSMPState {
 			if (res.getAction() != ResponseAction.READ)
 				return new Response(currentDomain, ResponseAction.WRITE);
 
+			bb.clear();
 			return new Response(currentDomain, ResponseAction.READ);
 		}
 
