@@ -287,6 +287,7 @@ public class TcpStructure {
 		try {
 			socketChannel.read(byteBuffer);
 			System.out.println("* TcpStructure: Buffer state: " + byteBuffer);
+			byteBuffer.flip();
 			Response response = protocol.doIt(byteBuffer);
 			this.handleResponse(key, response);
 		} catch (IOException e) {
