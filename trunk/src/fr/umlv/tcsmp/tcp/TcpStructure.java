@@ -51,7 +51,7 @@ public class TcpStructure {
 		}
 	}
 	
-	public void startClient(int port) throws IOException {
+	private void startClient(int port) throws IOException {
 		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(TcpStructure.BUFFER_SIZE);
 		KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, givenProtocol);
 		Response response = givenProtocol.doIt(byteBuffer);
@@ -62,7 +62,7 @@ public class TcpStructure {
 		System.out.println("* TcpStructure: End of Transmission");
 	}
 
-	public void startServer(int port) throws IOException {
+	private void startServer(int port) throws IOException {
 		ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 		InetSocketAddress localIsa = new InetSocketAddress(port);
 		serverSocketChannel.socket().bind(localIsa);
@@ -71,7 +71,7 @@ public class TcpStructure {
 		this.handleSelector();
 	}
 	
-	public void handleSelector() throws IOException {
+	private void handleSelector() throws IOException {
 		int nbKeysSelected;
 		while(true) {
 			do {
@@ -188,7 +188,7 @@ public class TcpStructure {
 		}
 	}
 
-	public void doAccept(SelectionKey key) {
+	private void doAccept(SelectionKey key) {
 		ServerSocketChannel serverSocketChannel = (ServerSocketChannel)key.channel();
 		try {
 			SocketChannel socketChannel = serverSocketChannel.accept();
@@ -218,7 +218,7 @@ public class TcpStructure {
 		}
 	}
 
-	public void doRead(SelectionKey key) {
+	private void doRead(SelectionKey key) {
 		SocketChannel socketChannel = (SocketChannel)key.channel();
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
@@ -234,7 +234,7 @@ public class TcpStructure {
 		}
 	}
 
-	public void doWrite(SelectionKey key) {
+	private void doWrite(SelectionKey key) {
 		SocketChannel socketChannel = (SocketChannel)key.channel();
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
@@ -253,7 +253,7 @@ public class TcpStructure {
 		this.handleResponse(key, response);
 	}
 
-	public void doConnect(SelectionKey key) {
+	private void doConnect(SelectionKey key) {
 		SocketChannel socketChannel = (SocketChannel)key.channel();
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		System.out.println("* TcpStructure: Closing " + socketChannel.socket().getRemoteSocketAddress());
@@ -268,7 +268,7 @@ public class TcpStructure {
 		}
 	}
 
-	public static int getResponseOps(ResponseAction responseAction) {
+	private static int getResponseOps(ResponseAction responseAction) {
 		switch (responseAction) {
 		case READ:
 			return SelectionKey.OP_READ;
