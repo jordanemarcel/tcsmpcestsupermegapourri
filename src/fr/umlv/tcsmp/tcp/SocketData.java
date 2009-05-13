@@ -1,7 +1,9 @@
 package fr.umlv.tcsmp.tcp;
 
 import java.nio.channels.SocketChannel;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class SocketData {
 	private final SocketChannel originalClient;
@@ -17,6 +19,10 @@ public class SocketData {
 	
 	public SocketChannel getSocket(String domain) {
 		return domainSocketMap.get(domain);
+	}
+	
+	public Collection<SocketChannel> getClients() {
+		return domainSocketMap.values();
 	}
 
 }
