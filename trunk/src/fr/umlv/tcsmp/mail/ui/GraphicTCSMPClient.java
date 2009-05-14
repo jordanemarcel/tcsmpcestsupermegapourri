@@ -17,6 +17,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import fr.umlv.tcsmp.proto.Protocol;
+import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.states.TCSMPState;
 
 public class GraphicTCSMPClient {
@@ -86,13 +87,13 @@ public class GraphicTCSMPClient {
 				if(from.length()==0)
 					JOptionPane.showMessageDialog(parent, "You HAVE to fill the 'FROM' field", "Error", JOptionPane.ERROR_MESSAGE);
 				
-				MailData mailData = new MailData();
-				mailData.setBody(mail);
-				mailData.setSubject(subject);
-				mailData.setFrom(from);
-				mailData.setTo(to);
-				mailData.setCc(ccField.getText());
-				System.out.println(mailData);
+//				MailData mailData = new MailData();
+//				mailData.setBody(mail);
+//				mailData.setSubject(subject);
+//				mailData.setFrom(from);
+//				mailData.setTo(to);
+//				mailData.setCc(ccField.getText());
+//				System.out.println(mailData);
 				
 				
 				ArrayList<String> ccList = new ArrayList<String>();
@@ -106,8 +107,7 @@ public class GraphicTCSMPClient {
 					bccList.add(s);
 				}
 				
-				TCSMPState state = TCSMPState.newDefaultClientState();
-				Protocol p = new Protocol(state);
+				Protocol p = new Protocol(ProtocolMode.CLIENT);
 				List<String> recpt = p.getRecpts();
 				recpt.addAll(ccList);
 				recpt.addAll(bccList);
