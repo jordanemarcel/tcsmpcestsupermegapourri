@@ -297,7 +297,6 @@ public class TcpStructure {
 			socketChannel.configureBlocking(false);
 			Response response = newServerProtocol.doIt(byteBuffer);
 			ResponseAction responseAction = response.getAction();
-			System.out.println("* TcpStructure: Response from Protocol: " + responseAction);
 			switch (responseAction) {
 			case READ: case WRITE: 
 				socketChannel.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
