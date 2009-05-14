@@ -121,12 +121,14 @@ public class RctpServerState extends TCSMPState {
 		} catch (ParseException e) {
 			bb.put(TCSMPParser.encode(new String("500 Invalid address in RCPT.\r\n")));
 			bb.flip();
+			send = true;
 			return new Response(ResponseAction.WRITE);
 		}
 
 		if (proto.isRelay(domain) == false) {
 			bb.put(TCSMPParser.encode("250 OK\r\n"));
 			bb.flip();
+			send = true;
 			return new Response(ResponseAction.WRITE);
 		}
 

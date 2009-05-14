@@ -23,8 +23,6 @@ public class Protocol {
 	private final ProtocolMode protocolMode;
 	private int protocolPort = 26;
 
-	private final List<String> rcpts;
-	private String from;
 	private String clientDomain;
 
 	private final Map<String, Puzzle> puzzles;
@@ -48,7 +46,6 @@ public class Protocol {
 		messageHandler = handler;
 		message = new Message();
 		myDomains = new ArrayList<String>();
-		rcpts = new ArrayList<String>();
 		puzzles = new HashMap<String, Puzzle>();
 		protocolMode = mode;
 		domainErrors = new HashMap<String, StringBuilder>();
@@ -69,12 +66,11 @@ public class Protocol {
 	}
 
 	public List<String> getRecpts() {
-		return rcpts;
+		return message.getRcpts();
 	}
 	
 	public void addRcpt(String rcpt) {
 		message.addRctp(rcpt);
-		rcpts.add(rcpt);
 	}
 
 	public ProtocolMode getProtocolMode() {
@@ -120,7 +116,7 @@ public class Protocol {
 
 	public boolean isRelay() {
 		try {
-			for (String rcpt: rcpts) {
+			for (String rcpt: message.getRcpts()) {
 				if (isRelay(TCSMPParser.parseDomain(rcpt)))
 					return true;
 			}
@@ -187,18 +183,16 @@ public class Protocol {
 	 * @return a new Protocol identical to this one. 
 	 */
 	public Protocol newProtocol() {
-		return new Protocol(protocolMode);
+		return newProtocol(protocolMode);
 	}
 	
 	public Protocol newProtocol(ProtocolMode mode) {
 		Protocol pr = new Protocol(mode);
 		pr.clientDomain = clientDomain;
-		pr.from = from;
 		pr.message.copy(message);
-		for (String d : myDomains)
+		for (String d : myDomains) {
 			pr.myDomains.add(d);
-		for (String r : rcpts)
-			pr.rcpts.add(r);
+		}
 		for (Entry<String, Puzzle> p : puzzles.entrySet()) {
 			pr.puzzles.put(p.getKey(), p.getValue());
 		}
@@ -214,11 +208,10 @@ public class Protocol {
 
 	public void setFrom(String from) {
 		message.setFrom(from);
-		this.from = from;
 	}
 
 	public String getFrom() {
-		return from;
+		return message.getFrom();
 	}
 
 	public void setClientDomain(String domain) {
