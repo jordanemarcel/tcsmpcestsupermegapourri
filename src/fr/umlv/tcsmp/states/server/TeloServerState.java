@@ -58,9 +58,15 @@ public class TeloServerState extends TCSMPState {
 			return new Response(ResponseAction.WRITE);
 		}
 
-		/** 
-		 * Change domain
-		 */
+		// check domain
+		if (args[1].contains(".") == false) {
+			bb.put(TCSMPParser.encode("500 Invalid domain syntax.\r\n"));
+			bb.flip();
+			error = true;
+			return new Response(ResponseAction.WRITE);
+		}
+		
+		// OK write domain in the proto
 		proto.setClientDomain(args[1]);
 		
 		/**
