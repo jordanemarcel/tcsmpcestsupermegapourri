@@ -18,7 +18,6 @@ import javax.swing.JTextField;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
-import fr.umlv.tcsmp.states.TCSMPState;
 
 public class GraphicTCSMPClient {
 	public static void main(String[] args) {
