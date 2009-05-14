@@ -43,6 +43,14 @@ public class MailServerState extends TCSMPState {
 
 		String [] args = TCSMPParser.parseCommand(bb);
 
+		if (args.length == 0) {
+			bb.clear();
+			bb.put(ErrorReplies.syntaxError());
+			bb.flip();
+			error = true;
+			return new Response(ResponseAction.WRITE);
+		}
+		
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);

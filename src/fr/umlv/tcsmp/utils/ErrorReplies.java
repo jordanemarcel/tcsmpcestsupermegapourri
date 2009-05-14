@@ -15,4 +15,8 @@ public class ErrorReplies {
 	public static ByteBuffer unexpectedError() {
 		return TCSMPParser.encode("421 Error: unexpected error\r\n");
 	}
+	
+	public static ByteBuffer syntaxError() {
+		return TCSMPParser.encode("421 Error: command syntax error\r\n");
+	}
 }
