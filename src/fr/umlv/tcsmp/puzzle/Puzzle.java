@@ -103,6 +103,8 @@ public class Puzzle {
 								break;
 							}
 							if(k==2) {
+								this.setOffset(bak);
+								w.setOffset(obak);
 								return true;
 							}
 						}

@@ -101,7 +101,7 @@ public class PkeyServerState extends TCSMPState {
 		 */
 		if (proto.isRelay(args[1]) == false) {
 			Puzzle p = proto.getPuzzleFor(proto.getClientDomain());
-			if (puzzle.equals(p)) {
+			if (puzzle.equals(p) && Puzzle.isResolved(puzzle)) {
 				bb.put(TCSMPParser.encode("216 Your mail has been kept !\r\n"));
 			}
 			else {
