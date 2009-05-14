@@ -21,7 +21,7 @@ public class DataServerState extends TCSMPState {
 			return new Response(ResponseAction.READ);
 		}
 		
-		Scanner sc = new Scanner(new String(bb.array()));
+		Scanner sc = new Scanner(TCSMPParser.decode(bb));
 		while (sc.hasNextLine()) {
 			String line = sc.nextLine();
 			proto.mail(line + "\r\n");
@@ -35,6 +35,7 @@ public class DataServerState extends TCSMPState {
 		}
 		
 		/* no data to send, read more */
+		bb.clear();
 		return new Response(ResponseAction.READ);
 	}
 }

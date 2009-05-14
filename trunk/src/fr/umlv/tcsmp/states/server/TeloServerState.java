@@ -12,11 +12,15 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 public class TeloServerState extends TCSMPState {
 
 	private boolean send = false;
+	private boolean error = false;
 	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		
 		if (send) {
-			proto.setState(new FromServerState());
+			if (error == false)
+				proto.setState(new FromServerState());
+			else
+				error = send = false;
 			bb.clear();
 			return new Response(ResponseAction.READ);
 		}
@@ -35,6 +39,7 @@ public class TeloServerState extends TCSMPState {
 		if (args.length != 2 || args[0].equals("TELO") == false) {
 			bb.put(ErrorReplies.unknowCommand("TELO", args[0]));
 			bb.flip();
+			error = true;
 			return new Response(ResponseAction.WRITE);
 		}
 
