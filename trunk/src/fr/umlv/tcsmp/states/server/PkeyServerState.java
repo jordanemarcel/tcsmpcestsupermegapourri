@@ -40,9 +40,8 @@ public class PkeyServerState extends TCSMPState {
 			if (send == false) {
 				if (res.getAction() == ResponseAction.WRITE) {
 					fakeProto = null;
-					// XXX: check the response to see if soluce is good or not
-					// in order to see if we can switch state
-					proto.setState(new QuitServerState());
+					if (serverResponse.split(" ")[0].startsWith("2"))
+						proto.setState(new QuitServerState());
 					bb.clear();
 					bb.put(TCSMPParser.encode(serverResponse));
 					bb.flip();
@@ -101,20 +100,17 @@ public class PkeyServerState extends TCSMPState {
 		}
 
 
-		/**
-		 * Add the puzzle in the proto
-		 */
+
+		// create the matrice
 		String dims = args[2];
 		String desc = args[3];
 		Puzzle puzzle = TCSMPParser.parsePuzzleDesc(dims, desc);
 
-		/**
-		 * check to see if it's a solution for us or not
-		 * XXX: foo
-		 */
+		// check solution
 		if (proto.isRelay(args[1]) == false) {
 			Puzzle p = proto.getPuzzleFor(proto.getClientDomain());
 			if (puzzle.equals(p) && Puzzle.isResolved(puzzle)) {
+				proto.processMessage();
 				bb.put(TCSMPParser.encode("216 Your mail has been kept !\r\n"));
 			}
 			else {

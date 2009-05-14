@@ -7,6 +7,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
+import fr.umlv.tcsmp.states.client.BannerClientState;
 import fr.umlv.tcsmp.states.client.RctpClientState;
 import fr.umlv.tcsmp.states.client.TeloClientState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
@@ -45,6 +46,7 @@ public class RctpServerState extends TCSMPState {
 			if (send == false) {
 				if (res.getAction() == ResponseAction.WRITE) {
 					fakeProto = null;
+					send = true;
 					bb.clear();
 					bb.put(TCSMPParser.encode(serverResponse));
 					bb.flip();
@@ -114,7 +116,7 @@ public class RctpServerState extends TCSMPState {
 		try {
 			domain = TCSMPParser.parseDomain(args[1]);
 			String user = TCSMPParser.parseUser(args[1]);
-			proto.getRecpts().add(user + "@" + domain);
+			proto.addRcpt(user + "@" + domain);
 		} catch (ParseException e) {
 			bb.put(TCSMPParser.encode(new String("500 Invalid address in RCPT.\r\n")));
 			bb.flip();
@@ -131,12 +133,8 @@ public class RctpServerState extends TCSMPState {
 
 		// Create a fakeProto for our client states
 		fakeProto = proto.newProtocol();
-		fakeProto.setState(new TeloClientState());
+		fakeProto.setState(new BannerClientState());
 		currentRCPTDomain = domain;
-		Response res = fakeProto.doIt(bb);
-		if (res.getAction() != ResponseAction.READ)
-			return new Response(currentRCPTDomain, ResponseAction.WRITE);
-
 		return new Response(currentRCPTDomain, ResponseAction.READ);
 	}
 	

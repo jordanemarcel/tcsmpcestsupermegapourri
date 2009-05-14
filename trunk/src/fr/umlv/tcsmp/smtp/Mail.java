@@ -4,26 +4,33 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * Class which is able to send mail through the SMTP protocol.
  */
 public class Mail {
 
-	private final String smtpServer;
+	private final InetAddress smtpServer;
 	private final int port;
 	private Socket conn;
 	private PrintStream out;
 	private BufferedReader in;
 
-	public Mail(String smtpServer, int port) {
-		this.smtpServer = smtpServer;
+	public Mail(String smtpServer, int port) throws UnknownHostException {
+		this.smtpServer = InetAddress.getByName(smtpServer);
 		this.port = port;
 	}
 
-	public Mail(String smtpServer) {
+	public Mail(String smtpServer) throws UnknownHostException {
 		this(smtpServer, 25);
+	}
+	
+	public Mail(InetAddress ia) {
+		this.smtpServer = ia;
+		this.port = 25;
 	}
 
 	private void sendCommand(String cmd, boolean check) throws IOException {
@@ -42,8 +49,8 @@ public class Mail {
 		String reply;
 		try
 		{
-			sendCommand("HELO foo", true);
-			sendCommand("MAIL FROM: "+from, true);
+			sendCommand("HELO foobar.com", true);
+			sendCommand("MAIL FROM: <"+from+">", true);
 			sendCommand("RCPT TO: <"+to+">", true);
 			sendCommand("DATA", true);
 			sendCommand("From: "+from, false);

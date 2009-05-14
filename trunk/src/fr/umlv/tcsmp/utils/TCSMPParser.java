@@ -16,8 +16,8 @@ import fr.umlv.tcsmp.puzzle.Puzzle;
 public class TCSMPParser {
 
 	private static final Charset charset = Charset.forName("ASCII");
-	private static Pattern emailrx = Pattern.compile("<(\\w+)@(\\w+\\.\\p{Alpha}{2,3})>");
-	private static Pattern emailrx2 = Pattern.compile("(\\w+)@(\\w+\\.\\p{Alpha}{2,3})");
+	private static Pattern emailrx = Pattern.compile("<(.*?)@(.*?\\.\\p{Alpha}{2,3})>");
+	private static Pattern emailrx2 = Pattern.compile("(.*?)@(.*?\\.\\p{Alpha}{2,3})");
 	
 	/**
 	 * Simply split command found in bytebuffer. 
