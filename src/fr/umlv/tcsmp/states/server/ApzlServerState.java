@@ -3,6 +3,7 @@ package fr.umlv.tcsmp.states.server;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 import fr.umlv.tcsmp.proto.Protocol;
@@ -58,8 +59,7 @@ public class ApzlServerState extends TCSMPState {
 			// we have a response for the currentDomain
 			if (domains.size() != 0) {
 				// add its response
-				// XXX: split multiline response
-				responses.add(TCSMPParser.decode(bb));
+				responses.addAll(Arrays.asList(TCSMPParser.slipResponseLine(TCSMPParser.decode(bb))));
 				domains.remove(currentDomain);
 				try {
 					currentDomain = domains.getFirst();
