@@ -122,6 +122,14 @@ public abstract class TCSMPState {
 	public boolean isTimeout() {
 		return timeoutState != TIMEOUT_NONE;
 	}
+	
+	/**
+	 * Something weird occured.
+	 * Do nothing here, should be overriden.
+	 */
+	public void cancel() {
+		
+	}
 
 	/**
 	 * Parse TCSMP command found in the ByteBuffer and

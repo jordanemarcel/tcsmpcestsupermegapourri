@@ -162,7 +162,17 @@ public class Protocol {
 	public boolean isTimeout() {
 		return state.isTimeout();
 	}
+	
+	/**
+	 * Just realaying a cancel to the state
+	 */
+	public void cancel() {
+		state.cancel();
+	}
 
+	/**
+	 * @return a new Protocol identical to this one. 
+	 */
 	public Protocol newProtocol() {
 		Protocol pr = new Protocol(protocolMode);
 		pr.clientDomain = clientDomain;
