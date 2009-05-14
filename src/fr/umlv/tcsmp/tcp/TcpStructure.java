@@ -180,11 +180,11 @@ public class TcpStructure {
 					System.out.println("* TcpStructure: Domain null");
 					if(socketChannel==originalClient) {
 						System.out.println("* TcpStructure: Original client");
-						//TODO CancelKeyException bug to resolved
 						key.interestOps(TcpStructure.getResponseOps(responseAction));
 						return;
 					} else {
 						System.out.println("* TcpStructure: Not original client");
+						System.out.println("* TcpStructure: cancelling key...");
 						key.cancel();
 						originalClient.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
 						return;
@@ -198,6 +198,7 @@ public class TcpStructure {
 						return;
 					} else {
 						key.cancel();
+						System.out.println("* TcpStructure: cancelling key...");
 						System.out.println("* TcpStructure: Socket is not last client");
 						if(client==null) {
 							System.out.println("* TcpStructure: Client is null");
@@ -225,6 +226,7 @@ public class TcpStructure {
 				}
 				if(socketChannel==socketData.getOriginalClient()) {
 					System.out.println("* TcpStructure: Socket is original client");
+					System.out.println("* TcpStructure: cancelling key...");
 					key.cancel();
 				}
 				return;
@@ -384,6 +386,8 @@ public class TcpStructure {
 				} catch (IOException e1) {
 					System.err.println(e1);
 				}
+			} else {
+				System.out.println("Not connected!");
 			}
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
