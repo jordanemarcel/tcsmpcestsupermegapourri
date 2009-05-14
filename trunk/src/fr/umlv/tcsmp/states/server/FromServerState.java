@@ -65,8 +65,15 @@ public class FromServerState extends TCSMPState {
 		try {
 			String domain = TCSMPParser.parseDomain(args[1]);
 			String user = TCSMPParser.parseUser(args[1]);
+			if (domain.equals(proto.getClientDomain()) == false) {
+				error = true;
+				bb.put(TCSMPParser.encode(new String("555 Open relaying is disabled.\r\n")));
+				bb.flip();
+				return new Response(ResponseAction.WRITE);
+			}
 			proto.setFrom(user + "@" + domain);
 		} catch (ParseException e) {
+			error = true;
 			bb.put(TCSMPParser.encode(new String("500 Invalid from.\r\n")));
 			bb.flip();
 			return new Response(ResponseAction.WRITE);
