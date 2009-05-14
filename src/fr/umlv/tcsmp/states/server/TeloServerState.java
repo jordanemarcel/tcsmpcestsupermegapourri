@@ -9,6 +9,7 @@ import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
+import fr.umlv.tcsmp.utils.TCSMPLogger;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class TeloServerState extends TCSMPState {

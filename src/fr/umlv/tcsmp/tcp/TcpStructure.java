@@ -279,7 +279,7 @@ public class TcpStructure {
 			throw new IOException("Can't establish a connection with the client :-(");
 		}
 	}
-
+			
 	/**
 	 * Selector method: accepts a new connection
 	 * @param key - selected key
@@ -383,8 +383,9 @@ public class TcpStructure {
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		System.out.println("* TcpStructure: Connecting to " + socketChannel.socket().getRemoteSocketAddress());
 		try {
-			if(socketChannel.finishConnect()) {
+			if(socketChannel.finishConnect() == false) {
 				socketChannel.close();
+				return;
 			}
 			key.interestOps(TcpStructure.getResponseOps(keyAttachment.getCurrentResponse().getAction()));
 		} catch (IOException e) {
