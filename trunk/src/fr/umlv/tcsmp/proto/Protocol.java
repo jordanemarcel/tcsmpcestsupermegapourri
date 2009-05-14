@@ -119,6 +119,12 @@ public class Protocol {
 				/* pos and limit have not been altered. */
 				return new Response(ResponseAction.CONTINUEREAD);
 			}
+			if (TCSMPParser.decode(bb).startsWith("\n") == true ||
+					TCSMPParser.decode(bb).startsWith("\r") == true) {
+				/* blank line, ignore it. */
+				bb.clear();
+				return new Response(ResponseAction.READ);
+			}
 		}
 
 		/* exit state */
