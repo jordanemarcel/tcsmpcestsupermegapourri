@@ -146,7 +146,7 @@ public class RctpServerState extends TCSMPState {
 		error = false;
 		fakeProto = null;
 		bb.clear();
-		bb.put(TCSMPParser.encode(serverResponse));
+		bb.put(ErrorReplies.unexpectedError());
 		bb.flip();
 		return new Response(ResponseAction.WRITE);
 	}
