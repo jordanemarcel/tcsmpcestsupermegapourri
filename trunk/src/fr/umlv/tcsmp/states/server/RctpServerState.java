@@ -10,6 +10,7 @@ import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.states.client.RctpClientState;
 import fr.umlv.tcsmp.states.client.TeloClientState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
+import fr.umlv.tcsmp.utils.TCSMPLogger;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class RctpServerState extends TCSMPState {
@@ -17,7 +18,6 @@ public class RctpServerState extends TCSMPState {
 	private final static int TIMEOUT = 300000; // 5 minutes
 	
 	private boolean send = false;
-	private boolean error = false;
 
 	private String currentRCPTDomain;
 	private String serverResponse;
@@ -33,13 +33,10 @@ public class RctpServerState extends TCSMPState {
 		// we are in a relaying mode
 		if (fakeProto != null) {
 			
-			// write an error response to the client and stop relaying
-			if (error) {
-				
-			}
-
 			// save each time the response of the server
 			serverResponse = TCSMPParser.decode(bb);
+			
+			TCSMPLogger.debug("RCTP STATE: I've received " + serverResponse + " from " + currentRCPTDomain);
 			
 			// get response from the fake proto.
 			Response res = fakeProto.doIt(bb);
@@ -60,6 +57,7 @@ public class RctpServerState extends TCSMPState {
 
 			// last state, the next response will be replied to the client
 			if (fakeProto.getState().getClass().equals(RctpClientState.class)) {
+				TCSMPLogger.debug("TCSMP STATE: TELO, PKEY and RCTP have been done");
 				send = false;
 			}
 
@@ -118,7 +116,7 @@ public class RctpServerState extends TCSMPState {
 			String user = TCSMPParser.parseUser(args[1]);
 			proto.getRecpts().add(user + "@" + domain);
 		} catch (ParseException e) {
-			bb.put(TCSMPParser.encode(new String("500 Invalid RCPT.\r\n")));
+			bb.put(TCSMPParser.encode(new String("500 Invalid address in RCPT.\r\n")));
 			bb.flip();
 			return new Response(ResponseAction.WRITE);
 		}
@@ -129,6 +127,7 @@ public class RctpServerState extends TCSMPState {
 			return new Response(ResponseAction.WRITE);
 		}
 
+		TCSMPLogger.debug("RCTP STATE: don't know about " + domain + " ... relaying.");
 
 		// Create a fakeProto for our client states
 		fakeProto = proto.newProtocol();
@@ -143,7 +142,6 @@ public class RctpServerState extends TCSMPState {
 	
 	@Override
 	public Response cancel(Protocol proto, ByteBuffer bb) {
-		error = false;
 		fakeProto = null;
 		bb.clear();
 		bb.put(ErrorReplies.unexpectedError());
