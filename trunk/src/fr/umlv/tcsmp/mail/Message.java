@@ -14,7 +14,8 @@ public class Message {
 	}
 	
 	public void copy(Message message) {
-		this.setFrom(message.from);
+		if (message.from != null)
+			this.setFrom(message.from);
 		for (String rcpt : message.rcpts)
 			addRctp(rcpt);
 		for (String data : message.mail)
@@ -26,11 +27,11 @@ public class Message {
 	}
 	
 	public void setFrom(String from) {
-		this.from = from;
+		this.from = from.toLowerCase();
 	}
 	
 	public void addRctp(String rcpt) {
-		this.rcpts.add(rcpt);
+		this.rcpts.add(rcpt.toLowerCase());
 	}
 	
 	public ArrayList<String> getMail() {

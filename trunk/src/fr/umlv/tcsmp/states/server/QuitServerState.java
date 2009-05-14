@@ -56,6 +56,13 @@ public class QuitServerState extends TCSMPState {
 		send = true;
 		String [] args = TCSMPParser.parseCommand(bb);
 		
+		if (args.length == 0) {
+			bb.clear();
+			bb.put(ErrorReplies.syntaxError());
+			bb.flip();
+			return new Response(ResponseAction.WRITE);
+		}
+		
 		if (args[0].equals("QUIT") == false) {
 			bb.clear();
 			bb.put(ErrorReplies.unknowCommand("QUIT", args[0]));

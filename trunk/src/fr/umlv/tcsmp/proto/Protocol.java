@@ -214,7 +214,7 @@ public class Protocol {
 	}
 
 	public void setClientDomain(String domain) {
-		this.clientDomain = domain;
+		this.clientDomain = domain.toLowerCase();
 	}
 
 	public String getClientDomain() {

@@ -92,6 +92,15 @@ public class PkeyServerState extends TCSMPState {
 		String [] args = TCSMPParser.parseCommand(bb);
 		bb.clear();
 
+		if (args.length == 0) {
+			bb.clear();
+			bb.put(ErrorReplies.syntaxError());
+			bb.flip();
+			send = true;
+			error = true;
+			return new Response(ResponseAction.WRITE);
+		}
+		
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);
@@ -101,6 +110,7 @@ public class PkeyServerState extends TCSMPState {
 		if (args.length != 4 || args[0].equals("PKEY") == false) {
 			bb.put(ErrorReplies.unknowCommand("PKEY", args[0]));
 			bb.flip();
+			send = true;
 			error = true;
 			return new Response(ResponseAction.WRITE);
 		}

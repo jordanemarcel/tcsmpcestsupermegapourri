@@ -90,12 +90,12 @@ public class TCSMPParser {
 	 */
 	public static String parseDomain(String mail) throws ParseException {
 		Matcher matcher = emailrx.matcher(mail);
-		if(matcher.matches())
-			return matcher.group(2);
+		if(matcher.matches() && matcher.groupCount() == 2)
+			return matcher.group(2).toLowerCase();
 
 		matcher = emailrx2.matcher(mail);
-		if(matcher.matches())
-			return matcher.group(2);
+		if(matcher.matches() && matcher.groupCount() == 2)
+			return matcher.group(2).toLowerCase();
 		
 		throw new ParseException(mail + " is not a valid email address", 0);
 	}
@@ -111,12 +111,12 @@ public class TCSMPParser {
 	 */
 	public static String parseUser(String mail) throws ParseException {
 		Matcher matcher = emailrx.matcher(mail);
-		if(matcher.matches())
-			return matcher.group(1);
+		if(matcher.matches() && matcher.groupCount() == 2)
+			return matcher.group(1).toLowerCase();
 		
 		matcher = emailrx2.matcher(mail);
-		if(matcher.matches())
-			return matcher.group(1);
+		if(matcher.matches() && matcher.groupCount() == 2)
+			return matcher.group(1).toLowerCase();
 
 		throw new ParseException(mail + " is not a valid email address", 0);
 	}
