@@ -138,16 +138,16 @@ public class SimpleServerStateTest {
 		/**
 		 * GOOD PKEY
 		 */
-//		System.out.println(puzz.lineString());
-//		Puzzle.resolve(puzz);
-//		pkey = "PKEY foobar.com 4,4 " + puzz.lineString() + "\r\n";
-//		System.out.print(pkey);
-//		bb.clear();
-//		bb.put(TCSMPParser.encode(pkey));
-//		bb.flip();
-//		res = p.doIt(bb);
-//		printBB(res, bb);
-//		p.doIt(bb);
+		System.out.println(puzz.lineString());
+		Puzzle.resolve(puzz);
+		pkey = "PKEY foobar.com 4,4 " + puzz.lineString() + "\r\n";
+		System.out.print(pkey);
+		bb.clear();
+		bb.put(TCSMPParser.encode(pkey));
+		bb.flip();
+		res = p.doIt(bb);
+		printBB(res, bb);
+		p.doIt(bb);
 		
 		/**
 		 * QUIT

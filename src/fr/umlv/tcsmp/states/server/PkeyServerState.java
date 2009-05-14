@@ -23,33 +23,28 @@ public class PkeyServerState extends TCSMPState {
 
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 
-		if (send) {
-			// state was in error, just need need READ
-			if (error == false) {
-				proto.setState(new QuitServerState());
-			} else {	
-				error = false;
-				send = false;
-			}
-			
-			bb.clear();
-
-			return new Response(ResponseAction.READ);
-		}
-
 		// we are in a relaying mode
 		if (fakeProto != null) {
 
+			String serverResponse = TCSMPParser.decode(bb);
+			
 			Response res = fakeProto.doIt(bb);
 
 			// We can reply the code to the client
-			if (res.getAction() == ResponseAction.READ && send == false) {
-				fakeProto = null;
-				bb.position(0);
-				// XXX: check the response to see if soluce is good or not
-				// in order to see if we can switch state
-				proto.setState(new QuitServerState());
-				return new Response(ResponseAction.WRITE);
+			if (send == false) {
+				if (res.getAction() == ResponseAction.WRITE) {
+					fakeProto = null;
+					// XXX: check the response to see if soluce is good or not
+					// in order to see if we can switch state
+					proto.setState(new QuitServerState());
+					bb.clear();
+					bb.put(TCSMPParser.encode(serverResponse));
+					bb.flip();
+					return new Response(ResponseAction.WRITE);
+				}
+				else {
+					return new Response(currentDomain, ResponseAction.READ);
+				}
 			}
 
 			// last state, we have to tell to reply the response to the client
@@ -60,8 +55,20 @@ public class PkeyServerState extends TCSMPState {
 			if (res.getAction() != ResponseAction.READ)
 				return new Response(currentDomain, ResponseAction.WRITE);
 
-			bb.clear();
 			return new Response(currentDomain, ResponseAction.READ);
+		}
+		
+		if (send) {
+			// state was in error, just need need READ
+			if (error == false) {
+				proto.setState(new QuitServerState());
+			} else {	
+				error = false;
+				send = false;
+			}
+			
+			bb.clear();
+			return new Response(ResponseAction.READ);
 		}
 
 		String [] args = TCSMPParser.parseCommand(bb);
@@ -106,6 +113,11 @@ public class PkeyServerState extends TCSMPState {
 			send = true;
 			return new Response(ResponseAction.WRITE);
 		}
+		else
+		{
+			// we have to add the PKEY in the puzzles for the PkeyClient.
+			proto.addPuzzleFor(args[1], puzzle);
+		}
 
 
 		// fake proto for client state
@@ -116,6 +128,7 @@ public class PkeyServerState extends TCSMPState {
 		Response res = fakeProto.doIt(bb);
 		if (res.getAction() != ResponseAction.READ)
 			return new Response(currentDomain, ResponseAction.WRITE);
+		
 		return new Response(currentDomain, ResponseAction.READ);
 	}
 

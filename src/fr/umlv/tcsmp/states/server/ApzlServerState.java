@@ -64,6 +64,9 @@ public class ApzlServerState extends TCSMPState {
 					bb.clear();
 					bb.put(TCSMPParser.encode(res));
 					bb.flip();
+					if (responses.size() == 0) {
+						send = true;
+					}
 					return new Response(ResponseAction.WRITE);
 				}
 			}
@@ -75,8 +78,9 @@ public class ApzlServerState extends TCSMPState {
 				bb.put(TCSMPParser.encode(res));
 				bb.flip();
 				// yeah we have finished
-				if (responses.size() == 0)
+				if (responses.size() == 0) {
 					send = true;
+				}
 				return new Response(ResponseAction.WRITE);
 			}
 			
@@ -103,6 +107,7 @@ public class ApzlServerState extends TCSMPState {
 		if (proto.isRelay() == false) {
 			// XXX: puzzle size must be dynamic
 			Puzzle p = Puzzle.randomPuzzle(4, 4);
+			Puzzle.shuffle(p);
 			proto.addPuzzleFor(proto.getClientDomain(), p);
 			bb.clear();
 			bb.put(TCSMPParser.encode("215 " + proto.getMyDomains().get(0) + " 4,4 " + p.lineString() + "\r\n"));

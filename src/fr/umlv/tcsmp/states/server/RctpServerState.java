@@ -23,8 +23,7 @@ public class RctpServerState extends TCSMPState {
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 
-		/** we are in a relaying mode
-		 */
+		// we are in a relaying mode
 		if (fakeProto != null) {
 
 			// save each time the response of the server
