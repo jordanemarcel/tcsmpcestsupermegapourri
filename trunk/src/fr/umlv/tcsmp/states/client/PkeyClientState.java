@@ -25,6 +25,16 @@ public class PkeyClientState extends TCSMPState {
 		processedDomains = new HashMap<String, Boolean>();
 	}
 
+	private void checkIfFinished(Protocol proto) {
+		if (processedDomains.size() == proto.getPuzzles().size()) {
+			// Done processing puzzles
+			proto.setState(new QuitClientState());
+		}
+		else {
+			proto.setState(this);
+		}
+	}
+	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (resp == null) {
 			Puzzle puzzle = null;
@@ -38,8 +48,7 @@ public class PkeyClientState extends TCSMPState {
 					processedDomains.put(entry.getKey(), true);
 				}
 				puzzle = entry.getValue();
-					// XXX Booya
-				//puzzle.resolve();
+				Puzzle.resolve(puzzle);
 				currentDomain = entry.getKey();
 				break;
 			}
@@ -67,27 +76,22 @@ public class PkeyClientState extends TCSMPState {
 
 			switch(Integer.parseInt(list.get(0))) {
 			// States
-			// TODO add check if MAIL was not found on server
 			case 216:
-				resp = null;
 				processedDomains.put(currentDomain, true);
+				checkIfFinished(proto);
+				break;
+			case 517:
+				proto.setState(new MailClientState(this));
 				break;
 			case 516:
-			case 517:
-				// TODO record msg?
-				processedDomains.put(currentDomain, true);
-				resp = null;
 			default:
-				throw new AssertionError("Pouet");
+				proto.addErrorFor(currentDomain, list.get(0) + " " + list.get(1));
+				processedDomains.put(currentDomain, true);
+				checkIfFinished(proto);
+				break;
 			}
 			
-			if (processedDomains.size() == proto.getPuzzles().size()) {
-				// Done processing puzzles
-				proto.setState(new QuitClientState());
-			}
-			else {
-				proto.setState(this);
-			}
+			resp = null;
 			
 			bb.clear();
 			return proto.doIt(bb);

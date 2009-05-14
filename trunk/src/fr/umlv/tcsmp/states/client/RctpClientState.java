@@ -52,11 +52,12 @@ public class RctpClientState extends TCSMPState {
 			case 550:
 			case 551:
 			case 552:
-			case 553://TODO check? + record error somewhere maybe
-				proto.getRecpts().remove(index);
+			case 553:
+			default://TODO check? + record error somewhere maybe
+				proto.addErrorFor(proto.getRecpts().get(index), list.get(0) + " " + list.get(1));
+				// Don't remove, use error to known if something went wrong
+				// proto.getRecpts().remove(index);
 				break;
-			default:
-				throw new AssertionError("Pouet");
 			}
 			
 			if (index >= proto.getRecpts().size()) {

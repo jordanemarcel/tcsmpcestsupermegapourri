@@ -1,21 +1,15 @@
 package fr.umlv.tcsmp.junit;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
-import fr.umlv.tcsmp.states.client.BannerClientState;
-import fr.umlv.tcsmp.states.server.BannerServerState;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class ServerStateTest {
 
-	private static void printBB(Response res, ByteBuffer bb) {
-		if (res == null)
-			return;
-		
+	private static boolean printBB(Response res, ByteBuffer bb) {
 		switch (res.getAction()) {
 		case WRITE:
 			if (res.getDest() != null)
@@ -26,29 +20,37 @@ public class ServerStateTest {
 		case RELAYALL:
 			System.out.print("ALL" + " -> " + TCSMPParser.decode(bb));
 			break;
+		case CLOSE:
+			System.out.println("CONNECTION CLOSED");
+			return true;
 		}
-// Don't clear buffer in this case because the other end uses it
-//		bb.clear(); /* assume bb has been consumed */
+		return false;
 	}
 	
-	private static void writeReadwrite(Protocol serverProtocol, ByteBuffer serverBB, Protocol clientProtocol, ByteBuffer clientBB) {
+	private static boolean writeReadwrite(Protocol serverProtocol, ByteBuffer serverBB, Protocol clientProtocol, ByteBuffer clientBB) {
 		// WRITE
-		printBB(serverProtocol.doIt(serverBB), serverBB);
+		if (printBB(serverProtocol.doIt(serverBB), serverBB)) {
+			return true;
+		}
 		clientBB.put(serverBB);
 		serverBB.clear();
 		clientBB.flip();
 		serverProtocol.doIt(serverBB);
 		
 		// READ
-		printBB(clientProtocol.doIt(clientBB), clientBB);
+		if (printBB(clientProtocol.doIt(clientBB), clientBB)) {
+			return true;
+		}
 		// WRITE
 		clientProtocol.doIt(clientBB);
 		serverBB.put(clientBB);
 		clientBB.clear();
 		serverBB.flip();
+		
+		return false;
 	}
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) {
 		ByteBuffer serverBB = ByteBuffer.allocate(1024);
 		ByteBuffer clientBB = ByteBuffer.allocate(1024);
 		
@@ -63,50 +65,6 @@ public class ServerStateTest {
 		// XXX .
 		clientProtocol.mail("P'tain, ca dechire du caribou.\r\n.\r\n");
 		
-		/**
-		 * BANNER.
-		 */
-		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
-
-		/**
-		 * TELO
-		 */
-		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
-
-		/**
-		 * FROM
-		 */
-		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
-
-		/**
-		 * RCPT
-		 */
-		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
-
-		/**
-		 * APZL
-		 */
-		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
-
-		/**
-		 * MAIL
-		 */
-		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
-		
-		/**
-		 * DATA
-		 */
-		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
-
-		/**
-		 * PKEY
-		 */
-		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
-		
-		/**
-		 * QUIT
-		 */
-		writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB);
-		
+		while(!writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB));
 	}
 }

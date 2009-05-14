@@ -26,13 +26,13 @@ public class FromClientState extends TCSMPState {
 
 			return new Response(resp);
 		}
-		
+
 		if (resp == ResponseAction.WRITE) {
 			// Request was sent, signify we want to get the reply
 			resp = ResponseAction.READ;
 			return new Response(resp);
 		}
-		
+
 		if (resp == ResponseAction.READ) {
 			// We got here because we got the answer
 			ArrayList<String> list = new ArrayList<String>();
@@ -42,15 +42,16 @@ public class FromClientState extends TCSMPState {
 			case 250:
 				proto.setState(new RctpClientState());
 				break;
-				// TODO RESPONSE CODES
 			default:
-				throw new AssertionError("Pouet");
+				proto.setState(new QuitClientState());
+				proto.addMainError(list.get(0) + " " + list.get(1));
+				break;
 			}
-			
+
 			bb.clear();
 			return proto.doIt(bb);
 		}
-		
+
 		return null;
 	}
 }
