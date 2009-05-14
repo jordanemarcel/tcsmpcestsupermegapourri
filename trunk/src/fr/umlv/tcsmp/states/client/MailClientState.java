@@ -115,4 +115,26 @@ public class MailClientState extends TCSMPState {
 
 		return null;
 	}
+	
+	@Override
+	public Response cancel(Protocol proto, ByteBuffer bb) {
+		bb.clear();
+		if (!sentRequest) {
+			if (resp == ResponseAction.WRITE) {
+				proto.addMainError("Communication error while MAIL'ing.");
+			}
+			else {
+				proto.addMainError("Communication error while getting MAIL response.");
+			}
+		}
+		else {
+			if (resp == ResponseAction.WRITE) {
+				proto.addMainError("Communication error while sending mail data.");
+			}
+			else {
+				proto.addMainError("Communication error while response for the mailed data.");
+			}
+		}
+		return new Response(ResponseAction.CLOSE);
+	}
 }

@@ -54,4 +54,16 @@ public class FromClientState extends TCSMPState {
 
 		return null;
 	}
+	
+	@Override
+	public Response cancel(Protocol proto, ByteBuffer bb) {
+		bb.clear();
+		if (resp == ResponseAction.WRITE) {
+			proto.addMainError("Communication error while FROM'ing.");
+		}
+		else {
+			proto.addMainError("Communication error while getting FROM response.");
+		}
+		return new Response(ResponseAction.CLOSE);
+	}
 }

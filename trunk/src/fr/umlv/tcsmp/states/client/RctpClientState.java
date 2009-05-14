@@ -79,4 +79,16 @@ public class RctpClientState extends TCSMPState {
 
 		return null;
 	}
+	
+	@Override
+	public Response cancel(Protocol proto, ByteBuffer bb) {
+		bb.clear();
+		if (resp == ResponseAction.WRITE) {
+			proto.addMainError("Communication error while RCPT'ing.");
+		}
+		else {
+			proto.addMainError("Communication error while getting RCPT response.");
+		}
+		return new Response(ResponseAction.CLOSE);
+	}
 }
