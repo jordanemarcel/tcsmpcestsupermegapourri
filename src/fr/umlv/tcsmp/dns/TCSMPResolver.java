@@ -2,7 +2,6 @@ package fr.umlv.tcsmp.dns;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 
@@ -13,7 +12,7 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
 
-public class TCSMPResolver {
+public class TCSMPResolver implements DNSResolver {
 
 	/* DNS server to ask */
 	private final String server;
@@ -47,8 +46,8 @@ public class TCSMPResolver {
 			env.put("java.naming.provider.url", "dns://" + server + "/");
 			DirContext ctx = new InitialDirContext(env);
 			Attributes attrs = ctx.getAttributes(host, new String[] { "MX" });
-			for (NamingEnumeration ae = attrs.getAll(); ae.hasMoreElements();) {
-				Attribute attr = (Attribute) ae.next();
+			for (NamingEnumeration<? extends Attribute> ae = attrs.getAll(); ae.hasMoreElements();) {
+				Attribute attr = ae.next();
 				return InetAddress.getByName(attr.get(0).toString().split("\\s+")[1]);
 			}
 			ctx.close();
