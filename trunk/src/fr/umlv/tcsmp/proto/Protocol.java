@@ -6,13 +6,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import fr.umlv.tcsmp.mail.Message;
 import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
-import fr.umlv.tcsmp.tcp.handlers.SmtpHandler;
+import fr.umlv.tcsmp.tcp.handlers.PrintHandler;
 import fr.umlv.tcsmp.tcp.handlers.TCSMPHandler;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
@@ -58,7 +57,7 @@ public class Protocol {
 	}
 
 	public Protocol(ProtocolMode mode) {
-		this(mode, new SmtpHandler());
+		this(mode, new PrintHandler());
 	}
 	
 	public int getProtocolPort() {

@@ -39,9 +39,11 @@ public class Message {
 	
 	public String getLongMail() {
 		StringBuilder sb = new StringBuilder();
+
 		for (String s : mail) {
 			sb.append(s);
 		}
+		
 		return sb.toString();
 	}
 	
@@ -55,6 +57,12 @@ public class Message {
 	
 	@Override
 	public String toString() {
-		return mail.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("From: ").append(from).append("\n");
+		for (String r : rcpts) {
+			sb.append("To: ").append(r).append("\n");
+		}
+		sb.append(getLongMail());
+		return sb.toString();
 	}
 }
