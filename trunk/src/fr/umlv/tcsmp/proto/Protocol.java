@@ -25,7 +25,7 @@ public class Protocol {
 	private String clientDomain;
 
 	private final Map<String, Puzzle> puzzles;
-	private final Map<String, StringBuilder> serverErrors;
+	private final Map<String, StringBuilder> domainErrors;
 	private final StringBuilder mainErrors;
 	
 	// TODO escape "." ?
@@ -45,7 +45,7 @@ public class Protocol {
 		rcpts = new ArrayList<String>();
 		puzzles = new HashMap<String, Puzzle>();
 		protocolMode = mode;
-		serverErrors = new HashMap<String, StringBuilder>();
+		domainErrors = new HashMap<String, StringBuilder>();
 		mainErrors = new StringBuilder();
 	}
 
@@ -71,19 +71,22 @@ public class Protocol {
 	}
 	
 	public void addMainError(String error) {
-		mainErrors.append("\n").append(error);
+		if (mainErrors.length() != 0) {
+			mainErrors.append("\n");
+		}
+		mainErrors.append(error);
 	}
 	
-	public Map<String, StringBuilder> getServerErrors() {
-		return serverErrors;
+	public Map<String, StringBuilder> getDomainErrors() {
+		return domainErrors;
 	}
 	
 	public void addErrorFor(String domain, String errorString) {
 		StringBuilder errorBuilder;
-		errorBuilder = serverErrors.get(domain);
+		errorBuilder = domainErrors.get(domain);
 		if (errorBuilder == null) {
 			errorBuilder = new StringBuilder();
-			serverErrors.put(domain, errorBuilder);
+			domainErrors.put(domain, errorBuilder);
 		}
 		errorBuilder.append(errorString);
 	}

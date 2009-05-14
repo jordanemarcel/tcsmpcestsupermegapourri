@@ -1,6 +1,7 @@
 package fr.umlv.tcsmp.junit;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
@@ -62,9 +63,22 @@ public class ServerStateTest {
 		clientProtocol.setFrom("toto@titi.com");
 		clientProtocol.setClientDomain("titi.com");
 		clientProtocol.getRecpts().add("billou@biniou.com");
+		clientProtocol.getRecpts().add("jojo@biniou.com");
+		clientProtocol.getRecpts().add("clem@biniou.com");
 		// XXX .
 		clientProtocol.mail("P'tain, ca dechire du caribou.\r\n.\r\n");
 		
-		while(!writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB));
+		while(!writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB)) {};
+		
+		System.out.println("--------------\nOriginal server errors:");
+		System.out.println(clientProtocol.getMainErrors());
+
+		System.out.println("Particular server errors:");
+		for(Map.Entry<String, StringBuilder> entry : clientProtocol.getDomainErrors().entrySet()) {
+			System.out.println(entry.getKey() + ":");
+			System.out.println(entry.getValue());
+			System.out.println("---------");
+		}
 	}
+	
 }

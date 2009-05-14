@@ -2,6 +2,7 @@ package fr.umlv.tcsmp.states.client;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Map;
 
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
@@ -51,11 +52,18 @@ public class ApzlClientState extends TCSMPState {
 					case 515:
 					default:
 						// NOOP TODO maybe record error msg?
+						proto.addErrorFor("Unknown" + i/2, list.get(i) + " " + list.get(i+1));
 						break;
 					}
 				}
 				
-				proto.setState(new MailClientState());		
+				proto.setState(new QuitClientState());	
+				for(Map.Entry<String, Puzzle> entry :proto.getPuzzles().entrySet()) {
+					if (entry.getValue() != null) {
+						proto.setState(new MailClientState());	
+					}
+				}
+					
 				resp = null;
 				bb.clear();
 				return proto.doIt(bb);

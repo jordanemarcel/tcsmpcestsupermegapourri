@@ -39,7 +39,7 @@ public class TeloClientState extends TCSMPState {
 				QuitClientState quiteState = null;
 
 				for(int i=0; i<list.size(); i+=2) {
-					switch(Integer.parseInt(list.get(0))) {
+					switch(Integer.parseInt(list.get(i))) {
 					// States
 					case 250:
 						proto.setState(new FromClientState());

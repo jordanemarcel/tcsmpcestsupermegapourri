@@ -55,13 +55,19 @@ public class RctpClientState extends TCSMPState {
 			case 553:
 			default://TODO check? + record error somewhere maybe
 				proto.addErrorFor(proto.getRecpts().get(index), list.get(0) + " " + list.get(1));
+				index++;
 				// Don't remove, use error to known if something went wrong
 				// proto.getRecpts().remove(index);
 				break;
 			}
 			
 			if (index >= proto.getRecpts().size()) {
-				proto.setState(new ApzlClientState());			
+				if (proto.getDomainErrors().size() == index) {
+					proto.setState(new QuitClientState());
+				}
+				else {
+					proto.setState(new ApzlClientState());
+				}
 			}
 			else {
 				resp = null;
