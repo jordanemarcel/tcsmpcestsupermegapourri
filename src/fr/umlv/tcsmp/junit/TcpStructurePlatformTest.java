@@ -15,6 +15,7 @@ public class TcpStructurePlatformTest {
 		try {
 			TcpStructure tcpStructure = new TcpStructure(resolver);
 			Protocol protocol = new Protocol(ProtocolMode.SERVER);
+			protocol.addDomain("foobar.com");
 			tcpStructure.processProtocol(protocol);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
