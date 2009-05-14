@@ -10,7 +10,6 @@ import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.client.BannerClientState;
 import fr.umlv.tcsmp.states.server.BannerServerState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
-import fr.umlv.tcsmp.utils.TCSMPParser;
 
 /**
  * Class representing a state in the TCSMP proto. 
@@ -127,8 +126,9 @@ public abstract class TCSMPState {
 	 * Something weird occured.
 	 * Do nothing here, should be overriden.
 	 */
-	public void cancel() {
-		
+	public Response cancel(ByteBuffer bb) {
+		bb.clear();
+		return new Response(ResponseAction.CLOSE);
 	}
 
 	/**

@@ -19,6 +19,7 @@ public class RctpServerState extends TCSMPState {
 	private final static int TIMEOUT = 300000; // 5 minutes
 	
 	private boolean send = false;
+	private boolean error = false;
 
 	private String currentRCPTDomain;
 	private String serverResponse;
@@ -33,6 +34,11 @@ public class RctpServerState extends TCSMPState {
 
 		// we are in a relaying mode
 		if (fakeProto != null) {
+			
+			// write an error response to the client and stop relaying
+			if (error) {
+				
+			}
 
 			// save each time the response of the server
 			serverResponse = TCSMPParser.decode(bb);
@@ -135,5 +141,15 @@ public class RctpServerState extends TCSMPState {
 			return new Response(currentRCPTDomain, ResponseAction.WRITE);
 
 		return new Response(currentRCPTDomain, ResponseAction.READ);
+	}
+	
+	@Override
+	public Response cancel(ByteBuffer bb) {
+		error = false;
+		fakeProto = null;
+		bb.clear();
+		bb.put(TCSMPParser.encode(serverResponse));
+		bb.flip();
+		return new Response(ResponseAction.WRITE);
 	}
 }
