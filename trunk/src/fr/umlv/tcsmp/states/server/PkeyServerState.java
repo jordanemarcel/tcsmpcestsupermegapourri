@@ -14,9 +14,9 @@ import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class PkeyServerState extends TCSMPState {
-	
+
 	private final static int TIMEOUT = 600000; // 10 minutes
-	
+
 	private boolean send = false;
 	private boolean error = false;
 	private boolean pzlok = false;
@@ -24,19 +24,19 @@ public class PkeyServerState extends TCSMPState {
 
 	private Protocol fakeProto;
 	private String currentDomain;
-	
+
 
 	public PkeyServerState() {
 		super(TIMEOUT);
 	}
-	
+
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 
 		// we are in a relaying mode
 		if (fakeProto != null) {
 
 			String serverResponse = TCSMPParser.decode(bb);
-			
+
 			Response res = fakeProto.doIt(bb);
 
 			// We can reply the code to the client
@@ -66,13 +66,13 @@ public class PkeyServerState extends TCSMPState {
 
 			return new Response(currentDomain, ResponseAction.READ);
 		}
-		
+
 		// are we in timeout waiting for RCTP
 		if (isTimeout())
 			return timeoutResponse(bb);
 		else
 			timeoutReset();
-		
+
 		// send OK ?
 		if (send) {
 			// state was in error, just need need READ
@@ -84,7 +84,7 @@ public class PkeyServerState extends TCSMPState {
 				error = false;
 				send = false;
 			}
-			
+
 			bb.clear();
 			return new Response(ResponseAction.READ);
 		}
@@ -100,7 +100,7 @@ public class PkeyServerState extends TCSMPState {
 			error = true;
 			return new Response(ResponseAction.WRITE);
 		}
-		
+
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);
@@ -119,30 +119,38 @@ public class PkeyServerState extends TCSMPState {
 		// create the matrice
 		String dims = args[2];
 		String desc = args[3];
-		Puzzle puzzle = TCSMPParser.parsePuzzleDesc(dims, desc);
-
-		// check solution
-		if (proto.isRelay(args[1]) == false) {
-			Puzzle p = proto.getPuzzleFor(proto.getClientDomain());
-			if (puzzle.equals(p) && Puzzle.isResolved(puzzle)) {
-				proto.processMessage();
-				bb.put(TCSMPParser.encode("216 Your mail has been kept !\r\n"));
+		try {
+			Puzzle puzzle = TCSMPParser.parsePuzzleDesc(dims, desc);
+			// check solution
+			if (proto.isRelay(args[1]) == false) {
+				Puzzle p = proto.getPuzzleFor(proto.getClientDomain());
+				if (puzzle.equals(p) && Puzzle.isResolved(puzzle)) {
+					proto.processMessage();
+					bb.put(TCSMPParser.encode("216 Your mail has been kept !\r\n"));
+				}
+				else {
+					pkeyTry++;
+					bb.put(TCSMPParser.encode("516 Ahah dude... you FAIL.\r\n"));
+					error = true;
+				}
+				bb.flip();
+				send = true;
+				return new Response(ResponseAction.WRITE);
 			}
-			else {
-				pkeyTry++;
-				bb.put(TCSMPParser.encode("516 Ahah dude... you FAIL.\r\n"));
-				error = true;
+			else
+			{
+				// we have to add the PKEY in the puzzles for the PkeyClient.
+				proto.addPuzzleFor(args[1], puzzle);
 			}
+		}
+		catch (Exception e) {
+			pkeyTry++;
+			bb.put(TCSMPParser.encode("516 Ahah dude... bad puzzle... you FAIL.\r\n"));
+			error = true;
 			bb.flip();
 			send = true;
 			return new Response(ResponseAction.WRITE);
 		}
-		else
-		{
-			// we have to add the PKEY in the puzzles for the PkeyClient.
-			proto.addPuzzleFor(args[1], puzzle);
-		}
-
 
 		// fake proto for client state
 		fakeProto = proto.newProtocol(ProtocolMode.CLIENT);
@@ -153,11 +161,11 @@ public class PkeyServerState extends TCSMPState {
 		if (res.getAction() != ResponseAction.READ) {
 			return new Response(currentDomain, ResponseAction.WRITE);
 		}
-		
+
 		return new Response(currentDomain, ResponseAction.READ);
 	}
-	
-	
+
+
 	@Override
 	public Response cancel(Protocol proto, ByteBuffer bb) {
 		// relaying mode ? remove pkey and stop relaying
@@ -165,7 +173,7 @@ public class PkeyServerState extends TCSMPState {
 			fakeProto = null;
 			proto.removePuzzleFor(currentDomain);
 		}
-		
+
 		// unexpected error occured
 		bb.clear();
 		bb.put(ErrorReplies.unexpectedError());
