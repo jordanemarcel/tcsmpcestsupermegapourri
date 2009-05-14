@@ -131,5 +131,31 @@ public class TCSMPParser {
 		}
 		// last response should contains the space after code.
 	}
-
+	
+	/**
+	 * Return an array of string corresponding of the line in the response
+	 * @param response if the lines to split
+	 */
+	public static String[] slipResponseLine(String response) {
+		String[] stringArray = response.split("\r\n");
+		
+		if (stringArray.length == 0) {
+			throw new AssertionError("response must at least contain one line ended by CRLF");
+		}
+		
+		if (stringArray.length == 1) {
+			stringArray[0] += "\r\n";
+			return stringArray;
+		}
+		
+		String[] responses = new String[stringArray.length];
+		
+		for (int i = 0; i < stringArray.length - 1; i++) {
+			responses[i] = stringArray[i].replaceFirst("-", "\\s") + "\r\n";
+		}
+		
+		responses[stringArray.length-1] = stringArray[stringArray.length-1] + "\r\n";
+		
+		return responses;
+	}
 }
