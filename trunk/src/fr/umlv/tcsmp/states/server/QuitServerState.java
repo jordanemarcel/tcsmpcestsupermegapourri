@@ -38,6 +38,8 @@ public class QuitServerState extends TCSMPState {
 			// finished reply the last QUIT cmd to the client
 			if (domains.size() == 0) {
 				bb.position(0);
+				send = true;
+				domains = null;
 				return new Response(ResponseAction.WRITE);
 			}
 			
