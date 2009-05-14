@@ -128,6 +128,10 @@ public class Protocol {
 			throw new AssertionError("Already registered a puzzle for the given domain.");
 		}
 	}
+	
+	public void removePuzzleFor(String domain) {
+		puzzles.remove(domain);
+	}
 
 	public Map<String, Puzzle> getPuzzles() {
 		return puzzles;
@@ -167,7 +171,7 @@ public class Protocol {
 	 * Just realaying a cancel to the state
 	 */
 	public void cancel(ByteBuffer bb) {
-		state.cancel(bb);
+		state.cancel(this, bb);
 	}
 
 	/**

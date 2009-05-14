@@ -84,4 +84,18 @@ public class QuitServerState extends TCSMPState {
 		return new Response(ResponseAction.RELAYALL);
 	}
 	
+	@Override
+	public Response cancel(Protocol proto, ByteBuffer bb) {
+		// relaying state ? ignore the error and go to the next domain
+		if (domains != null) {
+			// read the next domain
+			return new Response(domains.removeFirst(), ResponseAction.READ);
+		}
+
+		// unknow error
+		bb.clear();
+		bb.put(ErrorReplies.unexpectedError());
+		bb.flip();
+		return new Response(ResponseAction.WRITE);
+	}
 }
