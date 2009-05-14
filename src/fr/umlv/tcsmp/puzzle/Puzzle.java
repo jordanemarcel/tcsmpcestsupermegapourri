@@ -89,19 +89,47 @@ public class Puzzle {
 				return false;
 			Wheel w = (Wheel) obj;
 			int bak = this.getOffset();
-			for(int i=0;i<4 && w.readSouth() != this.readSouth();i++){
-				this.rotate();
-			}
-			boolean eq=true;
-			for(int i=0; i<4;i++){
-				w.rotate();
-				this.rotate();
-				if(w.readSouth() != this.readSouth()){
-					eq=false;
+			int obak = w.getOffset();
+			
+			for(int i=0;i<3;i++) {
+				for(int j=0;j<3;j++) {
+					if(this.readSouth()==w.readSouth()) {
+						int tmpbak = this.getOffset();
+						int otmpbak = w.getOffset();
+						for(int k=0;k<3;k++) {
+							this.rotate();
+							w.rotate();
+							if(this.readSouth()!=w.readSouth()) {
+								break;
+							}
+							if(k==2) {
+								return true;
+							}
+						}
+						this.setOffset(tmpbak);
+						w.setOffset(otmpbak);
+					}
+					w.rotate();
 				}
+				this.rotate();
 			}
+			
+//			for(int i=0;i<4 && w.readSouth() != this.readSouth();i++){
+//				this.rotate();
+//			}
+//			boolean eq=true;
+//			for(int i=0; i<4;i++){
+//				w.rotate();
+//				this.rotate();
+//				if(w.readSouth() != this.readSouth()){
+//					eq=false;
+//					break;
+//				}
+//			}
+			
 			this.setOffset(bak);
-			return eq;
+			w.setOffset(obak);
+			return false;
 		}
 		@Override
 		public String toString() {
@@ -318,9 +346,9 @@ public class Puzzle {
 			if(wheelIndexArray[index]>=nbWheel){
 				wheelIndexArray[index]=0;
 				index--;
-				usedWheelSet.remove(wheelIndexArray[index]);
 				if(index<=0){
 					index=0;
+					usedWheelSet.remove(wheelIndexArray[index]);
 					puzzleWheel.get(wheelIndexArray[index]).rotate();
 					rotateWheelIndex[index]++;
 					if(rotateWheelIndex[index]>3){
@@ -328,6 +356,7 @@ public class Puzzle {
 						wheelIndexArray[index]++;
 					}
 				}else{
+					usedWheelSet.remove(wheelIndexArray[index]);
 					wheelIndexArray[index]++;
 				}
 				continue;
