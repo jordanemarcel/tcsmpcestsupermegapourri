@@ -15,6 +15,8 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class ApzlServerState extends TCSMPState {
 
+	private final static int TIMEOUT = 300000; // 5 minutes
+	
 	private boolean send = false;
 	private boolean error = false;
 
@@ -27,6 +29,10 @@ public class ApzlServerState extends TCSMPState {
 	// string of responses to the apzl command
 	private ArrayList<String> responses;
 
+	public ApzlServerState() {
+		super(TIMEOUT);
+	}
+	
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 
@@ -86,6 +92,13 @@ public class ApzlServerState extends TCSMPState {
 			
 			throw new AssertionError("response and domains list should not be empty");
 		}
+		
+		// are we in timeout
+		if (isTimeout())
+			return timeoutResponse(bb);
+		else
+			timeoutReset();
+		
 
 		String [] args = TCSMPParser.parseCommand(bb);
 

@@ -12,11 +12,25 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class FromServerState extends TCSMPState {
 
+	private final static int TIMEOUT = 300000; // 5 minutes
+	
 	private boolean send = false;
 	private boolean error = false;
 
+	public FromServerState() {
+		super(TIMEOUT);
+	}
+	
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
+		
+		// are we in timeout
+		if (isTimeout())
+			return timeoutResponse(bb);
+		else
+			timeoutReset();
+		
+		// send OK ?
 		if (send) {
 			if (error == false)
 				proto.setState(new RctpServerState());

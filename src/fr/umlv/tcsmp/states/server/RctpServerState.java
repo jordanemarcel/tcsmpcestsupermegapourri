@@ -3,6 +3,8 @@ package fr.umlv.tcsmp.states.server;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 
+import com.sun.crypto.provider.RC2Cipher;
+
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
@@ -14,12 +16,18 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class RctpServerState extends TCSMPState {
 
+	private final static int TIMEOUT = 300000; // 5 minutes
+	
 	private boolean send = false;
 
 	private String currentRCPTDomain;
 	private String serverResponse;
 	private Protocol fakeProto;
 
+	public RctpServerState() {
+		super(TIMEOUT);
+	}
+	
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 
@@ -58,7 +66,13 @@ public class RctpServerState extends TCSMPState {
 
 			return new Response(currentRCPTDomain, ResponseAction.READ);
 		}
-
+		
+		// are we in timeout waiting for RCTP
+		if (isTimeout())
+			return timeoutResponse(bb);
+		else
+			timeoutReset();
+		
 		if (send) {
 			send = false;
 			bb.clear();

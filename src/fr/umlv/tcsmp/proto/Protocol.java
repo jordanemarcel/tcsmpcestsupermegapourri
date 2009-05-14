@@ -155,6 +155,13 @@ public class Protocol {
 		/* exit state */
 		return state.processCommand(this, bb);
 	}
+	
+	/**
+	 * Just relaying the isTimeout to the state.
+	 */
+	public boolean isTimeout() {
+		return state.isTimeout();
+	}
 
 	public Protocol newProtocol() {
 		Protocol pr = new Protocol(protocolMode);
@@ -173,6 +180,8 @@ public class Protocol {
 	}
 
 	public void setState(TCSMPState state) {
+		// clear timeout of the previous state
+		this.state.timeoutClear();
 		this.state = state;
 	}
 

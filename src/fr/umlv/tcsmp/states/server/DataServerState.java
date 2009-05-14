@@ -11,10 +11,23 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class DataServerState extends TCSMPState {
 
+	private final static int TIMEOUT = 300000; // 5 minutes
+	
 	private boolean send = false;
+	
+	public DataServerState() {
+		super(TIMEOUT);
+	}
 	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 	
+		// are we in timeout
+		if (isTimeout())
+			return timeoutResponse(bb);
+		else
+			timeoutReset();
+		
+		// send OK ?
 		if (send) {
 			proto.setState(new PkeyServerState());
 			bb.clear();
