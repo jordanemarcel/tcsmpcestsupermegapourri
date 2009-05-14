@@ -3,8 +3,6 @@ package fr.umlv.tcsmp.states.server;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 
-import com.sun.crypto.provider.RC2Cipher;
-
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
