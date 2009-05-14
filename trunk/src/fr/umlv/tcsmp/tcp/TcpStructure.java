@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Set;
 
 import fr.umlv.tcsmp.dns.DNSResolver;
-import fr.umlv.tcsmp.dns.TCSMPResolver;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
@@ -30,9 +29,11 @@ import fr.umlv.tcsmp.proto.ResponseAction;
 public class TcpStructure {
 	/** Default TCP Application layer buffer size */
 	public static int BUFFER_SIZE = 1024;
+	/** Default timeout for the selector */
+	public static long SELECTOR_TIMEOUT = 30000;
 	/** Selector of the TCP structure */
 	private final Selector selector;
-	/** Dns Resolver of the TCP structure */
+	/** DNS Resolver of the TCP structure */
 	private final DNSResolver dnsResolver;
 	/** Protocol given to the TCP structure */
 	private Protocol givenProtocol;
@@ -110,9 +111,9 @@ public class TcpStructure {
 		int nbKeysSelected;
 		while(selector.keys().size()>0 || givenProtocol.getProtocolMode()==ProtocolMode.SERVER) {
 			do {
-				nbKeysSelected = selector.select();
+				nbKeysSelected = selector.select(SELECTOR_TIMEOUT);
+				this.checkTimeOut();
 			} while(nbKeysSelected<1);
-			
 			Set<SelectionKey> selectionKeys = selector.selectedKeys();
 			for(SelectionKey key: selectionKeys) {
 				if(key.isValid() && key.isAcceptable()) {
@@ -129,6 +130,27 @@ public class TcpStructure {
 				}
 			}
 			selectionKeys.clear();
+		}
+	}
+	
+	/**
+	 * This method checks if the keys of the selector that have not been selected
+	 * are timed out. If so, it calls the doIt() method of the key's protocol.
+	 */
+	private void checkTimeOut() {
+		Set<SelectionKey> selectionKeys = selector.keys();
+		Set<SelectionKey> selectedSelectionKeys = selector.selectedKeys();
+		for(SelectionKey selectionKey: selectionKeys) {
+			if(!selectedSelectionKeys.contains(selectionKey)) {
+				KeyAttachment keyAttachment = (KeyAttachment)selectionKey.attachment();
+				Protocol protocol = keyAttachment.getProtocol();
+				ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
+				if(false) { //TODO check timeout
+					Response response = protocol.doIt(byteBuffer);
+					keyAttachment.setCurrentResponse(response);
+					this.handleResponse(selectionKey, response);
+				}
+			}
 		}
 	}
 
