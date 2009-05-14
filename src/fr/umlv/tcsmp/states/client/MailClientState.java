@@ -27,7 +27,7 @@ public class MailClientState extends TCSMPState {
 
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (encodedMail == null) {
-			encodedMail = TCSMPParser.encode(proto.getMail().toString());
+			encodedMail = TCSMPParser.encode(proto.getMail());
 		}
 		if (!sentRequest) {
 			// MAIL Request was not send yet

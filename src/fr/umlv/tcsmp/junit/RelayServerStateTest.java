@@ -81,6 +81,13 @@ public class RelayServerStateTest {
 		if (res.getDest() == null)
 			throw new AssertionError("gni");
 		
+		System.out.print("\t");
+		String BANNER = "220 Coucou c'est nous";
+		bb.clear();						// reply
+		bb.put(TCSMPParser.encode(BANNER));
+		bb.flip();
+		res = p.doIt(bb);
+		
 		// RELAY TELO
 		System.out.print("\t");
 		printBB(res, bb);

@@ -9,8 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import fr.umlv.tcsmp.mail.Message;
 import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
+import fr.umlv.tcsmp.tcp.handlers.SmtpHandler;
+import fr.umlv.tcsmp.tcp.handlers.TCSMPHandler;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class Protocol {
@@ -28,10 +31,12 @@ public class Protocol {
 	private final Map<String, StringBuilder> domainErrors;
 	private final StringBuilder mainErrors;
 	
+	private final TCSMPHandler messageHandler;
+	
 	// TODO escape "." ?
-	private final StringBuilder mail;
+	private final Message message;
 
-	public Protocol(ProtocolMode mode) {
+	public Protocol(ProtocolMode mode, TCSMPHandler handler) {
 		switch(mode) {
 		case CLIENT:
 			state = TCSMPState.newDefaultClientState();
@@ -40,7 +45,8 @@ public class Protocol {
 			state = TCSMPState.newDefaultServerState();
 			break;
 		}
-		mail = new StringBuilder();
+		messageHandler = handler;
+		message = new Message();
 		myDomains = new ArrayList<String>();
 		rcpts = new ArrayList<String>();
 		puzzles = new HashMap<String, Puzzle>();
@@ -54,12 +60,21 @@ public class Protocol {
 		this.protocolPort = protocolPort;
 	}
 
+	public Protocol(ProtocolMode mode) {
+		this(mode, new SmtpHandler());
+	}
+	
 	public int getProtocolPort() {
 		return protocolPort;
 	}
 
 	public List<String> getRecpts() {
 		return rcpts;
+	}
+	
+	public void addRcpt(String rcpt) {
+		message.addRctp(rcpt);
+		rcpts.add(rcpt);
 	}
 
 	public ProtocolMode getProtocolMode() {
@@ -137,8 +152,8 @@ public class Protocol {
 		return puzzles;
 	}
 
-	public StringBuilder getMail() {
-		return mail;
+	public Message getMessage() {
+		return message;
 	}
 
 	public Response doIt(ByteBuffer bb) {
@@ -147,12 +162,6 @@ public class Protocol {
 			if (TCSMPParser.decode(bb).endsWith("\n") == false) {
 				/* pos and limit have not been altered. */
 				return new Response(ResponseAction.CONTINUEREAD);
-			}
-			if (TCSMPParser.decode(bb).startsWith("\n") == true ||
-					TCSMPParser.decode(bb).startsWith("\r") == true) {
-				/* blank line, ignore it. */
-				bb.clear();
-				return new Response(ResponseAction.READ);
 			}
 		}
 
@@ -181,7 +190,7 @@ public class Protocol {
 		Protocol pr = new Protocol(protocolMode);
 		pr.clientDomain = clientDomain;
 		pr.from = from;
-		pr.mail.append(mail);
+		pr.message.copy(message);
 		for (String d : myDomains)
 			pr.myDomains.add(d);
 		for (String r : rcpts)
@@ -200,6 +209,7 @@ public class Protocol {
 	}
 
 	public void setFrom(String from) {
+		message.setFrom(from);
 		this.from = from;
 	}
 
@@ -220,6 +230,14 @@ public class Protocol {
 	}
 
 	public void mail(String line) {
-		mail.append(line);
+		message.data(line);
+	}
+	
+	public String getMail() {
+		return message.getLongMail();
+	}
+	
+	public void processMessage() {
+		messageHandler.processMessage(message);
 	}
 }
