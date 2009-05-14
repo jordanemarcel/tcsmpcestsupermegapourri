@@ -6,12 +6,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import fr.umlv.tcsmp.mail.Message;
 import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
-import fr.umlv.tcsmp.tcp.handlers.PrintHandler;
+import fr.umlv.tcsmp.tcp.handlers.SmtpHandler;
 import fr.umlv.tcsmp.tcp.handlers.TCSMPHandler;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
@@ -23,6 +24,7 @@ public class Protocol {
 	private int protocolPort = 26;
 
 	private String clientDomain;
+	private String defaultRelay;
 
 	private final Map<String, Puzzle> puzzles;
 	private final Map<String, StringBuilder> domainErrors;
@@ -82,6 +84,14 @@ public class Protocol {
 	
 	public String getMainErrors() {
 		return mainErrors.toString();
+	}
+	
+	public void setDefaultRelay(String defaultRelay) {
+		this.defaultRelay = defaultRelay;
+	}
+	
+	public String getDefaultRelay() {
+		return defaultRelay;
 	}
 	
 	public void addMainError(String error) {

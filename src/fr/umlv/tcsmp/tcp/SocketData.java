@@ -1,6 +1,5 @@
 package fr.umlv.tcsmp.tcp;
 
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,6 +45,9 @@ public class SocketData {
 	 * @param domain - the given domain
 	 */
 	public void putSocket(SocketChannel socketChannel, String domain) {
+		if(socketChannel==originalClient) {
+			return;
+		}
 		domainSocketMap.put(domain, socketChannel);
 	}
 	
