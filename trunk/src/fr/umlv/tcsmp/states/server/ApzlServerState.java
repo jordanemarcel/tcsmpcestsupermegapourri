@@ -16,7 +16,7 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 public class ApzlServerState extends TCSMPState {
 
 	private final static int TIMEOUT = 300000; // 5 minutes
-	
+
 	private boolean send = false;
 	private boolean error = false;
 
@@ -32,7 +32,7 @@ public class ApzlServerState extends TCSMPState {
 	public ApzlServerState() {
 		super(TIMEOUT);
 	}
-	
+
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 
@@ -58,10 +58,12 @@ public class ApzlServerState extends TCSMPState {
 			// we have a response for the currentDomain
 			if (domains.size() != 0) {
 				// add its response
+				// XXX: split multiline response
 				responses.add(TCSMPParser.decode(bb));
 				domains.remove(currentDomain);
 				try {
 					currentDomain = domains.getFirst();
+					return new Response(currentDomain, ResponseAction.READ);
 				} catch (Exception e) {
 					// seems there is no more domains, reply response to the
 					// client
@@ -76,7 +78,7 @@ public class ApzlServerState extends TCSMPState {
 					return new Response(ResponseAction.WRITE);
 				}
 			}
-			
+
 			// we are currently writing response to the client
 			if (responses.size() != 0) {
 				String res = responses.remove(0);
@@ -89,16 +91,16 @@ public class ApzlServerState extends TCSMPState {
 				}
 				return new Response(ResponseAction.WRITE);
 			}
-			
+
 			throw new AssertionError("response and domains list should not be empty");
 		}
-		
+
 		// are we in timeout
 		if (isTimeout())
 			return timeoutResponse(bb);
 		else
 			timeoutReset();
-		
+
 
 		String [] args = TCSMPParser.parseCommand(bb);
 
@@ -146,5 +148,40 @@ public class ApzlServerState extends TCSMPState {
 
 		// send it to any RCPT
 		return new Response(ResponseAction.RELAYALL);
+	}
+
+
+	@Override
+	public Response cancel(Protocol proto, ByteBuffer bb) {
+		
+		// we have received a cancel while we asking for PZL
+		// add a error message for this domain and switch
+		// to the next one
+		if (domains != null) {
+			responses.add("515 " + currentDomain + " error while asking for puzzle\r\n");
+			domains.remove(currentDomain);
+			try {
+				currentDomain = domains.getFirst();
+				return new Response(currentDomain, ResponseAction.READ);
+			} catch (Exception e) {
+				// seems there is no more domains, reply response to the
+				// client
+				TCSMPParser.multilinize(responses);
+				String res = responses.remove(0);
+				bb.clear();
+				bb.put(TCSMPParser.encode(res));
+				bb.flip();
+				if (responses.size() == 0) {
+					send = true;
+				}
+				return new Response(ResponseAction.WRITE);
+			}
+		}
+
+		// unknow error
+		bb.clear();
+		bb.put(ErrorReplies.unexpectedError());
+		bb.flip();
+		return new Response(ResponseAction.WRITE);
 	}
 }

@@ -2,6 +2,8 @@ package fr.umlv.tcsmp.utils;
 
 import java.nio.ByteBuffer;
 
+import sun.nio.ch.SocketOpts.IP.TCP;
+
 public class ErrorReplies {
 
 	public static ByteBuffer unknowCommand(String expected, String received) {
@@ -9,7 +11,10 @@ public class ErrorReplies {
 	}
 	
 	public static ByteBuffer timeoutError() {
-		return TCSMPParser.encode(new String("421 Error: timeout exceeded\r\n"));
+		return TCSMPParser.encode("421 Error: timeout exceeded\r\n");
 	}
 	
+	public static ByteBuffer unexpectedError() {
+		return TCSMPParser.encode("421 Error: unexpected error\r\n");
+	}
 }

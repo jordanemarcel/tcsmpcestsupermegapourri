@@ -144,5 +144,21 @@ public class PkeyServerState extends TCSMPState {
 		
 		return new Response(currentDomain, ResponseAction.READ);
 	}
+	
+	
+	@Override
+	public Response cancel(Protocol proto, ByteBuffer bb) {
+		// relaying mode ? remove pkey and stop relaying
+		if (fakeProto != null) {
+			fakeProto = null;
+			proto.removePuzzleFor(currentDomain);
+		}
+		
+		// unexpected error occured
+		bb.clear();
+		bb.put(ErrorReplies.unexpectedError());
+		bb.flip();
+		return new Response(ResponseAction.WRITE);
+	}
 
 }

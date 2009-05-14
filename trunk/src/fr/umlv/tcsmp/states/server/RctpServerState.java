@@ -144,7 +144,7 @@ public class RctpServerState extends TCSMPState {
 	}
 	
 	@Override
-	public Response cancel(ByteBuffer bb) {
+	public Response cancel(Protocol proto, ByteBuffer bb) {
 		error = false;
 		fakeProto = null;
 		bb.clear();

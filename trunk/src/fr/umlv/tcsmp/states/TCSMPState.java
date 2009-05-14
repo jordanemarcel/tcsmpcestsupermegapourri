@@ -125,8 +125,9 @@ public abstract class TCSMPState {
 	/**
 	 * Something weird occured.
 	 * Do nothing here, should be overriden.
+	 * @param proto TODO
 	 */
-	public Response cancel(ByteBuffer bb) {
+	public Response cancel(Protocol proto, ByteBuffer bb) {
 		bb.clear();
 		return new Response(ResponseAction.CLOSE);
 	}
