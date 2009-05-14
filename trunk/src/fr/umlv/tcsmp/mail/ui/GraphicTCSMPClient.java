@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +17,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import fr.umlv.tcsmp.dns.DNSResolver;
+import fr.umlv.tcsmp.dns.TCSMPResolver;
+import fr.umlv.tcsmp.mail.Message;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
+import fr.umlv.tcsmp.tcp.TcpStructure;
 
 public class GraphicTCSMPClient {
 	
@@ -79,14 +84,17 @@ public class GraphicTCSMPClient {
 		send.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String mail = text.getText();
-				String from = fromField.getText();
-				String to = toField.getText();
-				String subject = subjectField.getText();
-				if(to.length()==0)
-					JOptionPane.showMessageDialog(parent, "You HAVE to fill the 'TO' field", "Error", JOptionPane.ERROR_MESSAGE);
-				if(from.length()==0)
-					JOptionPane.showMessageDialog(parent, "You HAVE to fill the 'FROM' field", "Error", JOptionPane.ERROR_MESSAGE);
+//				String mail = text.getText();
+//				String from = fromField.getText();
+//				String to = toField.getText();
+//				String subject = subjectField.getText();
+//				if(to.length()==0)
+//					JOptionPane.showMessageDialog(parent, "You HAVE to fill the 'TO' field", "Error", JOptionPane.ERROR_MESSAGE);
+//				if(from.length()==0)
+//					JOptionPane.showMessageDialog(parent, "You HAVE to fill the 'FROM' field", "Error", JOptionPane.ERROR_MESSAGE);
+				
+				
+				
 				
 //				MailData mailData = new MailData();
 //				mailData.setBody(mail);
@@ -97,22 +105,35 @@ public class GraphicTCSMPClient {
 //				System.out.println(mailData);
 				
 				
-				ArrayList<String> ccList = new ArrayList<String>();
-				String[] dests = ccField.getText().split(";");
-				for(String s : dests){
-					ccList.add(s);
-				}
-				ArrayList<String> bccList = new ArrayList<String>();
-				dests = bccField.getText().split(";");
-				for(String s : dests){
-					bccList.add(s);
-				}
+//				ArrayList<String> ccList = new ArrayList<String>();
+//				String[] dests = ccField.getText().split(";");
+//				for(String s : dests){
+//					ccList.add(s);
+//				}
+//				ArrayList<String> bccList = new ArrayList<String>();
+//				dests = bccField.getText().split(";");
+//				for(String s : dests){
+//					bccList.add(s);
+//				}
+				
 				
 				Protocol p = new Protocol(ProtocolMode.CLIENT);
 				List<String> recpt = p.getRecpts();
-				recpt.addAll(ccList);
-				recpt.addAll(bccList);
-				p.setFrom(from);
+//				recpt.addAll(ccList);
+//				recpt.addAll(bccList);
+//				p.setFrom(from);
+				p.setFrom("jordane@client.com");
+				recpt.add("jordane@server.com");
+				p.setDefaultRelay("192.168.1.10");
+				
+				DNSResolver resolver = new TCSMPResolver();
+				try {
+					TcpStructure tcpStructure = new TcpStructure(resolver);
+					tcpStructure.processProtocol(p);
+				} catch (IOException ioe) {
+					// TODO Auto-generated catch block
+					ioe.printStackTrace();
+				}
 				
 				//TODO envoi du mail
 				//TODO affiche d'un message en cas de réussite ou échec

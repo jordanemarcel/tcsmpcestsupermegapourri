@@ -20,6 +20,7 @@ public class BannerClientState extends TCSMPState {
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
+		
 		if (TCSMPParser.parseAnswer(bb, commandArgs)) {
 			// Multiline ended
 
