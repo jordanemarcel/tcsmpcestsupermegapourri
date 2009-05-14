@@ -10,4 +10,8 @@ public class TCSMPLogger {
 	public static void debug(String msg) {
 		log.log(Level.INFO, msg);
 	}
+
+	public static void error(String msg) {
+		log.log(Level.SEVERE, msg);
+	}
 }
