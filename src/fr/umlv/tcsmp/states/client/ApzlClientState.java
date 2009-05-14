@@ -34,36 +34,36 @@ public class ApzlClientState extends TCSMPState {
 
 		if (resp == ResponseAction.READ) {
 			// We got here because we got the answer
-			list.clear();
-
-			boolean parseResult = TCSMPParser.parseAnswer(bb, list);
-
-			for(int i=0; i<list.size(); i+=2) {
-				switch(Integer.parseInt(list.get(i))) {
-				// States
-				case 215:
-					String[] strings = list.get(i+1).split(" ");
-					String domain = strings[0];
-					String dims = strings[1];
-					String desc = strings[2];
-					Puzzle puzzle = TCSMPParser.parsePuzzleDesc(dims, desc);
-					proto.addPuzzleFor(domain, puzzle);
-					break;
-				case 515:
-					// NOOP TODO maybe record error msg?
-					break;
-				default:
-					throw new AssertionError("Pouet");
+			
+			if (TCSMPParser.parseAnswer(bb, list)) {
+				// Multiline ended
+				for(int i=0; i<list.size(); i+=2) {
+					switch(Integer.parseInt(list.get(i))) {
+					// States
+					case 215:
+						String[] strings = list.get(i+1).split(" ");
+						String domain = strings[0];
+						String dims = strings[1];
+						String desc = strings[2];
+						Puzzle puzzle = TCSMPParser.parsePuzzleDesc(dims, desc);
+						proto.addPuzzleFor(domain, puzzle);
+						break;
+					case 515:
+					default:
+						// NOOP TODO maybe record error msg?
+						break;
+					}
 				}
-			}
-
-			if (parseResult) {
+				
 				proto.setState(new MailClientState());		
 				resp = null;
 				bb.clear();
 				return proto.doIt(bb);
 			}
 
+			bb.clear();
+			// Multiline didn't end, read next lines
+			return new Response(ResponseAction.READ);
 
 		}
 

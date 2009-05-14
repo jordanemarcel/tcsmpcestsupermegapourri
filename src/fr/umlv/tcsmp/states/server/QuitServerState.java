@@ -51,7 +51,7 @@ public class QuitServerState extends TCSMPState {
 		// Check if we have to forward the command.
 		if (proto.isRelay() == false) {
 			bb.clear();
-			bb.put(TCSMPParser.encode("250 See you next time~~~~!\r\n"));
+			bb.put(TCSMPParser.encode("221 See you next time~~~~!\r\n"));
 			bb.flip();
 			return new Response(ResponseAction.WRITE);
 		}

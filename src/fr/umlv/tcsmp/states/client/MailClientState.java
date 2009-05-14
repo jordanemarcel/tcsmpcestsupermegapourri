@@ -6,10 +6,7 @@ import java.util.ArrayList;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
-import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
-import fr.umlv.tcsmp.states.server.QuitServerState;
-import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class MailClientState extends TCSMPState {
@@ -104,10 +101,9 @@ public class MailClientState extends TCSMPState {
 				case 451:
 				case 503:
 				case 554:
-					// TODO error msg?
-					proto.setState(new QuitClientState());
 				default:
-					throw new AssertionError("Pouet");
+					proto.setState(new QuitClientState());
+					proto.addMainError(list.get(0) + " " + list.get(1));
 				}
 				bb.clear();
 				return proto.doIt(bb);

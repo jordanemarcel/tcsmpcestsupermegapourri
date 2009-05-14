@@ -1,7 +1,6 @@
 package fr.umlv.tcsmp.states.client;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,16 +22,22 @@ public class BannerClientState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (TCSMPParser.parseAnswer(bb, commandArgs)) {
 			// Multiline ended
+
+			QuitClientState quiteState = null;
+
 			for(int i=0; i<commandArgs.size(); i+=2) {
 				switch (Integer.parseInt(commandArgs.get(i))) {
 				case 220:
 					proto.setState(new TeloClientState());
 					break;
 				case 554:
-					proto.setState(new QuitClientState());
-					break;
 				default:
-					throw new AssertionError("I don't know about this response code: " + commandArgs.get(i) + " for connection establishment.");
+					if (quiteState == null) {
+						quiteState = new QuitClientState();
+						proto.setState(quiteState);
+					}
+					proto.addMainError(commandArgs.get(i) + " " + commandArgs.get(i+1));
+					break;
 				}
 			}
 			bb.clear();

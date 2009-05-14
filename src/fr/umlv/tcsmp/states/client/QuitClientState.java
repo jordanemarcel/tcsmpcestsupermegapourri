@@ -7,7 +7,6 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
-import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class QuitClientState extends TCSMPState {
@@ -41,7 +40,7 @@ public class QuitClientState extends TCSMPState {
 			}
 			proto.setState(null);
 			bb.clear();
-			return null;
+			return new Response(ResponseAction.CLOSE);
 		}
 
 		return null;

@@ -17,15 +17,17 @@ public class Protocol {
 
 	private final List<String> myDomains; 
 	private TCSMPState state;
-	private ProtocolMode protocolMode;
+	private final ProtocolMode protocolMode;
 	private int protocolPort = 26;
 
 	private final List<String> rcpts;
 	private String from;
 	private String clientDomain;
 
-	private Map<String, Puzzle> puzzles;
-
+	private final Map<String, Puzzle> puzzles;
+	private final Map<String, StringBuilder> serverErrors;
+	private final StringBuilder mainErrors;
+	
 	// TODO escape "." ?
 	private final StringBuilder mail;
 
@@ -43,6 +45,8 @@ public class Protocol {
 		rcpts = new ArrayList<String>();
 		puzzles = new HashMap<String, Puzzle>();
 		protocolMode = mode;
+		serverErrors = new HashMap<String, StringBuilder>();
+		mainErrors = new StringBuilder();
 	}
 
 	public Protocol(ProtocolMode mode, int protocolPort) {
@@ -58,12 +62,30 @@ public class Protocol {
 		return rcpts;
 	}
 
-	public void setProtocolMode(ProtocolMode protocolMode) {
-		this.protocolMode = protocolMode;
-	}
-
 	public ProtocolMode getProtocolMode() {
 		return protocolMode;
+	}
+	
+	public String getMainErrors() {
+		return mainErrors.toString();
+	}
+	
+	public void addMainError(String error) {
+		mainErrors.append("\n").append(error);
+	}
+	
+	public Map<String, StringBuilder> getServerErrors() {
+		return serverErrors;
+	}
+	
+	public void addErrorFor(String domain, String errorString) {
+		StringBuilder errorBuilder;
+		errorBuilder = serverErrors.get(domain);
+		if (errorBuilder == null) {
+			errorBuilder = new StringBuilder();
+			serverErrors.put(domain, errorBuilder);
+		}
+		errorBuilder.append(errorString);
 	}
 
 	public TCSMPState getState() {
