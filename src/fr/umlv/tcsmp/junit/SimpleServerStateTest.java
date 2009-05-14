@@ -138,7 +138,6 @@ public class SimpleServerStateTest {
 		/**
 		 * GOOD PKEY
 		 */
-		System.out.println(puzz.lineString());
 		Puzzle.resolve(puzz);
 		pkey = "PKEY foobar.com 4,4 " + puzz.lineString() + "\r\n";
 		System.out.print(pkey);
