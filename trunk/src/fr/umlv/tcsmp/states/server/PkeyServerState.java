@@ -13,7 +13,9 @@ import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class PkeyServerState extends TCSMPState {
-
+	
+	private final static int TIMEOUT = 600000; // 10 minutes
+	
 	private boolean send = false;
 	private boolean error = false;
 	private int pkeyTry = 0;
@@ -21,6 +23,10 @@ public class PkeyServerState extends TCSMPState {
 	private Protocol fakeProto;
 	private String currentDomain;
 
+	public PkeyServerState() {
+		super(TIMEOUT);
+	}
+	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 
 		// we are in a relaying mode
@@ -58,6 +64,13 @@ public class PkeyServerState extends TCSMPState {
 			return new Response(currentDomain, ResponseAction.READ);
 		}
 		
+		// are we in timeout waiting for RCTP
+		if (isTimeout())
+			return timeoutResponse(bb);
+		else
+			timeoutReset();
+		
+		// send OK ?
 		if (send) {
 			// state was in error, just need need READ
 			if (error == false) {

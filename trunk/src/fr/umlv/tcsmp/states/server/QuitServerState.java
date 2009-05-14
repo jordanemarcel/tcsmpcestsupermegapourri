@@ -13,12 +13,24 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class QuitServerState extends TCSMPState {
 	
+	private final static int TIMEOUT = 60000; // 1 minutes
+	
 	private boolean send = false;
 	
 	// domains not treated
 	private LinkedList<String> domains;
 	
+	public QuitServerState() {
+		super(TIMEOUT);
+	}
+	
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
+		
+		// are we in timeout
+		if (isTimeout())
+			return timeoutResponse(bb);
+		else
+			timeoutReset();
 		
 		// we are in a relaying mode
 		if (domains != null) {
@@ -34,6 +46,7 @@ public class QuitServerState extends TCSMPState {
 		}
 		
 		if (send) {
+			timeoutClear();
 			bb.clear();
 			return new Response(ResponseAction.CLOSE);
 		}

@@ -7,4 +7,9 @@ public class ErrorReplies {
 	public static ByteBuffer unknowCommand(String expected, String received) {
 		return TCSMPParser.encode(new String("500 Invalid command (Found is " + received + " but expected is " + expected + ")\r\n"));
 	}
+	
+	public static ByteBuffer timeoutError() {
+		return TCSMPParser.encode(new String("421 Error: timeout exceeded\r\n"));
+	}
+	
 }
