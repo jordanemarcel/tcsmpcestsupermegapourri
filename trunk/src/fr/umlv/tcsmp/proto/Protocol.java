@@ -166,8 +166,8 @@ public class Protocol {
 	/**
 	 * Just realaying a cancel to the state
 	 */
-	public void cancel() {
-		state.cancel();
+	public void cancel(ByteBuffer bb) {
+		state.cancel(bb);
 	}
 
 	/**
