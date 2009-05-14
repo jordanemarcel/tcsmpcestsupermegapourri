@@ -3,6 +3,7 @@ package fr.umlv.tcsmp.states.server;
 import java.nio.ByteBuffer;
 
 import fr.umlv.tcsmp.proto.Protocol;
+import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.puzzle.Puzzle;
@@ -18,10 +19,12 @@ public class PkeyServerState extends TCSMPState {
 	
 	private boolean send = false;
 	private boolean error = false;
+	private boolean pzlok = false;
 	private int pkeyTry = 0;
 
 	private Protocol fakeProto;
 	private String currentDomain;
+	
 
 	public PkeyServerState() {
 		super(TIMEOUT);
@@ -40,8 +43,9 @@ public class PkeyServerState extends TCSMPState {
 			if (send == false) {
 				if (res.getAction() == ResponseAction.WRITE) {
 					fakeProto = null;
+					send = true;
 					if (serverResponse.split(" ")[0].startsWith("2"))
-						proto.setState(new QuitServerState());
+						pzlok = true;
 					bb.clear();
 					bb.put(TCSMPParser.encode(serverResponse));
 					bb.flip();
@@ -72,9 +76,11 @@ public class PkeyServerState extends TCSMPState {
 		// send OK ?
 		if (send) {
 			// state was in error, just need need READ
-			if (error == false) {
+			if (error == false && pzlok == true) {
 				proto.setState(new QuitServerState());
-			} else {	
+			} else {
+				if (currentDomain != null)
+					proto.removePuzzleFor(currentDomain);
 				error = false;
 				send = false;
 			}
@@ -98,7 +104,6 @@ public class PkeyServerState extends TCSMPState {
 			error = true;
 			return new Response(ResponseAction.WRITE);
 		}
-
 
 
 		// create the matrice
@@ -130,13 +135,14 @@ public class PkeyServerState extends TCSMPState {
 
 
 		// fake proto for client state
-		fakeProto = proto.newProtocol();
+		fakeProto = proto.newProtocol(ProtocolMode.CLIENT);
 		fakeProto.setState(new MailClientState());
 		send = true;
 		currentDomain = args[1];
 		Response res = fakeProto.doIt(bb);
-		if (res.getAction() != ResponseAction.READ)
+		if (res.getAction() != ResponseAction.READ) {
 			return new Response(currentDomain, ResponseAction.WRITE);
+		}
 		
 		return new Response(currentDomain, ResponseAction.READ);
 	}

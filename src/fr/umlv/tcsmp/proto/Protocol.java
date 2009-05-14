@@ -187,7 +187,11 @@ public class Protocol {
 	 * @return a new Protocol identical to this one. 
 	 */
 	public Protocol newProtocol() {
-		Protocol pr = new Protocol(protocolMode);
+		return new Protocol(protocolMode);
+	}
+	
+	public Protocol newProtocol(ProtocolMode mode) {
+		Protocol pr = new Protocol(mode);
 		pr.clientDomain = clientDomain;
 		pr.from = from;
 		pr.message.copy(message);

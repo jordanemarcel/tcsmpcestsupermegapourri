@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.text.ParseException;
 
 import fr.umlv.tcsmp.proto.Protocol;
+import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
@@ -37,7 +38,7 @@ public class RctpServerState extends TCSMPState {
 			// save each time the response of the server
 			serverResponse = TCSMPParser.decode(bb);
 			
-			TCSMPLogger.debug("RCTP STATE: I've received " + serverResponse + " from " + currentRCPTDomain);
+//			TCSMPLogger.debug("RCTP STATE: I've received " + serverResponse + " from " + currentRCPTDomain);
 			
 			// get response from the fake proto.
 			Response res = fakeProto.doIt(bb);
@@ -59,7 +60,7 @@ public class RctpServerState extends TCSMPState {
 
 			// last state, the next response will be replied to the client
 			if (fakeProto.getState().getClass().equals(RctpClientState.class)) {
-				TCSMPLogger.debug("TCSMP STATE: TELO, PKEY and RCTP have been done");
+//				TCSMPLogger.debug("TCSMP STATE: TELO, PKEY and RCTP have been done");
 				send = false;
 			}
 
@@ -129,10 +130,10 @@ public class RctpServerState extends TCSMPState {
 			return new Response(ResponseAction.WRITE);
 		}
 
-		TCSMPLogger.debug("RCTP STATE: don't know about " + domain + " ... relaying.");
+//		TCSMPLogger.debug("RCTP STATE: don't know about " + domain + " ... relaying.");
 
 		// Create a fakeProto for our client states
-		fakeProto = proto.newProtocol();
+		fakeProto = proto.newProtocol(ProtocolMode.CLIENT);
 		fakeProto.setState(new BannerClientState());
 		currentRCPTDomain = domain;
 		return new Response(currentRCPTDomain, ResponseAction.READ);

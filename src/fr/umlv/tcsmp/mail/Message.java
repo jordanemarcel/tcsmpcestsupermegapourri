@@ -14,11 +14,11 @@ public class Message {
 	}
 	
 	public void copy(Message message) {
-		message.setFrom(from);
-		for (String rcpt : rcpts)
-			message.addRctp(rcpt);
-		for (String data : mail)
-			message.data(data);
+		this.setFrom(message.from);
+		for (String rcpt : message.rcpts)
+			addRctp(rcpt);
+		for (String data : message.mail)
+			data(data);
 	}
 	
 	public void data(String data) {
@@ -38,12 +38,11 @@ public class Message {
 	}
 	
 	public String getLongMail() {
-		String data = "";
+		StringBuilder sb = new StringBuilder();
 		for (String s : mail) {
-			System.out.println(data);
-			data += s;
+			sb.append(s);
 		}
-		return data;
+		return sb.toString();
 	}
 	
 	public String getFrom() {
