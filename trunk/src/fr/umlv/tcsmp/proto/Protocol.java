@@ -28,7 +28,7 @@ public class Protocol {
 	private final Map<String, StringBuilder> domainErrors;
 	private final StringBuilder mainErrors;
 	
-	private final TCSMPHandler messageHandler;
+	private TCSMPHandler messageHandler;
 	
 	// TODO escape "." ?
 	private final Message message;
@@ -62,6 +62,10 @@ public class Protocol {
 	
 	public int getProtocolPort() {
 		return protocolPort;
+	}
+
+	public void setMessageHandler(TCSMPHandler messageHandler) {
+		this.messageHandler = messageHandler;
 	}
 
 	public List<String> getRecpts() {
@@ -188,6 +192,7 @@ public class Protocol {
 	public Protocol newProtocol(ProtocolMode mode) {
 		Protocol pr = new Protocol(mode);
 		pr.clientDomain = clientDomain;
+		pr.messageHandler = messageHandler;
 		pr.message.copy(message);
 		for (String d : myDomains) {
 			pr.myDomains.add(d);

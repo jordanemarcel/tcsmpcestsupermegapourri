@@ -63,7 +63,10 @@ public class Message {
 		for (String r : rcpts) {
 			sb.append("To: ").append(r).append("\n");
 		}
-		sb.append(getLongMail());
+		for (String s : mail) {
+			if (s.equals(".\r\n") == false)
+				sb.append(s.replace("\r", ""));
+		}
 		return sb.toString();
 	}
 }

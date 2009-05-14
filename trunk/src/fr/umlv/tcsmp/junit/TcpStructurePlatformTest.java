@@ -7,6 +7,7 @@ import fr.umlv.tcsmp.dns.TCSMPResolver;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.tcp.TcpStructure;
+import fr.umlv.tcsmp.tcp.handlers.MboxHandler;
 
 public class TcpStructurePlatformTest {
 
@@ -20,6 +21,7 @@ public class TcpStructurePlatformTest {
 			} else {
 				protocol.addDomain("foobar.com");
 			}
+			protocol.setMessageHandler(new MboxHandler());
 			tcpStructure.processProtocol(protocol);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
