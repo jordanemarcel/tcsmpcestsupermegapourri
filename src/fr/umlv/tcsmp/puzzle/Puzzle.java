@@ -17,7 +17,7 @@ public class Puzzle {
 		System.out.println(p);
 		System.out.println(p.equals(p2));
 		resolve(p);
-		System.out.println(p);
+//		System.out.println(p);
 		System.out.println(p.equals(p2));
 		
 		

@@ -47,4 +47,11 @@ public class BannerClientState extends TCSMPState {
 		// Multiline didn't end, read next lines
 		return new Response(ResponseAction.READ);
 	}
+	
+	@Override
+	public Response cancel(Protocol proto, ByteBuffer bb) {
+		bb.clear();
+		proto.addMainError("Communication error while getting the banner.");
+		return new Response(ResponseAction.CLOSE);
+	}
 }

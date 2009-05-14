@@ -64,4 +64,16 @@ public class TeloClientState extends TCSMPState {
 		// Multiline didn't end, read next lines
 		return new Response(ResponseAction.READ);
 	}
+	
+	@Override
+	public Response cancel(Protocol proto, ByteBuffer bb) {
+		bb.clear();
+		if (resp == ResponseAction.WRITE) {
+			proto.addMainError("Communication error while TELO'ing.");
+		}
+		else {
+			proto.addMainError("Communication error while getting TELO response.");
+		}
+		return new Response(ResponseAction.CLOSE);
+	}
 }

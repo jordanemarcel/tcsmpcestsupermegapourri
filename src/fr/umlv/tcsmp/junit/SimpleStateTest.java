@@ -6,9 +6,12 @@ import java.util.Map;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
+import fr.umlv.tcsmp.proto.ResponseAction;
+import fr.umlv.tcsmp.states.client.MailClientState;
+import fr.umlv.tcsmp.states.client.PkeyClientState;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
-public class ServerStateTest {
+public class SimpleStateTest {
 
 	private static boolean printBB(Response res, ByteBuffer bb) {
 		switch (res.getAction()) {
@@ -29,21 +32,36 @@ public class ServerStateTest {
 	}
 	
 	private static boolean writeReadwrite(Protocol serverProtocol, ByteBuffer serverBB, Protocol clientProtocol, ByteBuffer clientBB) {
-		// WRITE
+		// server goes in WRITE 
 		if (printBB(serverProtocol.doIt(serverBB), serverBB)) {
 			return true;
 		}
 		clientBB.put(serverBB);
 		serverBB.clear();
 		clientBB.flip();
-		serverProtocol.doIt(serverBB);
+		// server goes in READ
+		if (serverProtocol.doIt(serverBB).getAction() == ResponseAction.CLOSE) {
+			return true;
+		}
 		
-		// READ
+		// client goes in WRITE
 		if (printBB(clientProtocol.doIt(clientBB), clientBB)) {
 			return true;
 		}
-		// WRITE
-		clientProtocol.doIt(clientBB);
+
+		
+		if (clientProtocol.getState().getClass() == PkeyClientState.class) {
+			// simulate write failure
+			if (clientProtocol.cancel(clientBB).getAction() == ResponseAction.CLOSE) {
+				return true;
+			}
+		}
+		else {
+			// client goes in READ
+			if (clientProtocol.doIt(clientBB).getAction() == ResponseAction.CLOSE) {
+				return true;
+			}
+		}
 		serverBB.put(clientBB);
 		clientBB.clear();
 		serverBB.flip();
