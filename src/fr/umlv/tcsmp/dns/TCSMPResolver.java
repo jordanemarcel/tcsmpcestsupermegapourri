@@ -24,6 +24,8 @@ public class TCSMPResolver implements DNSResolver {
 			hosts.put("biniou", InetAddress.getByName("192.168.0.1"));
 			hosts.put("pouet", InetAddress.getByName("192.168.0.2"));
 			hosts.put("gni.com", InetAddress.getByName("192.168.1.101"));
+			hosts.put("relay.com", InetAddress.getByName("192.168.1.10"));
+			hosts.put("server.com", InetAddress.getByName("192.168.1.11"));
 		} catch (UnknownHostException e) {}
 	}
 

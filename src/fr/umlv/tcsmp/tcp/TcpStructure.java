@@ -175,61 +175,77 @@ public class TcpStructure {
 		try {
 			switch (responseAction) {
 			case READ: case WRITE:
+				System.out.println("* TcpStructure: READ/WRITE");
 				if(domain==null) {
+					System.out.println("* TcpStructure: Domain null");
 					if(socketChannel==originalClient) {
+						System.out.println("* TcpStructure: Original client");
+						//TODO CancelKeyException bug to resolved
 						key.interestOps(TcpStructure.getResponseOps(responseAction));
 						return;
 					} else {
+						System.out.println("* TcpStructure: Not original client");
 						key.cancel();
 						originalClient.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
 						return;
 					}
 				} else {
+					System.out.println("* TcpStructure: Domain non null");
 					SocketChannel client = socketData.getSocket(domain);
 					if(socketChannel==client) {
+						System.out.println("* TcpStructure: Socket is last client");
 						key.interestOps(TcpStructure.getResponseOps(responseAction));
 						return;
 					} else {
 						key.cancel();
+						System.out.println("* TcpStructure: Socket is not last client");
 						if(client==null) {
+							System.out.println("* TcpStructure: Client is null");
 							keyAttachment.setCurrentResponse(response);
 							this.connectNewClient(domain, keyAttachment);
 							return;
 						} else {
+							System.out.println("* TcpStructure: Client is not null");
 							client.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
 							return;
 						}
 					}
 				}
 			case RELAYALL:
+				System.out.println("* TcpStructure: RELAYALL");
 				Collection<SocketChannel> allClient = protocolDomainMap.get(protocol).getClients();
 				for(SocketChannel client: allClient) {
 					if(client==socketChannel) {
+						System.out.println("* TcpStructure: client is socketchannel");
 						key.interestOps(SelectionKey.OP_WRITE);
 					} else {
+						System.out.println("* TcpStructure: client is not socketchannel");
 						client.register(selector, TcpStructure.getResponseOps(responseAction), new KeyAttachment(keyAttachment));
 					}
 				}
 				if(socketChannel==socketData.getOriginalClient()) {
+					System.out.println("* TcpStructure: Socket is original client");
 					key.cancel();
 				}
 				return;
 			case CLOSE:
+				System.out.println("* TcpStructure: Close socket");
 				socketChannel.close();
 				return;
 			}
 		} catch (ClosedChannelException e) {
+			System.err.println(e);
 			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
-			System.err.println(e);
+			
 		} catch (IOException e) {
+			System.err.println(e);
 			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
-			System.err.println(e);
 			if(socketChannel.isConnected()) {
 				try {
 					socketChannel.close();
@@ -237,7 +253,6 @@ public class TcpStructure {
 					System.err.println(e);
 				}
 			}
-			System.err.println(e);
 		}
 	}
 
@@ -252,7 +267,7 @@ public class TcpStructure {
 	private void connectNewClient(String domain, KeyAttachment keyAttachment) throws IOException {
 		Protocol protocol = keyAttachment.getProtocol();
 		if(domain==null) {
-			throw new IOException("Can't establish a connection with a null client :-(");
+			throw new IOException("* TcpStructure: Can't establish a connection with a null client :-(");
 		}
 		try {
 			InetAddress domainAddress = dnsResolver.resolv(domain);
@@ -261,22 +276,24 @@ public class TcpStructure {
 			Response currentResponse = keyAttachment.getCurrentResponse();
 			client.configureBlocking(false);
 			if(client.connect(remoteIsa)) {
+				System.out.println("* TcpStructure: Immediate connection");
 				client.register(selector, TcpStructure.getResponseOps(currentResponse.getAction()), keyAttachment);
 			} else {
+				System.out.println("* TcpStructure: Non Immediate connection");
 				client.register(selector, SelectionKey.OP_CONNECT, keyAttachment);
 			}
 		} catch(IllegalArgumentException iae) {
 			System.err.println(iae);
-			System.err.println("Could not connect to the client");
-			throw new IOException("Can't establish a connection with the client :-(");
+			System.err.println("* TcpStructure: Could not connect to the client");
+			throw new IOException("* TcpStructure: Can't establish a connection with the client :-(");
 		} catch (UnknownHostException e) {
 			System.err.println(e);
-			System.err.println("Could not connect to the client");
-			throw new IOException("Can't establish a connection with the client :-(");
+			System.err.println("* TcpStructure: Could not connect to the client");
+			throw new IOException("* TcpStructure: Can't establish a connection with the client :-(");
 		} catch (IOException e) {
 			System.err.println(e);
-			System.err.println("Could not connect to the client");
-			throw new IOException("Can't establish a connection with the client :-(");
+			System.err.println("* TcpStructure: Could not connect to the client");
+			throw new IOException("* TcpStructure: Can't establish a connection with the client :-(");
 		}
 	}
 			
@@ -381,12 +398,16 @@ public class TcpStructure {
 	private void doConnect(SelectionKey key) {
 		SocketChannel socketChannel = (SocketChannel)key.channel();
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
-		System.out.println("* TcpStructure: Connecting to " + socketChannel.socket().getRemoteSocketAddress());
+		System.out.println("* TcpStructure: Preparing to connect..");
 		try {
-			if(socketChannel.finishConnect() == false) {
+			if(socketChannel.finishConnect()==false) {
+				System.out.println("* TcpStructure: Closing!");
 				socketChannel.close();
 				return;
 			}
+			System.out.println("* TcpStructure: Connected!");
+			SocketData socketData = protocolDomainMap.get(keyAttachment.getProtocol());
+			socketData.putSocket(socketChannel, keyAttachment.getCurrentResponse().getDest());
 			key.interestOps(TcpStructure.getResponseOps(keyAttachment.getCurrentResponse().getAction()));
 		} catch (IOException e) {
 			System.out.println(e);

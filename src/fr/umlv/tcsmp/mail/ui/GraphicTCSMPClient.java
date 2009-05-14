@@ -20,13 +20,15 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 
 public class GraphicTCSMPClient {
+	
 	public static void main(String[] args) {
-		final JFrame f = new JFrame("TCSMP Client");
+		JFrame f = new JFrame("Write an Email");
 		f.setSize(400,600);
 		f.setContentPane(GraphicTCSMPClient.createMainPanel(f));
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setVisible(true);
 	}
+
 	private static JPanel createMainPanel(final JFrame parent){
 		JPanel main = new JPanel(new BorderLayout());
 		JPanel header = new JPanel(new GridLayout(10,1));
