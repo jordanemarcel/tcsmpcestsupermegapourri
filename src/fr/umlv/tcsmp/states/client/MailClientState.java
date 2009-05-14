@@ -56,9 +56,12 @@ public class MailClientState extends TCSMPState {
 					sentRequest = true;
 					resp = null;
 					break;
-					//TODO resp codes
+				case 451:
+				case 554:
+				case 503:
 				default:
-					throw new AssertionError("Pouet");
+					proto.setState(new QuitClientState());
+					proto.addMainError(list.get(0) + " " + list.get(1));
 				}
 				bb.clear();
 				return proto.doIt(bb);
