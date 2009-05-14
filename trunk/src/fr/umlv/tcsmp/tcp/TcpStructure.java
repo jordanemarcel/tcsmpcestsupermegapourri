@@ -148,7 +148,7 @@ public class TcpStructure {
 				}
 				Protocol protocol = keyAttachment.getProtocol();
 				ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
-				if(false) { //TODO check timeout
+				if(protocol.isTimeout()) {
 					Response response = protocol.doIt(byteBuffer);
 					keyAttachment.setCurrentResponse(response);
 					this.handleResponse(selectionKey, response);
@@ -219,11 +219,17 @@ public class TcpStructure {
 				return;
 			}
 		} catch (ClosedChannelException e) {
-			//TODO Cancel
-			key.cancel();
+			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
+			byteBuffer.clear();
+			Response cancelResponse = protocol.cancel(byteBuffer);
+			this.handleResponse(key, cancelResponse);
 			System.err.println(e);
 		} catch (IOException e) {
-			//TODO Cancel
+			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
+			byteBuffer.clear();
+			Response cancelResponse = protocol.cancel(byteBuffer);
+			this.handleResponse(key, cancelResponse);
+			System.err.println(e);
 			if(socketChannel.isConnected()) {
 				try {
 					socketChannel.close();
@@ -231,7 +237,6 @@ public class TcpStructure {
 					System.err.println(e);
 				}
 			}
-			key.cancel();
 			System.err.println(e);
 		}
 	}
@@ -242,13 +247,13 @@ public class TcpStructure {
 	 * @param domain - the domain that is going to be resolved to get the address of a server
 	 * @param keyAttachment - The keyAttachment that contains information about the session protocol,
 	 * the ByteBuffer and the last response given by the protocol.
+	 * @throws IOException
 	 */
-	private void connectNewClient(String domain, KeyAttachment keyAttachment) {
-		if(domain==null) {
-			//TODO Cancel
-			throw new IllegalArgumentException("Can't establish a connection with a null client :-(");
-		}
+	private void connectNewClient(String domain, KeyAttachment keyAttachment) throws IOException {
 		Protocol protocol = keyAttachment.getProtocol();
+		if(domain==null) {
+			throw new IOException("Can't establish a connection with a null client :-(");
+		}
 		try {
 			InetAddress domainAddress = dnsResolver.resolv(domain);
 			InetSocketAddress remoteIsa = new InetSocketAddress(domainAddress, protocol.getProtocolPort());
@@ -261,20 +266,17 @@ public class TcpStructure {
 				client.register(selector, SelectionKey.OP_CONNECT, keyAttachment);
 			}
 		} catch(IllegalArgumentException iae) {
-			//TODO Cancel
 			System.err.println(iae);
 			System.err.println("Could not connect to the client");
-			return;
+			throw new IOException("Can't establish a connection with the client :-(");
 		} catch (UnknownHostException e) {
-			//TODO Cancel
 			System.err.println(e);
 			System.err.println("Could not connect to the client");
-			return;
+			throw new IOException("Can't establish a connection with the client :-(");
 		} catch (IOException e) {
-			//TODO Cancel
 			System.err.println(e);
 			System.err.println("Could not connect to the client");
-			return;
+			throw new IOException("Can't establish a connection with the client :-(");
 		}
 	}
 
@@ -305,7 +307,6 @@ public class TcpStructure {
 				return;
 			}
 		} catch (IOException e) {
-			//TODO Cancel
 			System.err.println("Could not accept a new connection");
 			System.err.println(e);
 			return;
@@ -329,7 +330,6 @@ public class TcpStructure {
 			this.handleResponse(key, response);
 		} catch (IOException e) {
 			System.err.println(e);
-			//TODO Cancel
 			if(socketChannel.isConnected()) {
 				try {
 					socketChannel.close();
@@ -337,7 +337,9 @@ public class TcpStructure {
 					System.err.println(e1);
 				}
 			}
-			key.cancel();
+			byteBuffer.clear();
+			Response cancelResponse = protocol.cancel(byteBuffer);
+			this.handleResponse(key, cancelResponse);
 		}
 	}
 
@@ -360,7 +362,6 @@ public class TcpStructure {
 			this.handleResponse(key, response);
 		} catch (IOException e) {
 			System.err.println(e);
-			//TODO Cancel
 			if(socketChannel.isConnected()) {
 				try {
 					socketChannel.close();
@@ -368,7 +369,9 @@ public class TcpStructure {
 					System.err.println(e1);
 				}
 			}
-			key.cancel();
+			byteBuffer.clear();
+			Response cancelResponse = protocol.cancel(byteBuffer);
+			this.handleResponse(key, cancelResponse);
 		}
 	}
 
@@ -387,7 +390,6 @@ public class TcpStructure {
 			key.interestOps(TcpStructure.getResponseOps(keyAttachment.getCurrentResponse().getAction()));
 		} catch (IOException e) {
 			System.out.println(e);
-			//TODO Cancel
 			if(socketChannel.isConnected()) {
 				try {
 					socketChannel.close();
@@ -395,7 +397,11 @@ public class TcpStructure {
 					System.err.println(e1);
 				}
 			}
-			key.cancel();
+			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
+			Protocol protocol = keyAttachment.getProtocol();
+			byteBuffer.clear();
+			Response cancelResponse = protocol.cancel(byteBuffer);
+			this.handleResponse(key, cancelResponse);
 		}
 	}
 
