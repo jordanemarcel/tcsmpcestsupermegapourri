@@ -2,8 +2,6 @@ package fr.umlv.tcsmp.utils;
 
 import java.nio.ByteBuffer;
 
-import sun.nio.ch.SocketOpts.IP.TCP;
-
 public class ErrorReplies {
 
 	public static ByteBuffer unknowCommand(String expected, String received) {
