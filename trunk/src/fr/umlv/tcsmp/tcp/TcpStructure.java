@@ -143,6 +143,9 @@ public class TcpStructure {
 		for(SelectionKey selectionKey: selectionKeys) {
 			if(!selectedSelectionKeys.contains(selectionKey)) {
 				KeyAttachment keyAttachment = (KeyAttachment)selectionKey.attachment();
+				if(keyAttachment==null) {
+					continue;
+				}
 				Protocol protocol = keyAttachment.getProtocol();
 				ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 				if(false) { //TODO check timeout
