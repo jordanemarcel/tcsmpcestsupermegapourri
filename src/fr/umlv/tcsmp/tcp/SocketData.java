@@ -10,7 +10,7 @@ import java.util.HashMap;
  */
 public class SocketData {
 	/** The client that initialized the session */
-	private final SocketChannel originalClient;
+	private SocketChannel originalClient;
 	/** A map of sockets and their corresponding domain */
 	private final HashMap<String, SocketChannel> domainSocketMap = new HashMap<String, SocketChannel>();
 	
@@ -49,6 +49,11 @@ public class SocketData {
 			return;
 		}
 		domainSocketMap.put(domain, socketChannel);
+	}
+	
+	//TODO javadoc
+	public void setOriginalClient(SocketChannel originalClient) {
+		this.originalClient = originalClient;
 	}
 	
 	/**

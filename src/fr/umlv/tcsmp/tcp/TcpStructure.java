@@ -10,8 +10,10 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Set;
 
 import fr.umlv.tcsmp.dns.DNSResolver;
@@ -19,6 +21,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
 import fr.umlv.tcsmp.proto.ResponseAction;
+import fr.umlv.tcsmp.utils.TCSMPParser;
 
 /**
  * This class is a generic TCP Client/Server. It is given a Protocol object which determines
@@ -37,6 +40,9 @@ public class TcpStructure {
 	private final DNSResolver dnsResolver;
 	/** Protocol given to the TCP structure */
 	private Protocol givenProtocol;
+	//TODO javadoc
+	private final ArrayList<PendingConnection> pendingConnectionList = 
+		new ArrayList<PendingConnection>();
 	/** Map that associates a Protocol (session) with a SocketData (list of connected
 	 *  clients) */
 	private final HashMap<Protocol, SocketData> protocolDomainMap = 
@@ -112,6 +118,7 @@ public class TcpStructure {
 	 */
 	private void handleSelector() throws IOException {
 		while(selector.keys().size()>0 || givenProtocol.getProtocolMode()==ProtocolMode.SERVER) {
+			this.closeTimedOutPendingConnection();
 			selector.select(SELECTOR_TIMEOUT);
 			this.checkTimeOut();
 			Set<SelectionKey> selectionKeys = selector.selectedKeys();
@@ -177,6 +184,11 @@ public class TcpStructure {
 			switch (responseAction) {
 			case READ: case WRITE:
 				System.out.println("* TcpStructure: READ/WRITE");
+				if(responseAction==ResponseAction.READ) {
+					System.out.println("Next: READ");
+				} else {
+					System.out.println("Next: WRITE");
+				}
 				if(domain==null) {
 					System.out.println("* TcpStructure: Domain null");
 					if(socketChannel==originalClient) {
@@ -214,6 +226,10 @@ public class TcpStructure {
 						}
 					}
 				}
+			case CONTINUEREAD:
+				System.out.println("* TcpStructure: CONTINUEREAD");
+				key.interestOps(SelectionKey.OP_READ);
+				return;
 			case RELAYALL:
 				System.out.println("* TcpStructure: RELAYALL");
 				Collection<SocketChannel> allClient = protocolDomainMap.get(protocol).getClients();
@@ -284,14 +300,19 @@ public class TcpStructure {
 			SocketChannel client = SocketChannel.open();
 			Response currentResponse = keyAttachment.getCurrentResponse();
 			client.configureBlocking(false);
+			SocketData socketData = protocolDomainMap.get(keyAttachment.getProtocol());
+			if(socketData.getOriginalClient()==null) {
+				socketData.setOriginalClient(client);
+			}
 			if(client.connect(remoteIsa)) {
 				System.out.println("* TcpStructure: Immediate connection");
-				SocketData socketData = protocolDomainMap.get(keyAttachment.getProtocol());
 				socketData.putSocket(client, keyAttachment.getCurrentResponse().getDest());
 				client.register(selector, TcpStructure.getResponseOps(currentResponse.getAction()), keyAttachment);
 			} else {
 				System.out.println("* TcpStructure: Non Immediate connection");
-				client.register(selector, SelectionKey.OP_CONNECT, keyAttachment);
+				SelectionKey selectionKey = client.register(selector, SelectionKey.OP_CONNECT, keyAttachment);
+				PendingConnection pendingConnection = new PendingConnection(selectionKey);
+				pendingConnectionList.add(pendingConnection);
 			}
 		} catch(IllegalArgumentException iae) {
 			System.err.println(iae);
@@ -349,6 +370,7 @@ public class TcpStructure {
 		try {
 			socketChannel.read(byteBuffer);
 			byteBuffer.flip();
+			System.out.println(TCSMPParser.decode(byteBuffer));
 			Response response = protocol.doIt(byteBuffer);
 			this.handleResponse(key, response);
 		} catch (IOException e) {
@@ -375,6 +397,7 @@ public class TcpStructure {
 		Protocol protocol = keyAttachment.getProtocol();
 		System.out.println("* TcpStructure: Writing to " + socketChannel.socket().getRemoteSocketAddress());
 		try {
+			System.out.println(TCSMPParser.decode(byteBuffer));
 			while(byteBuffer.hasRemaining()) {
 				socketChannel.write(byteBuffer);
 			}
@@ -408,6 +431,7 @@ public class TcpStructure {
 				socketChannel.close();
 				return;
 			}
+			this.removePendingConnection(key);
 			System.out.println("* TcpStructure: Connected!");
 			SocketData socketData = protocolDomainMap.get(keyAttachment.getProtocol());
 			socketData.putSocket(socketChannel, keyAttachment.getCurrentResponse().getDest());
@@ -425,6 +449,43 @@ public class TcpStructure {
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
 		}
+	}
+	
+	//TODO javadoc
+	private void closeTimedOutPendingConnection() {
+		for(PendingConnection pendingConnection: pendingConnectionList) {
+			if(pendingConnection.isTimedOut()) {
+				System.out.println(pendingConnectionList.size());
+				System.out.println("TIME OUT!!!!");
+				System.out.println(pendingConnectionList.size());
+				SelectionKey selectionKey = pendingConnection.getSelectionKey();
+				KeyAttachment keyAttachment = (KeyAttachment)selectionKey.attachment();
+				ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
+				Protocol protocol = keyAttachment.getProtocol();
+				byteBuffer.clear();
+				Response cancelResponse = protocol.cancel(byteBuffer);
+				this.handleResponse(selectionKey, cancelResponse);
+			}
+		}
+	}
+	
+	//TODO javadoc
+	private void removePendingConnection(SelectionKey selectionKey) {
+		Iterator<PendingConnection> it = pendingConnectionList.iterator();
+		while(it.hasNext()) {
+			PendingConnection pendingConnection = it.next();
+			if(pendingConnection.getSelectionKey()==selectionKey) {
+				it.remove();
+			}
+		}
+//		for( PendingConnection pendingConnection: pendingConnectionList) {
+//			if(pendingConnection.getSelectionKey()==selectionKey) {
+//				pendingConnectionList.remove(pendingConnection);
+//				//remove = true;
+//				//System.out.println("Key removed!");
+//				//break;
+//			}
+//		}
 	}
 
 	/**
