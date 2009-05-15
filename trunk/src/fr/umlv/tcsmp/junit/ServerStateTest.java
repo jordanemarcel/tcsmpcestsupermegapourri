@@ -3,10 +3,10 @@ package fr.umlv.tcsmp.junit;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+import fr.umlv.tcsmp.handlers.SmtpHandler;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
-import fr.umlv.tcsmp.tcp.handlers.SmtpHandler;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class ServerStateTest {

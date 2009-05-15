@@ -1,4 +1,4 @@
-package fr.umlv.tcsmp.tcp.handlers;
+package fr.umlv.tcsmp.handlers;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
