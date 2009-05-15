@@ -6,6 +6,7 @@ import java.util.Map;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
+import fr.umlv.tcsmp.tcp.handlers.SmtpHandler;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class ServerStateTest {
@@ -57,12 +58,14 @@ public class ServerStateTest {
 		
 		/* SERVER */
 		Protocol serverProtocol = new Protocol(ProtocolMode.SERVER);
-		serverProtocol.addDomain("gmail.com");
+		serverProtocol.addDomain("etudiant.univ-mlv.fr");
+		serverProtocol.setMessageHandler(new SmtpHandler());
+		
 		/* CLIENT */
 		Protocol clientProtocol = new Protocol(ProtocolMode.CLIENT);
 		clientProtocol.setFrom("toto@titi.com");
 		clientProtocol.setClientDomain("titi.com");
-		clientProtocol.addRcpt("clemun@gmail.com");
+		clientProtocol.addRcpt("clecigne@etudiant.univ-mlv.fr");
 //		clientProtocol.addRcpt("jmarce01@etudiant.univ-mlv.fr");
 //		clientProtocol.addRcpt("rmasso02@etudiant.univ-mlv.fr");
 		// XXX .
