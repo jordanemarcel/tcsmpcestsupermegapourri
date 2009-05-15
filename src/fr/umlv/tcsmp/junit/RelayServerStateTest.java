@@ -90,7 +90,7 @@ public class RelayServerStateTest {
 		
 		// RELAY TELO
 		// init banner client state
-		p.doIt(bb);
+//		p.doIt(bb);
 		System.out.print("\t");
 		printBB(res, bb);
 		p.doIt(bb);

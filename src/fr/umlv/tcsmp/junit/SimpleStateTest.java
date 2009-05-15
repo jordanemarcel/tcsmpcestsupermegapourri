@@ -77,14 +77,14 @@ public class SimpleStateTest {
 		/* SERVER */
 		Protocol serverProtocol = new Protocol(ProtocolMode.SERVER);
 		serverProtocol.addDomain("etudiant.univ-mlv.fr");
-		serverProtocol.setMessageHandler(new SmtpHandler());
+		serverProtocol.setMessageHandler(new PrintHandler());
 		/* CLIENT */
 		Protocol clientProtocol = new Protocol(ProtocolMode.CLIENT);
 		clientProtocol.setFrom("toto@titi.com");
 		clientProtocol.setClientDomain("titi.com");
-		clientProtocol.getRecpts().add("clecigne@etudiant.univ-mlv.fr");
-//		clientProtocol.getRecpts().add("jojo@biniou.com");
-//		clientProtocol.getRecpts().add("clem@biniou.com");
+		clientProtocol.addRcpt("clecigne@etudiant.univ-mlv.fr");
+//		clientProtocol.addRcpt("jojo@biniou.com");
+//		clientProtocol.addRcpt("clem@biniou.com");
 		// XXX .
 		clientProtocol.mail("P'tain, ca dechire du caribou.\r\n.\r\n");
 		

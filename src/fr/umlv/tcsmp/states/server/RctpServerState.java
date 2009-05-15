@@ -3,6 +3,8 @@ package fr.umlv.tcsmp.states.server;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 
+import sun.misc.Cleaner;
+
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
@@ -141,7 +143,7 @@ public class RctpServerState extends TCSMPState {
 //		TCSMPLogger.debug("RCTP STATE: don't know about " + domain + " ... relaying.");
 		// Create a fakeProto for our client states
 		fakeProto = proto.newProtocol(ProtocolMode.CLIENT);
-		fakeProto.getRecpts().clear();
+		fakeProto.clearRecpts();
 		
 		System.out.println("rcpt add " + user + "@" + domain);
 		fakeProto.addRcpt(user + "@" + domain);

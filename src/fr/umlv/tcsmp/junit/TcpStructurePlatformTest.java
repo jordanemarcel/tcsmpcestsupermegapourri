@@ -15,11 +15,11 @@ public class TcpStructurePlatformTest {
 		DNSResolver resolver = new TCSMPResolver();
 		try {
 			TcpStructure tcpStructure = new TcpStructure(resolver);
-			Protocol protocol = new Protocol(ProtocolMode.SERVER, 2626);
+			Protocol protocol = new Protocol(ProtocolMode.SERVER, 26);
 			if(args.length==1) {
 				protocol.addDomain(args[0]);
 			} else {
-				protocol.addDomain("etudiant.univ-mlv.fr");
+				protocol.addDomain("foobar.com");
 			}
 			protocol.setMessageHandler(new PrintHandler());
 			tcpStructure.processProtocol(protocol);

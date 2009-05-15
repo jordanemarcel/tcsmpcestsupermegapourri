@@ -11,8 +11,8 @@ import java.util.Random;
 
 public class Puzzle {
 	public static void main(String[] args) {
-		Puzzle p = Puzzle.randomPuzzle(6, 6);
-		Puzzle p2 = new Puzzle(6, 6, p.lineString());
+		Puzzle p = Puzzle.randomPuzzle(4, 4);
+		Puzzle p2 = new Puzzle(4, 4, p.lineString());
 		shuffle(p);
 		System.out.println(p);
 		System.out.println(p.equals(p2));
