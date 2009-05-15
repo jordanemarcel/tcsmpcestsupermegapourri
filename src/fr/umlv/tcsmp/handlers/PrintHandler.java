@@ -1,4 +1,4 @@
-package fr.umlv.tcsmp.tcp.handlers;
+package fr.umlv.tcsmp.handlers;
 
 import fr.umlv.tcsmp.mail.Message;
 

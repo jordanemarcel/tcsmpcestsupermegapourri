@@ -18,10 +18,10 @@ import javax.swing.JTextField;
 
 import fr.umlv.tcsmp.dns.DNSResolver;
 import fr.umlv.tcsmp.dns.TCSMPResolver;
+import fr.umlv.tcsmp.handlers.MboxHandler;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.tcp.TcpStructure;
-import fr.umlv.tcsmp.tcp.handlers.MboxHandler;
 
 public class GraphicTCSMPClient {
 	
@@ -141,7 +141,7 @@ public class GraphicTCSMPClient {
 				}
 				
 				//TODO envoi du mail
-				//TODO affiche d'un message en cas de réussite ou échec
+				//TODO affiche d'un message en cas de reussite ou echec
 			}
 		});
 		return main;

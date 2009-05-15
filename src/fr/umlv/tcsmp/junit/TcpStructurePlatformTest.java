@@ -4,10 +4,11 @@ import java.io.IOException;
 
 import fr.umlv.tcsmp.dns.DNSResolver;
 import fr.umlv.tcsmp.dns.TCSMPResolver;
+import fr.umlv.tcsmp.handlers.MboxHandler;
+import fr.umlv.tcsmp.handlers.PrintHandler;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.tcp.TcpStructure;
-import fr.umlv.tcsmp.tcp.handlers.PrintHandler;
 
 public class TcpStructurePlatformTest {
 
@@ -21,7 +22,7 @@ public class TcpStructurePlatformTest {
 			} else {
 				protocol.addDomain("foobar.com");
 			}
-			protocol.setMessageHandler(new PrintHandler());
+			protocol.setMessageHandler(new MboxHandler("/tmp"));
 			tcpStructure.processProtocol(protocol);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
