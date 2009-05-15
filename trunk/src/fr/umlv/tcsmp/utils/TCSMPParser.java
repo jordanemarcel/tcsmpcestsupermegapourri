@@ -158,4 +158,19 @@ public class TCSMPParser {
 		
 		return responses;
 	}
+	
+	/**
+	 * Tells whether a specified domain appears in any receipts recorded in the given list.
+	 * @param receipts list of correct email addresses
+	 * @param domain String domain to look for
+	 * @return true if domain was found, false otherwise
+	 */
+	public static boolean lookupDomain(List<String> receipts, String domain) {
+		for(String s : receipts) {
+			if (s.endsWith(domain)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
