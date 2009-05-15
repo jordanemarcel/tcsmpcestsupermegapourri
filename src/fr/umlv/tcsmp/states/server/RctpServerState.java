@@ -3,8 +3,6 @@ package fr.umlv.tcsmp.states.server;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 
-import sun.misc.Cleaner;
-
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
@@ -153,7 +151,9 @@ public class RctpServerState extends TCSMPState {
 		if (TCSMPParser.lookupDomain(proto.getRecpts(), domain)) {
 			fakeProto.setState(new RctpClientState());
 			proto.addRcpt(user + "@" + domain);
-			return new Response(currentRCPTDomain, ResponseAction.READ);
+			bb.clear();
+			fakeProto.doIt(bb);
+			return new Response(currentRCPTDomain, ResponseAction.WRITE);
 		}
 		
 		System.out.println("proto add " + user + "@" + domain);

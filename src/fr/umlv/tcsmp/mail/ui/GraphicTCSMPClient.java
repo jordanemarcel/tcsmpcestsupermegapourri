@@ -124,6 +124,7 @@ public class GraphicTCSMPClient {
 				p.setFrom("jordane@client.com");
 				p.setClientDomain("client.com");
 				p.addRcpt("jordane@biniou.com");
+				p.addRcpt("billou@biniou.com");
 				p.setDefaultRelay("192.168.1.1");
 				p.mail("Coucou toi. Tu m'aimes?\r\n.\r\n");
 				//p.setMessageHandler(new MboxHandler());
