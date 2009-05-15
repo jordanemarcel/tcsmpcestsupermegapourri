@@ -5,13 +5,12 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -19,10 +18,10 @@ import javax.swing.JTextField;
 
 import fr.umlv.tcsmp.dns.DNSResolver;
 import fr.umlv.tcsmp.dns.TCSMPResolver;
-import fr.umlv.tcsmp.mail.Message;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.tcp.TcpStructure;
+import fr.umlv.tcsmp.tcp.handlers.MboxHandler;
 
 public class GraphicTCSMPClient {
 	
@@ -123,13 +122,18 @@ public class GraphicTCSMPClient {
 //				recpt.addAll(bccList);
 //				p.setFrom(from);
 				p.setFrom("jordane@client.com");
+				p.setClientDomain("client.com");
 				recpt.add("jordane@server.com");
-				p.setDefaultRelay("192.168.1.10");
+				p.setDefaultRelay("127.0.0.1");
+				p.mail("blabla\r\n.\r\n");
+				//p.setMessageHandler(new MboxHandler());
 				
 				DNSResolver resolver = new TCSMPResolver();
 				try {
 					TcpStructure tcpStructure = new TcpStructure(resolver);
 					tcpStructure.processProtocol(p);
+					String mainErrors = p.getMainErrors();
+					Map<String, StringBuilder> domainErrors = p.getDomainErrors();
 				} catch (IOException ioe) {
 					// TODO Auto-generated catch block
 					ioe.printStackTrace();
