@@ -86,6 +86,9 @@ public class SimpleStateTest {
 		// XXX .
 		clientProtocol.mail("P'tain, ca dechire du caribou.\r\n.\r\n");
 		
+		// init client banner state
+		clientProtocol.doIt(clientBB);
+		
 		while(!writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB)) {};
 		
 		System.out.println("--------------\nOriginal server errors:");

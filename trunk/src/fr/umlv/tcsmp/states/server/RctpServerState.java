@@ -10,9 +10,7 @@ import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.states.client.BannerClientState;
 import fr.umlv.tcsmp.states.client.RctpClientState;
-import fr.umlv.tcsmp.states.client.TeloClientState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
-import fr.umlv.tcsmp.utils.TCSMPLogger;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
 public class RctpServerState extends TCSMPState {
@@ -121,10 +119,10 @@ public class RctpServerState extends TCSMPState {
 
 		// Check address and add it to the rctps array
 		String domain;
+		String user;
 		try {
 			domain = TCSMPParser.parseDomain(args[1]);
-			String user = TCSMPParser.parseUser(args[1]);
-			proto.addRcpt(user + "@" + domain);
+			user = TCSMPParser.parseUser(args[1]);
 		} catch (ParseException e) {
 			bb.put(TCSMPParser.encode(new String("500 Invalid address in RCPT.\r\n")));
 			bb.flip();
@@ -140,11 +138,20 @@ public class RctpServerState extends TCSMPState {
 		}
 
 //		TCSMPLogger.debug("RCTP STATE: don't know about " + domain + " ... relaying.");
-
 		// Create a fakeProto for our client states
 		fakeProto = proto.newProtocol(ProtocolMode.CLIENT);
-		fakeProto.setState(new BannerClientState());
+		fakeProto.getRecpts().clear();
+		fakeProto.addRcpt(user + "@" + domain);
+		
 		currentRCPTDomain = domain;
+		if (TCSMPParser.lookupDomain(proto.getRecpts(), domain)) {
+			fakeProto.setState(new RctpClientState());
+			return new Response(currentRCPTDomain, ResponseAction.READ);
+		}
+		
+		proto.addRcpt(user + "@" + domain);
+		
+		fakeProto.setState(new BannerClientState());
 		return new Response(currentRCPTDomain, ResponseAction.READ);
 	}
 	
