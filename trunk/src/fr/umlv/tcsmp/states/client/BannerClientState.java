@@ -13,6 +13,7 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 public class BannerClientState extends TCSMPState {
 
 	private final List<String> commandArgs;
+	private ResponseAction resp = null;
 
 	public BannerClientState() {
 		commandArgs = new ArrayList<String>();
@@ -20,6 +21,10 @@ public class BannerClientState extends TCSMPState {
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
+		if (resp == null) {
+			resp = ResponseAction.READ;
+			return new Response(resp);
+		}
 		
 		if (TCSMPParser.parseAnswer(bb, commandArgs)) {
 			// Multiline ended
