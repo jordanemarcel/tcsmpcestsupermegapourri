@@ -198,7 +198,7 @@ public class RelayStateTest {
 			throw new AssertionError("gni");
 		
 		// RELAY RCTP 2
-		res = relayProtocol.doIt(relayBB);
+//		res = relayProtocol.doIt(relayBB);
 		System.out.print("\t");
 		printBB(res, relayBB);
 		serverBB.put(relayBB);
