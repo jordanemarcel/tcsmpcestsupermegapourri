@@ -7,8 +7,7 @@ import fr.umlv.tcsmp.dns.TCSMPResolver;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.tcp.TcpStructure;
-import fr.umlv.tcsmp.tcp.handlers.MboxHandler;
-import fr.umlv.tcsmp.tcp.handlers.SmtpHandler;
+import fr.umlv.tcsmp.tcp.handlers.PrintHandler;
 
 public class TcpStructurePlatformTest {
 
@@ -22,7 +21,7 @@ public class TcpStructurePlatformTest {
 			} else {
 				protocol.addDomain("etudiant.univ-mlv.fr");
 			}
-			protocol.setMessageHandler(new SmtpHandler());
+			protocol.setMessageHandler(new PrintHandler());
 			tcpStructure.processProtocol(protocol);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
