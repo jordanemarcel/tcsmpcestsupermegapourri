@@ -49,7 +49,7 @@ public class RelayStateTest {
 		clientProtocol.setFrom("toto@titi.com");
 		clientProtocol.setClientDomain("titi.com");
 		clientProtocol.getRecpts().add("billou@biniou.com");
-//		clientProtocol.getRecpts().add("jojo@biniou.com");
+		clientProtocol.getRecpts().add("jojo@biniou.com");
 //		clientProtocol.getRecpts().add("clem@biniou.com");
 		clientProtocol.mail("P'tain, ca dechire du caribou.\r\n.\r\n");
 		
@@ -67,6 +67,8 @@ public class RelayStateTest {
 		/**
 		 * TELO
 		 */
+		// init client
+		clientProtocol.doIt(clientBB);
 		printBB(clientProtocol.doIt(clientBB), clientBB);
 		relayBB.put(clientBB);
 		clientBB.clear();
@@ -97,7 +99,7 @@ public class RelayStateTest {
 
 		
 		/**
-		 * RCPT
+		 * RCPT 1
 		 */
 		printBB(clientProtocol.doIt(clientBB), clientBB);
 		relayBB.put(clientBB);
@@ -124,6 +126,8 @@ public class RelayStateTest {
 		/**
 		 * RELAY TELO
 		 */
+		// init banner client state
+		relayProtocol.doIt(relayBB);
 		res = relayProtocol.doIt(relayBB);
 		System.out.print("\t");
 		printBB(res, relayBB);
@@ -155,7 +159,45 @@ public class RelayStateTest {
 		relayBB.flip();
 		serverProtocol.doIt(serverBB);
 		
-		// RELAY RCTP
+		// RELAY RCTP 1
+		res = relayProtocol.doIt(relayBB);
+		System.out.print("\t");
+		printBB(res, relayBB);
+		serverBB.put(relayBB);
+		relayBB.clear();
+		serverBB.flip();
+		relayProtocol.doIt(relayBB);
+
+		System.out.print("\t");
+		printBB(serverProtocol.doIt(serverBB), serverBB);
+		relayBB.put(serverBB);
+		serverBB.clear();
+		relayBB.flip();
+		serverProtocol.doIt(serverBB);
+
+		res = relayProtocol.doIt(relayBB);
+		printBB(res, relayBB);
+		clientBB.put(relayBB);
+		relayBB.clear();
+		clientBB.flip();
+		relayProtocol.doIt(relayBB);
+		
+		/**
+		 * RCPT 2
+		 */
+		printBB(clientProtocol.doIt(clientBB), clientBB);
+		
+		relayBB.put(clientBB);
+		clientBB.clear();
+		relayBB.flip();
+		clientProtocol.doIt(clientBB);
+		
+		res = relayProtocol.doIt(relayBB);
+		
+		if (res.getDest() == null)
+			throw new AssertionError("gni");
+		
+		// RELAY RCTP 2
 		res = relayProtocol.doIt(relayBB);
 		System.out.print("\t");
 		printBB(res, relayBB);
