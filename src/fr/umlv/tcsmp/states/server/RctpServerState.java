@@ -131,6 +131,7 @@ public class RctpServerState extends TCSMPState {
 		}
 
 		if (proto.isRelay(domain) == false) {
+			proto.addRcpt(user + "@" + domain);
 			bb.put(TCSMPParser.encode("250 OK\r\n"));
 			bb.flip();
 			send = true;
@@ -141,14 +142,18 @@ public class RctpServerState extends TCSMPState {
 		// Create a fakeProto for our client states
 		fakeProto = proto.newProtocol(ProtocolMode.CLIENT);
 		fakeProto.getRecpts().clear();
+		
+		System.out.println("rcpt add " + user + "@" + domain);
 		fakeProto.addRcpt(user + "@" + domain);
 		
 		currentRCPTDomain = domain;
 		if (TCSMPParser.lookupDomain(proto.getRecpts(), domain)) {
 			fakeProto.setState(new RctpClientState());
+			proto.addRcpt(user + "@" + domain);
 			return new Response(currentRCPTDomain, ResponseAction.READ);
 		}
 		
+		System.out.println("proto add " + user + "@" + domain);
 		proto.addRcpt(user + "@" + domain);
 		
 		fakeProto.setState(new BannerClientState());

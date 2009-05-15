@@ -13,8 +13,16 @@ import fr.umlv.tcsmp.smtp.Mail;
  */
 public class SmtpHandler implements TCSMPHandler {
 
-	private final String smtpServer = "etudiant.univ-mlv.fr";
+	private final String smtpServer;
 
+	public SmtpHandler() {
+		smtpServer = "etudiant.univ-mlv.fr";
+	}
+	
+	public SmtpHandler(String server) {
+		smtpServer = server;
+	}
+	
 	@Override
 	public void processMessage(Message message) {
 

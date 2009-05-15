@@ -66,7 +66,7 @@ public class Mail {
 			{
 				throw new IllegalAccessError(reply);
 			}
-			sendCommand("QUIT", true);
+//			sendCommand("QUIT", true);
 			closeConn();
 		}
 		catch(Exception any)

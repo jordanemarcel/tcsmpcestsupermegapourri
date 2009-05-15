@@ -8,6 +8,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.tcp.TcpStructure;
 import fr.umlv.tcsmp.tcp.handlers.MboxHandler;
+import fr.umlv.tcsmp.tcp.handlers.SmtpHandler;
 
 public class TcpStructurePlatformTest {
 
@@ -15,13 +16,13 @@ public class TcpStructurePlatformTest {
 		DNSResolver resolver = new TCSMPResolver();
 		try {
 			TcpStructure tcpStructure = new TcpStructure(resolver);
-			Protocol protocol = new Protocol(ProtocolMode.SERVER);
+			Protocol protocol = new Protocol(ProtocolMode.SERVER, 2626);
 			if(args.length==1) {
 				protocol.addDomain(args[0]);
 			} else {
-				protocol.addDomain("foobar.com");
+				protocol.addDomain("etudiant.univ-mlv.fr");
 			}
-			protocol.setMessageHandler(new MboxHandler());
+			protocol.setMessageHandler(new SmtpHandler());
 			tcpStructure.processProtocol(protocol);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
