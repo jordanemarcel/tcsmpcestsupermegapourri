@@ -2,6 +2,8 @@ package fr.umlv.tcsmp.tcp.handlers;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import fr.umlv.tcsmp.mail.Message;
 import fr.umlv.tcsmp.utils.TCSMPLogger;
@@ -47,7 +49,9 @@ public class MboxHandler implements TCSMPHandler {
 				// write a pseudo From.
 				mbox.write("From ".getBytes());
 				mbox.write(user.getBytes());
-				mbox.write(" Fri Apr 21 14:22:55 2006\n".getBytes()); // XXX
+				mbox.write(" ".getBytes());
+				mbox.write(new Date().toString().getBytes());
+				mbox.write("\n".getBytes());
 				
 				// dump mail
 				mbox.write(message.toString().getBytes());

@@ -83,6 +83,10 @@ public class Protocol {
 	public void addRcpt(String rcpt) {
 		message.addRctp(rcpt);
 	}
+	
+	public boolean containsRcpt(String rcpt) {
+		return message.getRcpts().contains(rcpt.toLowerCase());
+	}
 
 	public ProtocolMode getProtocolMode() {
 		return protocolMode;
