@@ -132,6 +132,12 @@ public class RctpServerState extends TCSMPState {
 		}
 
 		if (proto.isRelay(domain) == false) {
+			if (proto.containsRcpt(user + "@" + domain)) {
+				bb.put(TCSMPParser.encode("451 Duplicated address.\r\n"));
+				bb.flip();
+				send = true;
+				return new Response(ResponseAction.WRITE);
+			}
 			if (!user.equals("windows")) {
 				proto.addRcpt(user + "@" + domain);
 				bb.put(TCSMPParser.encode("250 OK\r\n"));
@@ -151,7 +157,6 @@ public class RctpServerState extends TCSMPState {
 		fakeProto = proto.newProtocol(ProtocolMode.CLIENT);
 		fakeProto.clearRecpts();
 		
-		System.out.println("rcpt add " + user + "@" + domain);
 		fakeProto.addRcpt(user + "@" + domain);
 		
 		currentRCPTDomain = domain;

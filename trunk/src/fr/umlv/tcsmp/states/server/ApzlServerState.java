@@ -128,12 +128,12 @@ public class ApzlServerState extends TCSMPState {
 
 		// I'm concerned.
 		if (proto.isRelay() == false) {
-			// XXX: puzzle size must be dynamic
-			Puzzle p = Puzzle.randomPuzzle(4, 4);
+			int dim = 3 + proto.getRecpts().size();
+			Puzzle p = Puzzle.randomPuzzle(dim, dim);
 			Puzzle.shuffle(p);
 			proto.addPuzzleFor(proto.getClientDomain(), p);
 			bb.clear();
-			bb.put(TCSMPParser.encode("215 " + proto.getMyDomains().get(0) + " 4,4 " + p.lineString() + "\r\n"));
+			bb.put(TCSMPParser.encode("215 " + proto.getMyDomains().get(0) + " " + dim + "," + dim + " " + p.lineString() + "\r\n"));
 			bb.flip();
 			send = true;
 			return new Response(ResponseAction.WRITE);
