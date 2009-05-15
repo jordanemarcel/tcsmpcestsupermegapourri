@@ -76,13 +76,13 @@ public class MailClientState extends TCSMPState {
 				bb.flip();
 				if (0 == encodedMail.remaining()) {
 					// Data was sent, signify we want to get the reply
-					resp = ResponseAction.REPLY;
+					resp = ResponseAction.WRITE;
 				}
 
 				return new Response(resp);
 			}
 
-			if (resp == ResponseAction.REPLY) {
+			if (resp == ResponseAction.WRITE) {
 				resp = ResponseAction.READ;
 				return new Response(resp);
 			}
@@ -95,7 +95,7 @@ public class MailClientState extends TCSMPState {
 				// States
 				case 250:
 					sentRequest = true;
-					resp = ResponseAction.REPLY;
+					resp = ResponseAction.WRITE;
 					if (pkeyState != null) 
 						proto.setState(pkeyState);	
 					else

@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import fr.umlv.tcsmp.mail.Message;
 import fr.umlv.tcsmp.puzzle.Puzzle;
 import fr.umlv.tcsmp.states.TCSMPState;
+import fr.umlv.tcsmp.tcp.handlers.PrintHandler;
 import fr.umlv.tcsmp.tcp.handlers.SmtpHandler;
 import fr.umlv.tcsmp.tcp.handlers.TCSMPHandler;
 import fr.umlv.tcsmp.utils.TCSMPParser;
@@ -29,9 +30,9 @@ public class Protocol {
 	private final Map<String, Puzzle> puzzles;
 	private final Map<String, StringBuilder> domainErrors;
 	private final StringBuilder mainErrors;
-	
+
 	private TCSMPHandler messageHandler;
-	
+
 	// TODO escape "." ?
 	private final Message message;
 
@@ -61,7 +62,7 @@ public class Protocol {
 	public Protocol(ProtocolMode mode) {
 		this(mode, new PrintHandler());
 	}
-	
+
 	public int getProtocolPort() {
 		return protocolPort;
 	}
@@ -73,7 +74,7 @@ public class Protocol {
 	public List<String> getRecpts() {
 		return message.getRcpts();
 	}
-	
+
 	public void addRcpt(String rcpt) {
 		message.addRctp(rcpt);
 	}
@@ -81,11 +82,11 @@ public class Protocol {
 	public ProtocolMode getProtocolMode() {
 		return protocolMode;
 	}
-	
+
 	public String getMainErrors() {
 		return mainErrors.toString();
 	}
-	
+
 	public void setDefaultRelay(String defaultRelay) {
 		this.defaultRelay = defaultRelay;
 	}
@@ -100,11 +101,11 @@ public class Protocol {
 		}
 		mainErrors.append(error);
 	}
-	
+
 	public Map<String, StringBuilder> getDomainErrors() {
 		return domainErrors;
 	}
-	
+
 	public void addErrorFor(String domain, String errorString) {
 		StringBuilder errorBuilder;
 		errorBuilder = domainErrors.get(domain);
@@ -152,7 +153,7 @@ public class Protocol {
 			throw new AssertionError("Already registered a puzzle for the given domain.");
 		}
 	}
-	
+
 	public void removePuzzleFor(String domain) {
 		puzzles.remove(domain);
 	}
@@ -177,14 +178,14 @@ public class Protocol {
 		/* exit state */
 		return state.processCommand(this, bb);
 	}
-	
+
 	/**
 	 * Just relaying the isTimeout to the state.
 	 */
 	public boolean isTimeout() {
 		return state.isTimeout();
 	}
-	
+
 	/**
 	 * Just realaying a cancel to the state
 	 */
@@ -198,7 +199,7 @@ public class Protocol {
 	public Protocol newProtocol() {
 		return newProtocol(protocolMode);
 	}
-	
+
 	public Protocol newProtocol(ProtocolMode mode) {
 		Protocol pr = new Protocol(mode);
 		pr.clientDomain = clientDomain;
@@ -243,12 +244,14 @@ public class Protocol {
 	public void mail(String line) {
 		message.data(line);
 	}
-	
+
 	public String getMail() {
 		return message.getLongMail();
 	}
-	
+
 	public void processMessage() {
-		messageHandler.processMessage(message);
+		if (messageHandler != null) {
+			messageHandler.processMessage(message);
+		}
 	}
 }
