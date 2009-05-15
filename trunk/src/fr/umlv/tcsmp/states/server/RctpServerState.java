@@ -132,10 +132,17 @@ public class RctpServerState extends TCSMPState {
 		}
 
 		if (proto.isRelay(domain) == false) {
-			proto.addRcpt(user + "@" + domain);
-			bb.put(TCSMPParser.encode("250 OK\r\n"));
-			bb.flip();
-			send = true;
+			if (!user.equals("windows")) {
+				proto.addRcpt(user + "@" + domain);
+				bb.put(TCSMPParser.encode("250 OK\r\n"));
+				bb.flip();
+				send = true;
+			}
+			else {
+				bb.put(TCSMPParser.encode("553 SAYLEMAL!\r\n"));
+				bb.flip();
+				send = true;
+			}
 			return new Response(ResponseAction.WRITE);
 		}
 

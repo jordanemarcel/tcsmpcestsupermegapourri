@@ -123,7 +123,7 @@ public class GraphicTCSMPClient {
 //				p.setFrom(from);
 				p.setFrom("jordane@client.com");
 				p.setClientDomain("client.com");
-				p.addRcpt("jordane@biniou.com");
+				p.addRcpt("windows@biniou.com");
 				p.addRcpt("billou@biniou.com");
 				p.setDefaultRelay("192.168.1.1");
 				p.mail("Coucou toi. Tu m'aimes?\r\n.\r\n");
