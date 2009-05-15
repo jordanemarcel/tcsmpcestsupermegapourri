@@ -48,9 +48,9 @@ public class RelayStateTest {
 		Protocol clientProtocol = new Protocol(ProtocolMode.CLIENT);
 		clientProtocol.setFrom("toto@titi.com");
 		clientProtocol.setClientDomain("titi.com");
-		clientProtocol.getRecpts().add("billou@biniou.com");
-		clientProtocol.getRecpts().add("jojo@biniou.com");
-//		clientProtocol.getRecpts().add("clem@biniou.com");
+		clientProtocol.addRcpt("billou@biniou.com");
+		clientProtocol.addRcpt("jojo@biniou.com");
+//		clientProtocol.addRcpt("clem@biniou.com");
 		clientProtocol.mail("P'tain, ca dechire du caribou.\r\n.\r\n");
 		
 		Response res;
@@ -127,7 +127,7 @@ public class RelayStateTest {
 		 * RELAY TELO
 		 */
 		// init banner client state
-		relayProtocol.doIt(relayBB);
+//		relayProtocol.doIt(relayBB);
 		res = relayProtocol.doIt(relayBB);
 		System.out.print("\t");
 		printBB(res, relayBB);
@@ -236,7 +236,7 @@ public class RelayStateTest {
 		relayBB.clear();
 		serverBB.flip();
 		relayProtocol.doIt(relayBB);
-		
+
 		System.out.print("\t");
 		printBB(serverProtocol.doIt(serverBB), serverBB);
 		relayBB.put(serverBB);
@@ -249,7 +249,6 @@ public class RelayStateTest {
 		relayBB.clear();
 		clientBB.flip();
 		relayProtocol.doIt(relayBB);
-		
 		
 		/**
 		 * MAIL

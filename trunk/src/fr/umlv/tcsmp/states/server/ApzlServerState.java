@@ -143,7 +143,11 @@ public class ApzlServerState extends TCSMPState {
 		domains = new LinkedList<String>();
 		for (String r : proto.getRecpts()) {
 			try {
-				domains.add(TCSMPParser.parseDomain(r));
+				// XXX BOOOOOOOOOOO why do you do this to meh. Need only one appearance 
+				// of a domain even if two RCPTs have the same!
+				String domain = TCSMPParser.parseDomain(r); 
+				if (!domains.contains(domain))
+					domains.add(domain);
 			} catch (ParseException e) {
 			}
 		}

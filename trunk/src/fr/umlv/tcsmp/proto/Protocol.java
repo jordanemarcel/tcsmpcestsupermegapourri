@@ -3,6 +3,7 @@ package fr.umlv.tcsmp.proto;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,11 @@ public class Protocol {
 	}
 
 	public List<String> getRecpts() {
-		return message.getRcpts();
+		return Collections.unmodifiableList(message.getRcpts());
+	}
+	
+	public void clearRecpts() {
+		message.getRcpts().clear();
 	}
 
 	public void addRcpt(String rcpt) {

@@ -123,9 +123,9 @@ public class GraphicTCSMPClient {
 //				p.setFrom(from);
 				p.setFrom("jordane@client.com");
 				p.setClientDomain("client.com");
-				recpt.add("jordane@server.com");
-				p.setDefaultRelay("127.0.0.1");
-				p.mail("blabla\r\n.\r\n");
+				p.addRcpt("jordane@biniou.com");
+				p.setDefaultRelay("192.168.1.1");
+				p.mail("Coucou toi. Tu m'aimes?\r\n.\r\n");
 				//p.setMessageHandler(new MboxHandler());
 				
 				DNSResolver resolver = new TCSMPResolver();

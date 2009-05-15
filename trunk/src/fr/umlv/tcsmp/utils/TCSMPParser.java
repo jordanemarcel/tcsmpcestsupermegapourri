@@ -42,7 +42,7 @@ public class TCSMPParser {
 		}
 				
 		String lastString = list.get(list.size() -1);
-		if (lastString.charAt(3) != '-') {
+		if (lastString.charAt(3) == ' ') {
 			list.remove(lastString);
 			list.add(lastString.substring(0, 3));
 			list.add(lastString.substring(4));
