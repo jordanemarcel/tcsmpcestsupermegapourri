@@ -85,7 +85,9 @@ public class QuitServerState extends TCSMPState {
 		domains = new LinkedList<String>();
 		for (String r : proto.getRecpts()) {
 			try {
-				domains.add(TCSMPParser.parseDomain(r));
+				String domain = TCSMPParser.parseDomain(r); 
+				if (!domains.contains(domain))
+					domains.add(domain);
 			} catch (ParseException e) {
 			}
 		}

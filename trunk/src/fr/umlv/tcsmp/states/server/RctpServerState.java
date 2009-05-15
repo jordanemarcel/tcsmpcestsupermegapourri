@@ -87,19 +87,20 @@ public class RctpServerState extends TCSMPState {
 		send = true;
 
 		String [] args = TCSMPParser.parseCommand(bb);
-		bb.clear();
 
-		if (args.length == 0) {
-			bb.clear();
-			bb.put(ErrorReplies.syntaxError());
-			bb.flip();
-			return new Response(ResponseAction.WRITE);
-		}
-		
+
 		if (args.length == 1 && args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);
 			return t.processCommand(proto, bb);
+		}
+		
+		bb.clear();
+		
+		if (args.length == 0) {
+			bb.put(ErrorReplies.syntaxError());
+			bb.flip();
+			return new Response(ResponseAction.WRITE);
 		}
 
 		if (args.length > 2 || (args[0].equals("RCPT") == false && args[0].equals("APZL") == false)) {
