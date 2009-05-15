@@ -39,4 +39,9 @@ public class Response {
 	public ResponseAction getAction() {
 		return action;
 	}
+	
+	@Override
+	public String toString() {
+		return "action: " + action + " - dest: " + dest;
+	}
 }

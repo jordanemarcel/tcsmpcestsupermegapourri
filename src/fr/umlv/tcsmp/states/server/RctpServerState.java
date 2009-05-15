@@ -168,7 +168,6 @@ public class RctpServerState extends TCSMPState {
 			return new Response(currentRCPTDomain, ResponseAction.WRITE);
 		}
 		
-		System.out.println("proto add " + user + "@" + domain);
 		proto.addRcpt(user + "@" + domain);
 		
 		fakeProto.setState(new BannerClientState());
