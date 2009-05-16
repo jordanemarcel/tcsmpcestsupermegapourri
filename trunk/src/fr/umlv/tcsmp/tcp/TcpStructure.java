@@ -266,11 +266,6 @@ public class TcpStructure {
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
-			try {
-				socketChannel.close();
-			} catch (IOException e1) {
-				System.err.println(e);
-			}
 		} catch (IOException e) {
 			System.err.println(e);
 			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
