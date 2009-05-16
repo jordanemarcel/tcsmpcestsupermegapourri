@@ -51,7 +51,7 @@ public class MailServerState extends TCSMPState {
 			return new Response(ResponseAction.WRITE);
 		}
 		
-		if (args.length == 1 && args[0].equals("QUIT")) {
+		if (args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);
 			return t.processCommand(proto, bb);
