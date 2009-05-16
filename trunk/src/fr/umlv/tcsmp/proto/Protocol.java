@@ -79,6 +79,10 @@ public class Protocol {
 	public void clearRecpts() {
 		message.getRcpts().clear();
 	}
+	
+	public void removeRcpt(String rcpt) {
+		message.getRcpts().remove(rcpt);
+	}
 
 	public void addRcpt(String rcpt) {
 		message.addRctp(rcpt);
@@ -140,6 +144,7 @@ public class Protocol {
 	public boolean isRelay() {
 		try {
 			for (String rcpt: message.getRcpts()) {
+				System.out.println(rcpt);
 				if (isRelay(TCSMPParser.parseDomain(rcpt)))
 					return true;
 			}

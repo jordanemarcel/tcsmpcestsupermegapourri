@@ -16,7 +16,7 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
 public class RctpServerState extends TCSMPState {
 
 	private final static int TIMEOUT = 300000; // 5 minutes
-	
+
 	private boolean send = false;
 
 	private String currentRCPTDomain;
@@ -26,18 +26,18 @@ public class RctpServerState extends TCSMPState {
 	public RctpServerState() {
 		super(TIMEOUT);
 	}
-	
+
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 
 		// we are in a relaying mode
 		if (fakeProto != null) {
-			
+
 			// save each time the response of the server
 			serverResponse = TCSMPParser.decode(bb);
-			
+
 //			TCSMPLogger.debug("RCTP STATE: I've received " + serverResponse + " from " + currentRCPTDomain);
-			
+
 			// get response from the fake proto.
 			Response res = fakeProto.doIt(bb);
 
@@ -69,13 +69,13 @@ public class RctpServerState extends TCSMPState {
 
 			return new Response(currentRCPTDomain, ResponseAction.READ);
 		}
-		
+
 		// are we in timeout waiting for RCTP
 		if (isTimeout())
 			return timeoutResponse(bb);
 		else
 			timeoutReset();
-		
+
 		if (send) {
 			send = false;
 			bb.clear();
@@ -91,9 +91,9 @@ public class RctpServerState extends TCSMPState {
 			proto.setState(t);
 			return t.processCommand(proto, bb);
 		}
-		
+
 		bb.clear();
-		
+
 		if (args.length == 0) {
 			bb.put(ErrorReplies.syntaxError());
 			bb.flip();
@@ -108,12 +108,19 @@ public class RctpServerState extends TCSMPState {
 
 		// manual switch state if needed
 		if (args[0].equals("APZL")) {
-			TCSMPState apzlState = new ApzlServerState();
-			proto.setState(apzlState);
-			// XXX: really need to recreate cmd ?
-			bb.put(TCSMPParser.encode("APZL\r\n"));
-			bb.flip();
-			return apzlState.processCommand(proto, bb);
+			// check on rcpt done before
+			if (proto.getRecpts().size() != 0) {
+				TCSMPState apzlState = new ApzlServerState();
+				proto.setState(apzlState);
+				bb.put(TCSMPParser.encode("APZL\r\n"));
+				bb.flip();
+				return apzlState.processCommand(proto, bb);
+			}
+			else {
+				bb.put(TCSMPParser.encode("421 You must issue at least one valid RCPT before APZL\r\n"));
+				bb.flip();
+				return new Response(ResponseAction.WRITE);
+			}
 		}
 
 
@@ -126,27 +133,24 @@ public class RctpServerState extends TCSMPState {
 		} catch (ParseException e) {
 			bb.put(TCSMPParser.encode(new String("500 Invalid address in RCPT.\r\n")));
 			bb.flip();
-			send = true;
 			return new Response(ResponseAction.WRITE);
 		}
 
 		if (proto.isRelay(domain) == false) {
+			System.out.println("I am the relay for " + domain);
 			if (proto.containsRcpt(user + "@" + domain)) {
 				bb.put(TCSMPParser.encode("451 Duplicated address.\r\n"));
 				bb.flip();
-				send = true;
 				return new Response(ResponseAction.WRITE);
 			}
 			if (!user.equals("windows")) {
 				proto.addRcpt(user + "@" + domain);
 				bb.put(TCSMPParser.encode("250 OK\r\n"));
 				bb.flip();
-				send = true;
 			}
 			else {
 				bb.put(TCSMPParser.encode("553 SAYLEMAL!\r\n"));
 				bb.flip();
-				send = true;
 			}
 			return new Response(ResponseAction.WRITE);
 		}
@@ -155,9 +159,9 @@ public class RctpServerState extends TCSMPState {
 		// Create a fakeProto for our client states
 		fakeProto = proto.newProtocol(ProtocolMode.CLIENT);
 		fakeProto.clearRecpts();
-		
+
 		fakeProto.addRcpt(user + "@" + domain);
-		
+
 		currentRCPTDomain = domain;
 		if (TCSMPParser.lookupDomain(proto.getRecpts(), domain)) {
 			fakeProto.setState(new RctpClientState());
@@ -166,18 +170,23 @@ public class RctpServerState extends TCSMPState {
 			fakeProto.doIt(bb);
 			return new Response(currentRCPTDomain, ResponseAction.WRITE);
 		}
-		
+
 		proto.addRcpt(user + "@" + domain);
-		
+
 		fakeProto.setState(new BannerClientState());
 		// init banner client state
 		fakeProto.doIt(bb);
 		return new Response(currentRCPTDomain, ResponseAction.READ);
 	}
-	
+
 	@Override
 	public Response cancel(Protocol proto, ByteBuffer bb) {
-		fakeProto = null;
+		if (fakeProto != null) {
+			if (fakeProto.getRecpts().size() > 0)
+				proto.removeRcpt(fakeProto.getRecpts().get(0));
+			fakeProto = null;
+		}
+		send = true;
 		bb.clear();
 		bb.put(ErrorReplies.unexpectedError());
 		bb.flip();
