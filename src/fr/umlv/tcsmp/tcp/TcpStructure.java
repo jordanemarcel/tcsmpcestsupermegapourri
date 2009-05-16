@@ -1,6 +1,7 @@
 package fr.umlv.tcsmp.tcp;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -91,7 +92,9 @@ public class TcpStructure {
 		keyAttachment.setCurrentResponse(response);
 		protocolDomainMap.put(givenProtocol, new SocketData(null));
 		String address = givenProtocol.getDefaultRelay();
+		System.out.println(address);
 		InetAddress inet = InetAddress.getByName(address);
+		System.out.println(inet);
 		this.connectNewClient(inet, keyAttachment);
 		this.handleSelector();
 		System.out.println("* TcpStructure: End of Transmission");
@@ -346,6 +349,9 @@ public class TcpStructure {
 			case CLOSE:
 				socketChannel.close();
 				return;
+			default:
+				socketChannel.close();
+				return;
 			}
 		} catch (IOException e) {
 			System.err.println("Could not accept a new connection");
@@ -365,7 +371,11 @@ public class TcpStructure {
 		Protocol protocol = keyAttachment.getProtocol();
 		System.out.println("* TcpStructure: Reading from " + socketChannel.socket().getRemoteSocketAddress());
 		try {
-			socketChannel.read(byteBuffer);
+			int size = socketChannel.read(byteBuffer);
+			if(size==-1) {
+				throw new IOException("Socket closed");
+			}
+			System.out.println(size);
 			byteBuffer.flip();
 			System.out.println(TCSMPParser.decode(byteBuffer));
 			Response response = protocol.doIt(byteBuffer);
@@ -417,8 +427,9 @@ public class TcpStructure {
 	/**
 	 * Selector method: connects to a socket
 	 * @param key - selected key
+	 * @throws ConnectException 
 	 */
-	private void doConnect(SelectionKey key) {
+	private void doConnect(SelectionKey key) throws ConnectException {
 		SocketChannel socketChannel = (SocketChannel)key.channel();
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		System.out.println("* TcpStructure: Preparing to connect..");
@@ -434,6 +445,9 @@ public class TcpStructure {
 			socketData.putSocket(socketChannel, keyAttachment.getCurrentResponse().getDest());
 			key.interestOps(TcpStructure.getResponseOps(keyAttachment.getCurrentResponse().getAction()));
 		} catch (IOException e) {
+			if(givenProtocol.getProtocolMode()==ProtocolMode.CLIENT) {
+				throw new ConnectException();
+			}
 			System.out.println(e);
 			try {
 				socketChannel.close();

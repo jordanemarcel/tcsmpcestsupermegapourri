@@ -5,7 +5,6 @@ import java.io.IOException;
 import fr.umlv.tcsmp.dns.DNSResolver;
 import fr.umlv.tcsmp.dns.TCSMPResolver;
 import fr.umlv.tcsmp.handlers.MboxHandler;
-import fr.umlv.tcsmp.handlers.PrintHandler;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.tcp.TcpStructure;
