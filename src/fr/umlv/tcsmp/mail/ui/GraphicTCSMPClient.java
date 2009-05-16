@@ -27,8 +27,9 @@ public class GraphicTCSMPClient {
 	
 	public static void main(String[] args) {
 		JFrame f = new JFrame("Write an Email");
-		f.setSize(400,600);
+		//f.setSize(400,600);
 		f.setContentPane(GraphicTCSMPClient.createMainPanel(f));
+		f.pack();
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setVisible(true);
 	}

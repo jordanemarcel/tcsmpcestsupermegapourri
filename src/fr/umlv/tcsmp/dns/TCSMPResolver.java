@@ -1,5 +1,8 @@
 package fr.umlv.tcsmp.dns;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -21,9 +24,6 @@ public class TCSMPResolver implements DNSResolver {
 
 	{
 		try {
-			hosts.put("biniou.com", InetAddress.getByName("192.168.1.2"));
-			hosts.put("biniou", InetAddress.getByName("192.168.0.1"));
-			hosts.put("pouet", InetAddress.getByName("192.168.0.2"));
 			hosts.put("gni.com", InetAddress.getByName("192.168.1.101"));
 			hosts.put("relay.com", InetAddress.getByName("192.168.1.10"));
 			hosts.put("server.com", InetAddress.getByName("192.168.1.11"));
@@ -31,11 +31,29 @@ public class TCSMPResolver implements DNSResolver {
 	}
 
 	public TCSMPResolver() {
-		this("127.0.0.1");
+		this("127.0.0.1", null);
 	}
 
 	public TCSMPResolver(String server) {
+		this(server, null);
+	}
+	
+	public TCSMPResolver(String server, String path) {
 		this.server = server;
+		readDomains(path);
+	}
+
+	private static void readDomains(String path) {
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+			String line;
+			while((line = br.readLine()) != null) {
+				String a [] = line.split("=");
+				if (a.length == 2)
+					hosts.put(a[0], InetAddress.getByName(a[1]));
+			}
+			br.close();
+		} catch(Exception e) {}
 	}
 
 	public InetAddress resolv(String host) throws UnknownHostException {
@@ -59,12 +77,12 @@ public class TCSMPResolver implements DNSResolver {
 
 		throw new UnknownHostException();
 	}
-	
+
 	/*
 	public static void main(String[] args) throws UnknownHostException {
-		
+
 		System.out.println(new TCSMPResolver("192.168.1.254").resolv("clem1.be"));
-		
+
 	}
-	*/
+	 */
 }
