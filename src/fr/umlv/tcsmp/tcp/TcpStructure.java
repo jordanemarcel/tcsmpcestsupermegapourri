@@ -188,10 +188,6 @@ public class TcpStructure {
 					System.out.println("Next: READ");
 				} else {
 					System.out.println("Next: WRITE");
-				}try {
-					socketChannel.close();
-				} catch (IOException e1) {
-					System.err.println(e);
 				}
 				if(domain==null) {
 					System.out.println("* TcpStructure: Domain null");
