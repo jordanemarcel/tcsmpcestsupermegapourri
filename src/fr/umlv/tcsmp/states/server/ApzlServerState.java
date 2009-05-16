@@ -112,13 +112,13 @@ public class ApzlServerState extends TCSMPState {
 			return new Response(ResponseAction.WRITE);
 		}
 		
-		if (args.length == 1 && args[0].equals("QUIT")) {
+		if (args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);
 			return t.processCommand(proto, bb);
-		}
+		}		
 
-		if (args.length != 1 || args[0].equals("APZL") == false) {
+		if (args[0].equals("APZL") == false) {
 			bb.clear();
 			bb.put(ErrorReplies.unknowCommand("APZL", args[0]));
 			bb.flip();

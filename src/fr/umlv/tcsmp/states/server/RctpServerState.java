@@ -86,8 +86,7 @@ public class RctpServerState extends TCSMPState {
 
 		String [] args = TCSMPParser.parseCommand(bb);
 
-
-		if (args.length == 1 && args[0].equals("QUIT")) {
+		if (args[0].equals("QUIT")) {
 			TCSMPState t = new QuitServerState();
 			proto.setState(t);
 			return t.processCommand(proto, bb);
