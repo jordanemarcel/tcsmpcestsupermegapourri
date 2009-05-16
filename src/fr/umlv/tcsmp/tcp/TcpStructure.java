@@ -188,6 +188,10 @@ public class TcpStructure {
 					System.out.println("Next: READ");
 				} else {
 					System.out.println("Next: WRITE");
+				}try {
+					socketChannel.close();
+				} catch (IOException e1) {
+					System.err.println(e);
 				}
 				if(domain==null) {
 					System.out.println("* TcpStructure: Domain null");
@@ -210,18 +214,20 @@ public class TcpStructure {
 						key.interestOps(TcpStructure.getResponseOps(responseAction));
 						return;
 					} else {
-						key.cancel();
-						System.out.println("* TcpStructure: cancelling key...");
 						System.out.println("* TcpStructure: Socket is not last client");
 						if(client==null) {
 							System.out.println("* TcpStructure: Client is null");
 							keyAttachment.setCurrentResponse(response);
 							InetAddress domainAddress = dnsResolver.resolv(domain);
 							this.connectNewClient(domainAddress, keyAttachment);
+							key.cancel();
+							System.out.println("* TcpStructure: cancelling key...");
 							return;
 						} else {
 							System.out.println("* TcpStructure: Client is not null");
 							client.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
+							key.cancel();
+							System.out.println("* TcpStructure: cancelling key...");
 							return;
 						}
 					}
