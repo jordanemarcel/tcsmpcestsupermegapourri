@@ -11,18 +11,18 @@ import java.util.Random;
 
 public class Puzzle {
 	public static void main(String[] args) {
-		Puzzle p = Puzzle.randomPuzzle(4, 4);
-		Puzzle p2 = new Puzzle(4, 4, p.lineString());
+		Puzzle p = Puzzle.randomPuzzle(6, 6);
+		Puzzle p2 = new Puzzle(6, 6, p.lineString());
 		shuffle(p);
 		System.out.println(p);
 		System.out.println(p.equals(p2));
 		resolve(p);
-//		System.out.println(p);
-		System.out.println(p.equals(p2));
+
 		
 		
 		// My test
-		Puzzle puz = new Puzzle(4, 4, "ntct41thdjhmiom6t6v7157ojqolocl866vr5triq0iuceut67chtphk0fk2e92f");
+		Puzzle puz = new Puzzle(4, 4, "ntct41thdjhmiomapeo7157ojqolocl866vr5triq0iuceut67chtphk0fk2e92f");
+//		resolve(puz);
 		System.out.println("ntct41thdjhmiom6t6v7157ojqolocl866vr5triq0iuceut67chtphk0fk2e92f");
 		System.out.println("vs");
 		System.out.println(puz.lineString());
@@ -356,6 +356,8 @@ public class Puzzle {
 					if(rotateWheelIndex[index]>3){
 						rotateWheelIndex[index]=0;
 						wheelIndexArray[index]++;
+						if(wheelIndexArray[index]>=nbWheel)
+							throw new IllegalArgumentException("Unresolvable puzzle");
 					}
 				}else{
 					usedWheelSet.remove(wheelIndexArray[index]);
