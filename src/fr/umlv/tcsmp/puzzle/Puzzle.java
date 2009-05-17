@@ -130,7 +130,7 @@ public class Puzzle {
 			Wheel w = (Wheel) obj;
 			int bak = this.getOffset();
 			int obak = w.getOffset();
-			
+
 			for(int i=0;i<3;i++) {
 				for(int j=0;j<3;j++) {
 					if(this.readSouth()==w.readSouth()) {
@@ -155,8 +155,8 @@ public class Puzzle {
 				}
 				this.rotate();
 			}
-			
-			
+
+
 			this.setOffset(bak);
 			w.setOffset(obak);
 			return false;
@@ -174,7 +174,8 @@ public class Puzzle {
 			return sb.toString();
 		}
 	}
-	private ArrayList<Wheel> wheels = new ArrayList<Wheel>();
+	private final ArrayList<Wheel> wheels = new ArrayList<Wheel>();
+	private final static Random rand = new Random();
 	private int width;
 	private int height;
 	/**
@@ -291,7 +292,6 @@ public class Puzzle {
 		if(width<=0 || height<=0)
 			throw new IllegalArgumentException("width and height have to be positive");
 		Wheel puzzle[][] = new Wheel[width][height];
-		Random rand = new Random();
 		//create random wheels
 		for(int i = 0;i<width;i++){
 			for(int j = 0;j<height;j++){
@@ -427,8 +427,8 @@ public class Puzzle {
 			return false;
 		LinkedList<Wheel> res = new LinkedList<Wheel>();
 		List<Wheel> pWheel = p.getWheels();
-		for(Wheel pW : pWheel){
-			for(Wheel myW : wheels){
+		for(Wheel myW : wheels){
+			for(Wheel pW : pWheel){
 				if(myW.equals(pW)){
 					res.add(pW);
 					break;
@@ -450,7 +450,7 @@ public class Puzzle {
 		int width = puzzle.getWidth();
 		HashSet<Integer> usedWheelSet = new HashSet<Integer>();
 		ArrayList<Wheel> puzzleWheel = new ArrayList<Wheel>(puzzle.getWheels());
-		LinkedList<Wheel> resolv = new LinkedList<Wheel>();
+		ArrayList<Wheel> resolv = new ArrayList<Wheel>();
 		int index = 0;
 		int nbWheel = puzzle.getWheels().size();
 		int wheelIndexArray[] = new int[nbWheel];
@@ -497,12 +497,12 @@ public class Puzzle {
 					wheelIndexArray[index]++;
 				}
 				//Bad wheel
-				resolv.getLast().rotate();
+				resolv.get(index).rotate();
 			}
 		}
 		puzzle.setWheels(resolv);
 	}
-	private static boolean checkWheelAtPos(LinkedList<Wheel> wheelList,int width,int pos){
+	private static boolean checkWheelAtPos(List<Wheel> wheelList,int width,int pos){
 		Wheel chechedWheel = wheelList.get(pos);
 		if(pos-width>=0 && chechedWheel.readNorth() != wheelList.get(pos-width).readSouth()){
 			return false;
