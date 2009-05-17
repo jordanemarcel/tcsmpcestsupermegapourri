@@ -426,16 +426,17 @@ public class Puzzle {
 		if(p.getHeight()!=this.getHeight() || p.getWidth()!=this.getWidth())
 			return false;
 		LinkedList<Wheel> res = new LinkedList<Wheel>();
-		List<Wheel> pWheel = p.getWheels();
+		//List<Wheel> pWheel = p.getWheels();
+		res.addAll(p.getWheels());
 		for(Wheel myW : wheels){
-			for(Wheel pW : pWheel){
+			for(Wheel pW : res){
 				if(myW.equals(pW)){
-					res.add(pW);
+					res.remove(pW);
 					break;
 				}
 			}
 		}
-		if(res.size()==wheels.size())
+		if(res.size()==0)
 			return true;
 		return false;
 	}
