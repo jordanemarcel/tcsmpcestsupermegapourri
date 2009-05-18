@@ -7,11 +7,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import fr.umlv.tcsmp.handlers.PrintHandler;
-import fr.umlv.tcsmp.handlers.SmtpHandler;
 import fr.umlv.tcsmp.handlers.TCSMPHandler;
 import fr.umlv.tcsmp.mail.Message;
 import fr.umlv.tcsmp.puzzle.Puzzle;

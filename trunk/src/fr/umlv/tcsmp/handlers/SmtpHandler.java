@@ -2,8 +2,6 @@ package fr.umlv.tcsmp.handlers;
 
 import java.net.InetAddress;
 
-import fr.umlv.tcsmp.dns.DNSResolver;
-import fr.umlv.tcsmp.dns.TCSMPResolver;
 import fr.umlv.tcsmp.mail.Message;
 import fr.umlv.tcsmp.smtp.Mail;
 

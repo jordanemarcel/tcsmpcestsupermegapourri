@@ -2,7 +2,6 @@ package fr.umlv.tcsmp.handlers;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import fr.umlv.tcsmp.mail.Message;

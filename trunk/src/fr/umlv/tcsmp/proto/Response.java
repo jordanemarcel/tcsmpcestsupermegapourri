@@ -1,6 +1,5 @@
 package fr.umlv.tcsmp.proto;
 
-import java.nio.ByteBuffer;
 
 /**
  * Class telling what actions the proto. must take. 
