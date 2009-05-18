@@ -6,9 +6,9 @@
    	<property name="src.dir" value="src"/>
    	<property name="classes.dir" value="bin"/>
    	<property name="jar.dir" value="."/>
-   	<property name="client.name" value="clientTCSMP"/>
-   	<property name="tpop.name" value="serverTPOP"/>
-   	<property name="tcsmp.name" value="serverTCSMP"/>
+   	<property name="client.name" value="ClientTCSMP"/>
+   	<property name="tpop.name" value="ServerTPOP"/>
+   	<property name="tcsmp.name" value="ServerTCSMP"/>
 	
    	<property name="main.client.class" value="fr.umlv.tcsmp.main.ClientTCSMP"/>
 	<property name="main.tpop.class" value="fr.umlv.tcsmp.main.ServerTPOP"/>
