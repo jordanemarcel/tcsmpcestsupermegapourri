@@ -74,9 +74,9 @@ public class Message {
 	public static String buildMailHeader(String from, List<String> to, List<String> cc, String subject) {
 		StringBuilder sb = new StringBuilder();
 		Calendar calendar = Calendar.getInstance();
-		String weekDay = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault());
+		String weekDay = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.US);
 		String day = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
-		String month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
+		String month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.US);
 		String year = Integer.toString(calendar.get(Calendar.YEAR));
 		String hour = Integer.toString(calendar.get(Calendar.HOUR_OF_DAY));
 		String min = Integer.toString(calendar.get(Calendar.MINUTE));

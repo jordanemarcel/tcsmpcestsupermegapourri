@@ -13,7 +13,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -243,24 +242,24 @@ public class TcpStructure {
 				this.debug("CONTINUEREAD");
 				key.interestOps(SelectionKey.OP_READ);
 				return;
-			case RELAYALL:
-				this.debug("RELAYALL");
-				Collection<SocketChannel> allClient = protocolDomainMap.get(protocol).getClients();
-				for(SocketChannel client: allClient) {
-					if(client==socketChannel) {
-						this.debug("client is socketchannel");
-						key.interestOps(SelectionKey.OP_WRITE);
-					} else {
-						this.debug("client is not socketchannel");
-						client.register(selector, TcpStructure.getResponseOps(responseAction), new KeyAttachment(keyAttachment));
-					}
-				}
-				if(socketChannel==socketData.getOriginalClient()) {
-					this.debug("Socket is original client");
-					this.debug("cancelling key...");
-					key.cancel();
-				}
-				return;
+//			case RELAYALL:
+//				this.debug("RELAYALL");
+//				Collection<SocketChannel> allClient = protocolDomainMap.get(protocol).getClients();
+//				for(SocketChannel client: allClient) {
+//					if(client==socketChannel) {
+//						this.debug("client is socketchannel");
+//						key.interestOps(SelectionKey.OP_WRITE);
+//					} else {
+//						this.debug("client is not socketchannel");
+//						client.register(selector, TcpStructure.getResponseOps(responseAction), new KeyAttachment(keyAttachment));
+//					}
+//				}
+//				if(socketChannel==socketData.getOriginalClient()) {
+//					this.debug("Socket is original client");
+//					this.debug("cancelling key...");
+//					key.cancel();
+//				}
+//				return;
 			case CLOSE:
 				key.cancel();
 				if(socketChannel==originalClient) {
@@ -270,12 +269,18 @@ public class TcpStructure {
 				}
 				return;
 			}
-		} catch (UnknownHostException e) {
-			System.err.println(e);
+		} catch (ClosedChannelException cce) {
+			System.err.println(cce);
 			if(socketChannel==originalClient) {
 				this.closeSession(protocol);
 				return;
 			}
+			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
+			byteBuffer.clear();
+			Response cancelResponse = protocol.cancel(byteBuffer);
+			this.handleResponse(key, cancelResponse);
+		} catch (UnknownHostException e) {
+			System.err.println(e);
 			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
@@ -525,8 +530,8 @@ public class TcpStructure {
 			return SelectionKey.OP_READ;
 		case WRITE:
 			return SelectionKey.OP_WRITE;
-		case RELAYALL:
-			return SelectionKey.OP_WRITE;
+//		case RELAYALL:
+//			return SelectionKey.OP_WRITE;
 		default:
 			throw new IllegalArgumentException("No Ops for " + responseAction.name());
 		}
