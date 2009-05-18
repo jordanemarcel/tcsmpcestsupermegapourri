@@ -14,15 +14,24 @@ import fr.umlv.tcsmp.states.TCSMPState;
 import fr.umlv.tcsmp.utils.ErrorReplies;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
+enum ApzlState {
+	
+	WAITDOIT,	// nothing has been done
+	SENDOK,		// when everything has been sent
+	RELAYED,	// an APZL command has been relayed
+	WAITREPLY,	// waiting reply from server
+	SENDRES,	// sending responses to clients
+}
+
 public class ApzlServerState extends TCSMPState {
 
 	private final static int TIMEOUT = 300000; // 5 minutes
 
-	private boolean send = false;
+	// tell if we can change state or not
 	private boolean error = false;
-	private boolean relayed = false;
-	private boolean waitreply = false;
-	private boolean sendresponse = false;
+	
+	// state of the relaying process
+	private ApzlState relayingState;
 
 	// current response proccessed domain
 	private String currentDomain;
@@ -35,33 +44,32 @@ public class ApzlServerState extends TCSMPState {
 
 	public ApzlServerState() {
 		super(TIMEOUT);
+		relayingState = ApzlState.WAITDOIT;
 	}
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		
-		// response has been sent... OK.
-		if (send) {
-			if (error == false)
+		switch (relayingState) {
+		case SENDOK:
+			// response PUZL have been sent...
+			if (error == false) {
 				proto.setState(new MailServerState());
+			}
 			else
-				send = error = false;
+			{
+				error = false;
+				relayingState = ApzlState.WAITDOIT;
+			}
 			bb.clear();
 			return new Response(ResponseAction.READ);
-		}
-		
-		// relayed
-		if (relayed == true) {
-			relayed = false;
-			waitreply = true;
+		case RELAYED:
+			// message has been relayed, waiting reply
+			relayingState = ApzlState.WAITREPLY;
 			bb.clear();
 			return new Response(currentDomain, ResponseAction.READ);
-		}
-		
-		// wait reply from domain
-		if (waitreply == true) {
-			waitreply = false;
-			System.out.println("received : " + TCSMPParser.decode(bb));
+		case WAITREPLY:
+			// catch reply from the client
 			responses.addAll(Arrays.asList(TCSMPParser.slipResponseLine(TCSMPParser.decode(bb))));
 			try {
 				currentDomain = domains.remove(0);
@@ -69,90 +77,37 @@ public class ApzlServerState extends TCSMPState {
 			catch (Exception e) {
 				// last domain has been processed
 				TCSMPParser.multilinize(responses);
-				sendresponse = true;
+				relayingState = ApzlState.SENDRES;
 				bb.clear();
 				bb.put(TCSMPParser.encode(responses.remove(0)));
 				bb.flip();
 				if (responses.size() == 0) {
-					send = true;
+					relayingState = ApzlState.SENDOK;
 				}
 				return new Response(ResponseAction.WRITE);
 			}
+			// send command to the next domain
 			bb.clear();
 			bb.put(TCSMPParser.encode("APZL\r\n"));
 			bb.flip();
-			relayed = true;
+			relayingState = ApzlState.RELAYED;
 			return new Response(currentDomain, ResponseAction.WRITE);
-		}
-		
-		if (sendresponse == true) {
+		case SENDRES:
+			// send responses to the client
 			bb.clear();
 			bb.put(TCSMPParser.encode(responses.remove(0)));
 			bb.flip();
 			if (responses.size() == 0) {
-				sendresponse = false;
-				send = true;
+				relayingState = ApzlState.SENDOK;
 			}
 			return new Response(ResponseAction.WRITE);
 		}
-
-
-		//		// we wait for response from domains
-		//		if (domains != null || responses != null) {
-		//
-		//			// first call, we have to read response from the current domain
-		//			if (responses == null) {			
-		//				responses = new ArrayList<String>();
-		//				bb.clear();
-		//				return new Response(currentDomain, ResponseAction.READ);
-		//			}
-		//
-		//			// we have a response for the currentDomain
-		//			if (domains.size() != 0) {
-		//				// add its response
-		//				responses.addAll(Arrays.asList(TCSMPParser.slipResponseLine(TCSMPParser.decode(bb))));
-		//				domains.remove(currentDomain);
-		//				try {
-		//					currentDomain = domains.getFirst();
-		//					bb.clear();
-		//					return new Response(currentDomain, ResponseAction.READ);
-		//				} catch (Exception e) {
-		//					// seems there is no more domains, reply response to the
-		//					// client
-		//					TCSMPParser.multilinize(responses);
-		//					String res = responses.remove(0);
-		//					bb.clear();
-		//					bb.put(TCSMPParser.encode(res));
-		//					bb.flip();
-		//					if (responses.size() == 0) {
-		//						send = true;
-		//					}
-		//					return new Response(ResponseAction.WRITE);
-		//				}
-		//			}
-		//
-		//			// we are currently writing response to the client
-		//			if (responses.size() != 0) {
-		//				String res = responses.remove(0);
-		//				bb.clear();
-		//				bb.put(TCSMPParser.encode(res));
-		//				bb.flip();
-		//				// yeah we have finished
-		//				if (responses.size() == 0) {
-		//					send = true;
-		//				}
-		//				return new Response(ResponseAction.WRITE);
-		//			}
-		//
-		//			throw new AssertionError("response and domains list should not be empty");
-		//		}
-
+	
 		// are we in timeout
 		if (isTimeout())
 			return timeoutResponse(bb);
 		else
 			timeoutReset();
-
 
 		String [] args = TCSMPParser.parseCommand(bb);
 
@@ -175,6 +130,7 @@ public class ApzlServerState extends TCSMPState {
 			bb.put(ErrorReplies.unknowCommand("APZL", args[0]));
 			bb.flip();
 			error = true;
+			relayingState = ApzlState.SENDOK;
 			return new Response(ResponseAction.WRITE);
 		}
 
@@ -187,17 +143,16 @@ public class ApzlServerState extends TCSMPState {
 			bb.clear();
 			bb.put(TCSMPParser.encode("215 " + proto.getMyDomains().get(0) + " " + dim + "," + dim + " " + p.lineString() + "\r\n"));
 			bb.flip();
-			send = true;
+			relayingState = ApzlState.SENDOK;
 			return new Response(ResponseAction.WRITE);
 		}
 
+		// if we are here, it significates that we have to relay APZL command.
 		if (domains == null) {
 			// create a list with all the domain of the rctp
 			domains = new LinkedList<String>();
 			for (String r : proto.getRecpts()) {
 				try {
-					// XXX BOOOOOOOOOOO why do you do this to meh. Need only one appearance 
-					// of a domain even if two RCPTs have the same!
 					String domain = TCSMPParser.parseDomain(r); 
 					if (!domains.contains(domain))
 						domains.add(domain);
@@ -212,10 +167,8 @@ public class ApzlServerState extends TCSMPState {
 		bb.clear();
 		bb.put(TCSMPParser.encode("APZL\r\n"));
 		bb.flip();
-		relayed = true;
+		relayingState = ApzlState.RELAYED;
 		
-		
-		// send it to any RCPT
 		return new Response(currentDomain, ResponseAction.WRITE);
 	}
 
@@ -232,7 +185,10 @@ public class ApzlServerState extends TCSMPState {
 			try {
 				currentDomain = domains.getFirst();
 				bb.clear();
-				return new Response(currentDomain, ResponseAction.READ);
+				bb.put(TCSMPParser.encode("APZL\r\n"));
+				bb.flip();
+				relayingState = ApzlState.RELAYED;
+				return new Response(currentDomain, ResponseAction.WRITE);
 			} catch (Exception e) {
 				// seems there is no more domains, reply response to the
 				// client
@@ -241,14 +197,17 @@ public class ApzlServerState extends TCSMPState {
 				bb.clear();
 				bb.put(TCSMPParser.encode(res));
 				bb.flip();
+				relayingState = ApzlState.SENDRES;
 				if (responses.size() == 0) {
-					send = true;
+					relayingState = ApzlState.SENDOK;
 				}
 				return new Response(ResponseAction.WRITE);
 			}
 		}
 
 		// unknow error
+		error = true;
+		relayingState = ApzlState.SENDOK;
 		bb.clear();
 		bb.put(ErrorReplies.unexpectedError());
 		bb.flip();
