@@ -76,14 +76,14 @@ public class PkeyServerState extends TCSMPState {
 		// send OK ?
 		if (send) {
 			// state was in error, just need need READ
-			if (error == false && pzlok == true) {
-				proto.setState(new QuitServerState());
-			} else {
+//			if (error == false && pzlok == true) {
+//				//proto.setState(new QuitServerState());
+//			} else {
 				if (currentDomain != null)
 					proto.removePuzzleFor(currentDomain);
 				error = false;
 				send = false;
-			}
+//			}
 
 			bb.clear();
 			return new Response(ResponseAction.READ);
