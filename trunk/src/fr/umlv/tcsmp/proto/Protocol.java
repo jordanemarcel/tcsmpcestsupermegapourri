@@ -106,18 +106,18 @@ public class Protocol {
 		return defaultRelay;
 	}
 	
-	public void addMainError(String error) {
+	public void addMainError(String cmd, String error) {
 		if (mainErrors.length() != 0) {
 			mainErrors.append("\n");
 		}
-		mainErrors.append(error);
+		mainErrors.append(cmd).append(":  ").append(error);
 	}
 
 	public Map<String, StringBuilder> getDomainErrors() {
 		return domainErrors;
 	}
 
-	public void addErrorFor(String domain, String errorString) {
+	public void addErrorFor(String cmd, String domain, String errorString) {
 		StringBuilder errorBuilder;
 		errorBuilder = domainErrors.get(domain);
 		if (errorBuilder == null) {

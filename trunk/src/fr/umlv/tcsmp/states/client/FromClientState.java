@@ -45,7 +45,7 @@ public class FromClientState extends TCSMPState {
 				break;
 			default:
 				proto.setState(new QuitClientState());
-				proto.addMainError(list.get(0) + " " + list.get(1));
+				proto.addMainError("FROM", list.get(0) + " " + list.get(1));
 				break;
 			}
 
@@ -60,10 +60,10 @@ public class FromClientState extends TCSMPState {
 	public Response cancel(Protocol proto, ByteBuffer bb) {
 		bb.clear();
 		if (resp == ResponseAction.WRITE) {
-			proto.addMainError("Communication error while FROM'ing.");
+			proto.addMainError("FROM", "Communication error while FROM'ing.");
 		}
 		else {
-			proto.addMainError("Communication error while getting FROM response.");
+			proto.addMainError("FROM", "Communication error while getting FROM response.");
 		}
 		return new Response(ResponseAction.CLOSE);
 	}

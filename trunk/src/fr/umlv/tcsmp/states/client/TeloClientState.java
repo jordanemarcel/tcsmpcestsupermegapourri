@@ -52,7 +52,7 @@ public class TeloClientState extends TCSMPState {
 							quiteState = new QuitClientState();
 							proto.setState(quiteState);
 						}
-						proto.addMainError(list.get(i) + " " + list.get(i+1));
+						proto.addMainError("TELO", list.get(i) + " " + list.get(i+1));
 						break;
 					}
 				}
@@ -70,10 +70,10 @@ public class TeloClientState extends TCSMPState {
 	public Response cancel(Protocol proto, ByteBuffer bb) {
 		bb.clear();
 		if (resp == ResponseAction.WRITE) {
-			proto.addMainError("Communication error while TELO'ing.");
+			proto.addMainError("TELO", "Communication error while TELO'ing.");
 		}
 		else {
-			proto.addMainError("Communication error while getting TELO response.");
+			proto.addMainError("TELO", "Communication error while getting TELO response.");
 		}
 		return new Response(ResponseAction.CLOSE);
 	}

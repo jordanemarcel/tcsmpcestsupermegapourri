@@ -62,7 +62,7 @@ public class MailClientState extends TCSMPState {
 				case 503:
 				default:
 					proto.setState(new QuitClientState());
-					proto.addMainError(list.get(0) + " " + list.get(1));
+					proto.addMainError("MAIL", list.get(0) + " " + list.get(1));
 				}
 				bb.clear();
 				return proto.doIt(bb);
@@ -108,7 +108,7 @@ public class MailClientState extends TCSMPState {
 				case 554:
 				default:
 					proto.setState(new QuitClientState());
-					proto.addMainError(list.get(0) + " " + list.get(1));
+					proto.addMainError("MAIL", list.get(0) + " " + list.get(1));
 				}
 				bb.clear();
 				return proto.doIt(bb);
@@ -123,18 +123,18 @@ public class MailClientState extends TCSMPState {
 		bb.clear();
 		if (!sentRequest) {
 			if (resp == ResponseAction.WRITE) {
-				proto.addMainError("Communication error while MAIL'ing.");
+				proto.addMainError("MAIL", "Communication error while MAIL'ing.");
 			}
 			else {
-				proto.addMainError("Communication error while getting MAIL response.");
+				proto.addMainError("MAIL", "Communication error while getting MAIL response.");
 			}
 		}
 		else {
 			if (resp == ResponseAction.WRITE) {
-				proto.addMainError("Communication error while sending mail data.");
+				proto.addMainError("MAIL", "Communication error while sending mail data.");
 			}
 			else {
-				proto.addMainError("Communication error while response for the mailed data.");
+				proto.addMainError("MAIL", "Communication error while response for the mailed data.");
 			}
 		}
 		return new Response(ResponseAction.CLOSE);

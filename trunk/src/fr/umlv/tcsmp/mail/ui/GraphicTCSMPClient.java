@@ -171,8 +171,8 @@ public class GraphicTCSMPClient {
 					String mainErrors = p.getMainErrors();
 					Map<String, StringBuilder> domainErrors = p.getDomainErrors();
 					StringBuilder errorMsg = new StringBuilder();
-					if (errorMsg.length() != 0) {
-						errorMsg.append(mainErrors).append("\n");
+					if (!mainErrors.isEmpty()) {
+						errorMsg.append("   ").append(mainErrors).append("\n");
 					}
 					for(Map.Entry<String, StringBuilder> entry : domainErrors.entrySet()) {
 						errorMsg.append("   " + entry.getKey()).append(": ").append(entry.getValue());
@@ -182,7 +182,7 @@ public class GraphicTCSMPClient {
 						errorMsg.setLength(errorMsg.length() - 1);
 					}
 					if (errorMsg.length() != 0) {
-						errorMsg.insert(0, "Error(s) occured, concerning the following mail addresses/servers:\n");
+						errorMsg.insert(0, "Error(s) occured (eventually concerning the given mail addresses/servers) :\n");
 						errorMsg.append("\n\nOthers, if any, were sent successfully.");
 						JOptionPane.showMessageDialog(parent, errorMsg, "Error(s) sending mail", JOptionPane.ERROR_MESSAGE);
 					}
