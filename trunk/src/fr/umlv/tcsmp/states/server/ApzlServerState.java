@@ -51,6 +51,7 @@ public class ApzlServerState extends TCSMPState {
 		// wait reply from domain
 		if (waitreply == true) {
 			waitreply = false;
+			System.out.println("received : " + TCSMPParser.decode(bb));
 			responses.addAll(Arrays.asList(TCSMPParser.slipResponseLine(TCSMPParser.decode(bb))));
 			try {
 				currentDomain = domains.remove(0);
@@ -67,6 +68,11 @@ public class ApzlServerState extends TCSMPState {
 				}
 				return new Response(ResponseAction.WRITE);
 			}
+			bb.clear();
+			bb.put(TCSMPParser.encode("APZL\r\n"));
+			bb.flip();
+			relayed = true;
+			return new Response(currentDomain, ResponseAction.WRITE);
 		}
 		
 		if (sendresponse == true) {
