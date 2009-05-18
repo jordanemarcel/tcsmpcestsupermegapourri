@@ -533,6 +533,7 @@ public class TcpStructure {
 	}
 
 	private void closeSession(Protocol sessionProtocol) {
+		this.debug("Closing session...");
 		SocketData socketData = protocolDomainMap.get(sessionProtocol);
 		for(SocketChannel socketChannel: socketData.getClients()) {
 			this.closeSocket(socketChannel);
@@ -540,6 +541,7 @@ public class TcpStructure {
 		SocketChannel originalClient = socketData.getOriginalClient();
 		this.closeSocket(originalClient);
 		protocolDomainMap.remove(sessionProtocol);
+		this.debug("...done!");
 	}
 
 	private void closeSocket(SocketChannel socketChannel) {
