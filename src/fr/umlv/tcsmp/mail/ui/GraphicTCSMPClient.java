@@ -171,12 +171,23 @@ public class GraphicTCSMPClient {
 					String mainErrors = p.getMainErrors();
 					Map<String, StringBuilder> domainErrors = p.getDomainErrors();
 					StringBuilder errorMsg = new StringBuilder();
-					errorMsg.append(mainErrors).append("\n");
-					for(Map.Entry<String, StringBuilder> entry : domainErrors.entrySet()) {
-						errorMsg.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+					if (errorMsg.length() != 0) {
+						errorMsg.append(mainErrors).append("\n");
 					}
-					if (errorMsg.length() == 0) {
-						JOptionPane.showMessageDialog(parent, errorMsg.toString(), "Error(s) sending mail", JOptionPane.ERROR_MESSAGE);
+					for(Map.Entry<String, StringBuilder> entry : domainErrors.entrySet()) {
+						errorMsg.append("   " + entry.getKey()).append(": ").append(entry.getValue());
+					}
+					if (domainErrors.size() > 1) {
+						// remove useless \n
+						errorMsg.setLength(errorMsg.length() - 1);
+					}
+					if (errorMsg.length() != 0) {
+						errorMsg.insert(0, "Error(s) occured, concerning the following mail addresses/servers:\n");
+						errorMsg.append("\n\nOthers, if any, were sent successfully.");
+						JOptionPane.showMessageDialog(parent, errorMsg, "Error(s) sending mail", JOptionPane.ERROR_MESSAGE);
+					}
+					else {
+						JOptionPane.showMessageDialog(parent, "Wootz, you've sent mail!", "Success", JOptionPane.INFORMATION_MESSAGE);
 					}
 				} catch (ConnectException ce) {
 					JOptionPane.showMessageDialog(parent, "Connection refused!", "Error", JOptionPane.ERROR_MESSAGE);
