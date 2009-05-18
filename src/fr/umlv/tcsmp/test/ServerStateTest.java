@@ -19,9 +19,6 @@ public class ServerStateTest {
 			else
 				System.out.println(TCSMPParser.decode(bb));
 			break;
-		case RELAYALL:
-			System.out.print("ALL" + " -> " + TCSMPParser.decode(bb));
-			break;
 		case CLOSE:
 			System.out.println("CONNECTION CLOSED");
 			return true;
