@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -261,30 +262,39 @@ public class TcpStructure {
 				}
 				return;
 			case CLOSE:
-				this.debug("Close socket");
 				key.cancel();
-				this.closeSocket(socketChannel);
+				if(socketChannel==originalClient) {
+					this.closeSession(protocol);
+				} else {
+					this.closeSocket(socketChannel);
+				}
 				return;
 			}
-		} catch (ClosedChannelException e) {
-			System.err.println(e);
-			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
-			byteBuffer.clear();
-			Response cancelResponse = protocol.cancel(byteBuffer);
-			this.handleResponse(key, cancelResponse);
 		} catch (UnknownHostException e) {
 			System.err.println(e);
+			if(socketChannel==originalClient) {
+				this.closeSession(protocol);
+				return;
+			}
 			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
 		} catch (IOException e) {
 			System.err.println(e);
+			if(socketChannel==originalClient) {
+				this.closeSession(protocol);
+				return;
+			}
 			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
 			this.closeSocket(socketChannel);
+		} catch (CancelledKeyException cke) {
+			System.err.println("Session corrupted: abort!");
+			this.closeSession(protocol);
+			return;
 		}
 	}
 
@@ -350,10 +360,10 @@ public class TcpStructure {
 				socketChannel.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
 				return;
 			case CLOSE:
-				this.closeSocket(socketChannel);
+				this.closeSession(newServerProtocol);
 				return;
 			default:
-				this.closeSocket(socketChannel);
+				this.closeSession(newServerProtocol);
 			return;
 			}
 		} catch (IOException e) {
@@ -385,7 +395,13 @@ public class TcpStructure {
 			this.handleResponse(key, response);
 		} catch (IOException e) {
 			System.err.println(e);
-			this.closeSocket(socketChannel);
+			SocketChannel originalClient = protocolDomainMap.get(protocol).getOriginalClient();
+			if(socketChannel==originalClient) {
+				this.closeSession(protocol);
+				return;
+			} else {
+				this.closeSocket(socketChannel);
+			}
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
@@ -412,7 +428,13 @@ public class TcpStructure {
 			this.handleResponse(key, response);
 		} catch (IOException e) {
 			System.err.println(e);
-			this.closeSocket(socketChannel);
+			SocketChannel originalClient = protocolDomainMap.get(protocol).getOriginalClient();
+			if(socketChannel==originalClient) {
+				this.closeSession(protocol);
+				return;
+			} else {
+				this.closeSocket(socketChannel);
+			}
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
@@ -511,14 +533,21 @@ public class TcpStructure {
 	}
 
 	private void closeSession(Protocol sessionProtocol) {
-
+		SocketData socketData = protocolDomainMap.get(sessionProtocol);
+		for(SocketChannel socketChannel: socketData.getClients()) {
+			this.closeSocket(socketChannel);
+		}
+		SocketChannel originalClient = socketData.getOriginalClient();
+		this.closeSocket(originalClient);
+		protocolDomainMap.remove(sessionProtocol);
 	}
 
 	private void closeSocket(SocketChannel socketChannel) {
 		try {
+			this.debug("Closing socket...");
 			socketChannel.close();
 		} catch (IOException e1) {
-			System.err.println(e1);
+			//nothing to do, already closed
 		}
 	}
 
