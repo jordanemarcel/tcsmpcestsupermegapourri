@@ -21,7 +21,7 @@ public class Protocol {
 	private final List<String> myDomains; 
 	private TCSMPState state;
 	private final ProtocolMode protocolMode;
-	private int protocolPort = 26;
+	private int protocolPort = 2626;
 
 	private String clientDomain;
 	private String defaultRelay;
@@ -216,6 +216,7 @@ public class Protocol {
 		Protocol pr = new Protocol(mode);
 		pr.clientDomain = clientDomain;
 		pr.messageHandler = messageHandler;
+		pr.protocolPort = protocolPort;
 		pr.message.copy(message);
 		for (String d : myDomains) {
 			pr.myDomains.add(d);
