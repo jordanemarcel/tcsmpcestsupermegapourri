@@ -33,7 +33,7 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
  */
 public class TcpStructure {
 	/** Used for debug */
-	private static boolean debug = true;
+	private static boolean DEBUG = false;
 	/** Default TCP Application layer buffer size */
 	public static int BUFFER_SIZE = 1024;
 	/** Default timeout for the selector */
@@ -543,7 +543,7 @@ public class TcpStructure {
 	 * @param message - the debug message
 	 */
 	private void debug(Object message) {
-		if(debug) {
+		if(DEBUG) {
 			System.out.println(" *** Tcp Structure: " + message);
 		}
 	}
