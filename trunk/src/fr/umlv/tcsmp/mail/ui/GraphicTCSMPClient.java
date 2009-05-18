@@ -163,7 +163,9 @@ public class GraphicTCSMPClient {
 				p.setFrom(from);
 				p.setClientDomain(clientDomain);
 				p.setDefaultRelay(relay);
-				p.mail(header+mail+"\r\n.\r\n");
+				p.mail(header);
+				p.mail(mail);
+				p.mail("\r\n.\r\n");
 
 				try {
 					TcpStructure tcpStructure = new TcpStructure(resolver);
