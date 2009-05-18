@@ -39,7 +39,17 @@ public class ApzlServerState extends TCSMPState {
 
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
-
+		
+		// response has been sent... OK.
+		if (send) {
+			if (error == false)
+				proto.setState(new MailServerState());
+			else
+				send = error = false;
+			bb.clear();
+			return new Response(ResponseAction.READ);
+		}
+		
 		// relayed
 		if (relayed == true) {
 			relayed = false;
@@ -85,16 +95,7 @@ public class ApzlServerState extends TCSMPState {
 			}
 			return new Response(ResponseAction.WRITE);
 		}
-		
-		// response has been sent... OK.
-		if (send) {
-			if (error == false)
-				proto.setState(new MailServerState());
-			else
-				send = error = false;
-			bb.clear();
-			return new Response(ResponseAction.READ);
-		}
+
 
 		//		// we wait for response from domains
 		//		if (domains != null || responses != null) {
