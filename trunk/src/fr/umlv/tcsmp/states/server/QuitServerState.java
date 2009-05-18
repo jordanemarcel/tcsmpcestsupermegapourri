@@ -48,7 +48,6 @@ public class QuitServerState extends TCSMPState {
 		}
 		
 		if (send) {
-			timeoutClear();
 			bb.clear();
 			return new Response(ResponseAction.CLOSE);
 		}

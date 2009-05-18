@@ -17,5 +17,4 @@ public class clientTCSMP {
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setVisible(true);
 	}
-
 }

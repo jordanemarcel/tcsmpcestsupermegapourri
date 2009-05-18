@@ -169,6 +169,14 @@ public class GraphicTCSMPClient {
 					tcpStructure.processProtocol(p);
 					String mainErrors = p.getMainErrors();
 					Map<String, StringBuilder> domainErrors = p.getDomainErrors();
+					StringBuilder errorMsg = new StringBuilder();
+					errorMsg.append(mainErrors).append("\n");
+					for(Map.Entry<String, StringBuilder> entry : domainErrors.entrySet()) {
+						errorMsg.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+					}
+					if (errorMsg.length() == 0) {
+						JOptionPane.showMessageDialog(parent, errorMsg.toString(), "Error(s) sending mail", JOptionPane.ERROR_MESSAGE);
+					}
 				} catch (ConnectException ce) {
 					JOptionPane.showMessageDialog(parent, "Connection refused!", "Error", JOptionPane.ERROR_MESSAGE);
 				} catch(UnknownHostException uhe) {
