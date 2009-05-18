@@ -7,4 +7,5 @@ public interface DNSResolver {
 	
 	public InetAddress resolv(String host) throws UnknownHostException;
 
+	public void setServer(String server);
 }

@@ -18,7 +18,7 @@ import javax.naming.directory.InitialDirContext;
 public class TCSMPResolver implements DNSResolver {
 
 	/* DNS server to ask */
-	private final String server;
+	private String server;
 
 	private static final HashMap<String, InetAddress> hosts = new HashMap<String, InetAddress>();
 
@@ -78,6 +78,11 @@ public class TCSMPResolver implements DNSResolver {
 		throw new UnknownHostException();
 	}
 
+	@Override
+	public void setServer(String server) {
+		this.server = server;
+	}
+	
 	/*
 	public static void main(String[] args) throws UnknownHostException {
 

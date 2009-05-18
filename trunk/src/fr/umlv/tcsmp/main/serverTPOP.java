@@ -27,7 +27,7 @@ public class serverTPOP {
 		
 		try {
 			TcpStructure tcpStructure = new TcpStructure(new TCSMPResolver());
-			Protocol protocol = new Protocol(ProtocolMode.SERVER, 26);
+			Protocol protocol = new Protocol(ProtocolMode.SERVER, 2626);
 			protocol.addDomain(args[0]);
 			protocol.setMessageHandler(handler);
 			tcpStructure.processProtocol(protocol);
