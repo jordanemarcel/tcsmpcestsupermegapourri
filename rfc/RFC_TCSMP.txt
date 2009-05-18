@@ -1,0 +1,1606 @@
+
+
+Network Working Group                                                                                               Clément LEBRETON
+
+Category: Standards Track                                                                                          Clément LECIGNE
+                                                                                                                                    Jordane MARCEL
+                                                                                                                                    Rémy MASSON
+
+
+Time-Control Stamped Mail Protocol
+(TCSMP)
+
+
+1. Introduction
+---------------
+
+TCSMP is a client-server protocol meant to transfer mail reliably and to make transfers time consuming.
+While this can sound surprising, the time consumption is to be considered as a cost, ie. sending a mail actually costs time. The idea is to prevent spamming: sending a mail to one recipient could take less than 1 sec, while sending a mail to 50 could take 30 seconds!
+
+Now in order to do so, TCSMP relies on puzzle solving. More precisely, it uses Eternity puzzles which complexity evolves exponentially. The server sends a puzzle to the client, which has to solve it in order for its mail to be accepted by the server.
+
+2. The TCSMP model
+------------------
+
+2.1 Buffers and state
+
+TCSMP sessions are stateful, with both parties carefully maintaining a common view of the current state. In this document, we model this state by a virtual "buffer" and a "state table" on the server that may be used by the client to, for example, clear the buffer" or "reset the state table", causing the information in the buffer to be discarded and the state to be returned to some previous state.
+
+2.2 Eternity puzzles
+
+The time cost part of TCSMP is done through the solving of an Eternity puzzle. In TCSMP, these puzzles can only be rectangular, and the way to read one is the following: from the top left piece to the the bottom right piece, from left to right and top to bottom.
+
+Each piece is read in the following order: north, east, south, west.
+
+Here is an example. For the following Eternity puzzle:
+ A Z E
+E P P R R L
+ B X G
+ B X G
+H A A F F S
+ Q B I
+
+
+The
+reading goes that way: A P B E Z R X P E L G R B A Q H X F B A G S I
+F
+
+3. The TCSMP procedures
+-----------------------
+
+This
+section contains descriptions of the procedures used in TCSMP:
+session initiation, mail transaction, relaying, and opening and
+closing exchanges.
+
+3.1. Session initiation
+
+A TCSMP
+session is initiated when a client opens a connection to a server and
+the server responds with a 220 opening message, acknowledging the
+client. Server implementations may include additional pieces of
+information, such as identification, software name/version to the
+message.
+A server unwilling to acknowledge the client may answer
+with a 554 message, providing reasons for doing so in the
+complementary text. In such a case, the server should close the
+connection.
+
+3.2. Client initiation
+
+Once the client has
+received the 220 welcoming message, it must identify through the TELO
+command. This particular command will return the version of the TCSMP
+protocol used and the supported options.
+
+3.3. Mail
+transactions
+
+There are several steps involved in sending a
+mail:
+    - giving sender information through the
+FROM command
+    - giving receivers information
+through one or several RCPT commands
+    - asking
+for puzzle(s) through the APZL command
+    -
+sending mail data through the MAIL command
+    -
+answering puzzles through the PKEY command
+
+These steps are to
+be taken in order. If a command is issue when it shouldn't, server
+should reply with a 503 "Bad sequence of commands".
+
+3.3.1.
+Determining sender information
+
+FROM «reverse-path»
+«CRLF»
+
+This command tells the TCSMP server that a new
+mail transaction is starting. The reverse-path has to be given
+between "«" and "»" and only contains the
+source mailbox. If accepted, the server returns a "250 OK"
+reply. If it isn't, the server should indicate to the client the
+reason for nonacceptance, and whether it's temporary and
+permanent.
+Possible return codes are provided in the
+specifications section.
+
+3.3.2. Determining receiver
+information
+
+RCPT «forward-path1» [«forward-path2»
+«forward-path3»...] «CRLF»
+
+This command specifies
+to the TCSMP server that the mail is to be sent to the given
+forward-paths, which describe target mailboxes. If accepted, the
+server returns a "250 OK" reply. This command can be used
+several times to specify additional receipts.
+
+It is at this
+moment that the TCSMP server tries to figure which TCSMP server is
+responsible for the recipient's domain (if it is not itself
+responsible for it), and connect to it, feeding it with TELO, FROM
+and RCPT commands.
+After a successful connection to the TCSMP
+server, every commands it receives it relayed towards this
+server.
+
+If the recipient is known not to be a deliverable
+address, the TCSMP server returns a 550 reply, typically with a
+string such as "no such user -" and the mailbox name (other
+circumstances and reply codes are possible).
+Possible return codes
+are provided in the specifications section.
+
+3.3.3. Asking for
+puzzle(s)
+
+APZL «CRLF»
+
+The client uses this to
+notify the server it's waiting for puzzle(s). It will then get 215
+response codes if all goes well. The response can be multi-line. For
+2 puzzles, it will get:
+
+
+    215-domain w,h FOOBAR «CRLF»
+    215 domain w,h CACAHUETE «CRLF»
+domain corresponds to the domain who is asking the solution to the given puzzle.
+"w" and "h" are 2 numbers indicating the height and width of the matrix representing the puzzle.
+FOOBAR and CACAHUETE correspond to puzzles to solve.
+
+
+3.3.4
+Sending out mail data
+
+MAIL «CRLF»
+
+This command is
+used to indicate that data transfer is starting. Upon receipt, server
+returns a 354 intermediate code indicating it is now waiting for the
+data itself, which will contain all lines but the end of data
+line.
+The end of data is signaled by a line figuring only a dot
+".". Parsers should look for «CRLF».«CRLF»
+which when read will indicate data transmission is finished. Having
+read the end of data line, the server will reply by a "250 OK"
+message.
+
+A transparency procedure is used to prevent the end
+of line statement from interfering with the user’s text (see
+Section 4.4).
+
+The server should cache mail data long as the
+PKEY commands haven't been received for every APZL relayed.
+If a
+server relayed 5 APZL commands, it should wait 5 PKEY commands before
+deleting the mail data, unless connection is broken.
+
+3.3.5.
+Giving out puzzle(s) solution
+
+PKEY domain h,l ABCDEFG...
+«CRLF»
+
+This command is used to provide the server with a
+puzzle solution for a given domain.
+"h" and "l"
+are 2 numbers indicating the height and width of the matrix
+representing the puzzle.
+"ABCDEF..." represents the
+puzzle, each part being described by 4 characters, parts being read
+from top left to bottom right.
+
+If PKEY command is issued and
+server doesn't have the mail data to be sent, it will return through
+a 517 message, indicating that it is waiting for the data first
+because it doesn't have it. After having sent the data, the client
+will have to issue the PKEY command again.
+
+Two cases can
+happen here:
+    - solution was found correct:
+server responds with a 216 response code
+    -
+solution was found incorrect: server responds with a 516 response
+code
+
+3.4. Mail exchange records
+
+Implementations should
+suppose MX records point to TCSMP servers. As of now, most MX records
+point to SMTP, but we shall soon take over the mail delivery
+world!
+
+3.5. Behavior of relays
+
+The Internet being what
+it is, it is often required to go through relays to reach certain
+destinations. TCSMP servers can behave as relays in a transparent
+way, becoming the server for one side, and the client for the
+other.
+
+The idea is to duplicate every meaningful information
+to the other end.
+
+Soon as the RCPT command is issued, the
+first server - server A -, if it isn't responsible for the
+recipients' domains, contacts their TCSMP server which it find using
+MX records. It then become a client, issuing TELO, FROM and RCPT
+commands to server B. If errors occur at this point contacting the
+other server, server B, the first RCPT command issued by the original
+client fails with a XXX code. Additional information can be provided
+in the message.
+
+Soon as the relay server A gets both the mail
+data (through the MAIL command) and the puzzle solution (through PKEY
+command), it in turns issues those commands to the other server B.
+Server A returns codes corresponding to the ones server B
+provided.
+
+3.6. Terminating sessions and connections
+
+A
+TCSMP session should only be terminated when the client sends a QUIT
+command, to which the server will always reply positively.
+
+The
+server should in no circumstances close a connection when errors
+occur. There are only specific cases in which it will close it :
+   
+- when connection is refused for policy reasons
+   
+- after received a QUIT command and having replied it
+   
+- after detecting the need to shut down the TCSMP server, in which
+case it should issue a 421 response code (asynchronously at worse,
+assuming the client will receive it after next command)
+   
+- after a timeout occurs waiting for client input
+
+For
+robustness, TCSMP clients experiencing connection close, reset, or
+any other failure should consider a 451 response has been issued.
+
+4.
+SPECIFICATIONS
+-------------------------------
+
+4.1. TCSMP
+commands
+
+4.1.1. Commands semantics and syntax
+
+The TCSMP
+commands define the mail transfer or the original mail system
+function requested by the user. TCSMP commands are character strings
+terminated by a «CRLF». The commands themselves are four
+alphanumeric characters terminated by a «SPACE» if parameters
+follow or «CRLF» otherwise, it must always be specified in
+uppercase. TCSMP commands does not exceed 1024 bytes in size, «CRLF»
+sequence included. TCSMP receivers are encouraged to tolerate
+trailing white space before the terminating «CRLF». Each TCSMP
+commands are now discussed bellow.
+
+4.1.1.1. TELO command
+
+This
+command is used to identify the TCSMP client to the TCSMP server. The
+argument field should contain the fully-qualified domain name of the
+TCSMP client if one is available. A client TCSMP should always start
+a session by issuing this TELO command. If the TCSMP server supports
+the TCSMP service extensions it will give a successful response, a
+failure response or an error response.
+
+Syntax:
+
+   
+TELO [«SPACE» FQDN] «CRLF»
+
+A successful response
+from the TCSMP server will be a multi-line reply. The first one
+should be a "200 «SPACE» OK «CRLF»" followed by
+a list of response corresponding to the protocols and extra features
+supported by the server. This kind of response should follow the
+syntax "200 «SPACE» KEYWORD «CRLF»". For
+example, if a TCSMP server implements this RFC, it must return the
+following sequence when it receives a TELO command.
+
+  
+ 200-TCSMPV1
+    200 OK
+
+Like commands,
+keywords must always be specified in uppercase.
+
+4.1.1.2. FROM
+command
+
+This command is used to identify the issuer of the
+mail through his reverse-path. Reverse-path is the identifier of the
+sender and it must be given between "«" and "»".
+There must be just only one issuer so in case there are more than one
+FROM command issued then only the last one issuer will be
+considered.
+
+Syntax:
+
+    FROM «SPACE»
+«X@BINIOU» «CRLF»
+
+When it receives this command,
+the server should analyze the reverse-path and should reply to the
+client if it accepts delivery or not. If not it should indicate the
+reason for nonacceptance and whether it's temporary or
+permanent.
+
+4.1.1.3. RCPT command
+
+
+This command is used to identify an individual recipient of the message data; multiple recipients are specified by multiple use of this command. The argument field contains a forward-path between "«" and "»". The forward-path consists of the required destination message box. This command is well relayed by relay server until destination TCSMP server is reached. When this command reaches its ultimate destination, the TCSMP server inserts it into the destination message box in accordance with the specified name, ending server response replies with a 200 OK message if forward-path address exists and with an error otherwise.
+Syntax:
+    RCPT «Y@POUET» «CRLF»
+
+
+
+4.1.1.4.
+RSET command
+
+This command does not take any parameters. It
+specifies that the current TCSMP transaction will be aborted. Any
+stored sender, recipients, puzzle and mail data MUST be discarded by
+servers. The receiver MUST send a "250 OK" reply to a
+successful RSET command. A RSET command can be issued at any time of
+the transaction. This command has the same effect of the NOOP command
+if issued just after a TELO command.
+
+A TCSMP server MUST NOT
+close the connection as the result of receiving a RSET, that is the
+purpose of the QUIT command.
+
+Since TELO implies some
+additional processing by the server, a RSET command will normally be
+more efficient than reissuing a TELO one even if the end result is
+the same.
+
+Syntax:
+
+    RSET
+«CRLF»
+
+4.1.1.5. NOOP command
+
+This command does
+not take any parameters and does not affect previously entered
+commands and buffers. It specifies no action except that the receiver
+MUST send an OK reply in response.
+
+If a parameter string is
+specified, servers SHOULD ignore it.
+
+Syntax:
+
+  
+ NOOP «CRLF»
+
+4.1.1.6. APZL command
+
+This
+command is used to request the puzzle(s) to resolve in order to be
+able to send a message to the different recipients. This command is
+issued just before sending the MAIL command. When receiving this
+command, each relay MUST generate a new APZL command for each domain
+found in its recipient buffer.
+
+Syntax:
+
+   
+APZL
+
+
+When this command reaches its ultimate destination, TCSMP server replies with the puzzle in the reply data. Reply from ending server will look like:
+    215 domain w,h ABCDEFGH
+domain corresponds to a domain which identify the ending server, w and h correspond respectively to the width and the height of the puzzle, following this two numbers is the data of the puzzle, order of the puzzle has been discussed in section 2.3.
+When forwarding theses commands, relay must wait all replies (with a timeout) from the different TCSMP server and response to the client with a multi-line replies containing all puzzles.
+For example, if relay A sends APZL command to two different domains, its reply will look like:
+    215-domain w,h FOOBAR
+    215 domain w,h CACAHUETE
+
+
+
+4.1.1.7.
+PKEY command
+
+This command is issued by the client to send the
+solved puzzle. Before sending this command, a MAIL command SHOULD
+have been issued. If it is not the case, the TCSMP server MUST reply
+with an error code 517.
+
+When client has solved one puzzle, it
+sends immediately the solution through this command.
+
+Syntax:
+
+   
+PKEY domain w,h BARFOO
+
+Command parameters are the same than
+the reply issued when server receives APZL command. The last argument
+corresponds to the solution of the puzzle and it must be the unique
+parameter which differs from the original one found in the APZL
+reply.
+
+This command is relayed by TCSMP relay to the well
+ending server which replies with a "216 solving OK" in case
+the solved puzzle is good and with a "516 solving ERROR"
+otherwise.
+
+
+4.1.1.8. MAIL command
+
+
+This command
+is issued by the TCSMP client without any parameters and in order to
+send message data to the TCSMP receiver.
+
+The TCSMP receiver
+normally reply with a 354 response to MAIL, and then treats the lines
+following the command as mail data from the sender. This command
+causes the mail data to be appended to the mail data buffer. The mail
+data may contain any of the 128 ASCII character codes, although
+experience has indicated that use of control characters other than
+SP, HT, CR, and LF may cause problems and SHOULD be avoided when
+possible.
+
+The message data is terminated by a line containing
+only a period, that is, the character sequence "«CRLF».«CRLF»".
+This is the end of message data indication. Note that the first
+«CRLF» of this terminating sequence is also the «CRLF»
+that ends the final line of the data (message text) or, if there was
+no data, ends the MAIL command itself. An extra «CRLF» MUST NOT
+be added, as that would cause an empty line to be added to the
+message.
+
+The custom of accepting lines ending only in «LF»,
+as a concession to non-conforming behavior on the part of some UNIX
+systems, has proven to cause more interoperability problems than it
+solves, and TCSMP server systems MUST NOT do this, even in the name
+of improved robustness. In particular, the sequence "«LF».«LF»"
+(bare line feeds, without carriage returns) MUST NOT be treated as
+equivalent to «CRLF».«CRLF» as the end of mail data
+indication.
+
+When receiver receives the ending «CRLF».«CRLF»
+which means that the message data is terminated, it MUST start the
+processing of the message data. If this processing is successful, the
+receiver MUST send an OK reply. If the processing fails the receiver
+MUST send a failure reply. The TCSMP model does not allow for partial
+failures at this point: either the message is accepted by the server
+for delivery and a positive response is returned or it is not
+accepted and a failure reply is returned. In sending a positive
+completion reply to the end of data indication, the receiver takes
+full responsibility for the message.
+
+When the TCSMP server
+accepts a message either for relaying or for final delivery, it
+inserts a trace record (also referred to interchangeably as a "time
+stamp line" or "Received" line) at the top of the mail
+data. This trace record indicates the identity of the host that sent
+the message, the identity of the host that received the message (and
+is inserting this time stamp), and the date and time the message was
+received. Relayed messages will have multiple time stamp
+lines.
+
+Syntax:
+    MAIL «CRLF»
+
+
+4.1.1.9.
+QUIT command
+
+This command specified that the receiver MUST
+send an OK reply and then close the communication. Receiver or sender
+MUST NOT intentionally close the communication without receiving or
+sending a QUIT command even if there was an error. Moreover QUIT
+reply must be waited by the issuer before closing the
+connection.
+
+The QUIT command may be issued at any
+time.
+
+Syntax:
+
+    QUIT «CRLF»
+
+
+4.2.
+TCSMP replies
+
+4.2.1. General syntax
+
+Replies to TCSMP
+commands serve to ensure the synchronization of requests and actions
+issued by sender or receiver and to guarantee that the TCSMP client
+always know the state of the server. Every command MUST generate at
+least one reply.
+
+An TCSMP reply consists of a three digit
+number transmitted as numeric characters at the beginning and
+followed by some text. The number is for use by automate to determine
+what state to enter next, the text, in most case, is for the human
+user. The three digits contain enough encoded information that the
+TCSMP client don't need to parse text to take the appropriate action.
+In the general case, the text may be receiver dependent and context
+dependent, so there are likely to be varying texts for each reply
+code. Formally a reply is defined to be the sequence:
+
+  
+ xyz «SPACE» one-text-line «CRLF»
+
+Only the
+TELO, APZL and HELP commands are expected to result in multi-line
+replies. In multi-line replies, the last reply has the normal form
+(xyz «SPACE» one-text-line «CRLF» whereas other replies
+(before the last reply) are defined by replacing the «SPACE»
+after the digits by a «HIPHEN» ("-") for the first
+replies. For example here is a sample multi-line reply issued when
+server receives TELO command.
+
+    200-TCSMPV1
+  
+ 200 OK
+
+The list of codes that appears below MUST NOT be
+construed as permanent. While the addition of new codes should be a
+rare and significant activity. Therefore, a TCSMP sender MUST be
+prepared to handle codes not specified in this document and MUST do
+so by interpreting the first digit only.
+
+4.2.2. Reply code
+severities and theory
+
+Each digit of the server reply have a
+special significance. The first digit denotes whether the response is
+good, bad or incomplete. A very simple TCSMP client, or one that
+receives an unexpected reply, will be able to determine its
+appropriate next action by examining the first digit of the reply. A
+sophisticated TCSMP client may examine the second digit to know what
+kind of error occurred. The third digit and any supplemental
+information that may be present is reserved for the finest gradation
+of information.
+
+There are five values for the first digit of
+the reply code:
+
+1yz   Positive Preliminary reply
+ 
+The command has been accepted, but the requested action is being
+ 
+held in abeyance, pending confirmation of the information in this
+ 
+reply. The TCSMP client should send another command specifying
+ 
+whether to continue or abort the action. Note: protocol TCSMP
+ 
+described in this RFC does not contain commands that generate
+ 
+this kind of reply code.
+
+2yz   Positive Completion
+reply
+  The requested action has been successfully completed.
+A new
+  request may be initiated.
+
+3yz  
+Positive Intermediate reply
+  The command has been accepted,
+but the requested action is being
+  held in abeyance, pending
+receipt of further information. The
+  SMTP client should send
+another command specifying this
+  information. This reply is
+used in command sequence groups (i.e.,
+  in MAIL).
+
+4yz  
+Transient Negative Completion reply
+  The command was not
+accepted, and the requested action did not
+  occur. However,
+the error condition is temporary and the action
+  may be
+requested again. The sender should return to the beginning
+ 
+of the command sequence (if any). A rule of thumb to determine
+ 
+whether a reply fits into the 4yz or the 5yz category (see below)
+ 
+is that replies are 4yz if they can be successful if repeated
+ 
+without any change in command form or in properties of the sender
+ 
+or receiver (that is, the command is repeated identically and the
+ 
+receiver does not put up a new implementation.)
+
+5yz  
+Permanent Negative Completion reply
+  The command was not
+accepted and the requested action did not
+  occur. The TCSMP
+client is discouraged from repeating the exact
+  request (in
+the same sequence). Even some "permanent" error
+ 
+conditions can be corrected, so the human user may want to direct
+ 
+the TCSMP client to re-initiate the command sequence by direct
+ 
+action at some point in the future (e.g., after the spelling has
+ 
+been changed, or the user has altered the account status).
+
+The
+second digit encodes responses in specific categories:
+
+x0z
+Syntax: These replies refer to syntax errors, syntactically
+  
+ correct commands that do not fit any functional category,
+and
+    unimplemented or superfluous commands.
+
+x1z
+Information: These are replies to requests for information,
+   
+such as status or help.
+
+x2z Connections: These are replies
+referring to the transmission
+    channel.
+
+x3z
+Unspecified.
+
+x4z Unspecified.
+
+x5z Message system: These
+replies indicate the status of the receiver
+   
+TCSMP system vis-a-vis the requested transfer or other mail
+system
+    action.
+
+The third digit gives a
+finer gradation of meaning in each category specified by the second
+digit. The list of replies illustrates this. The reply codes must
+strictly follow the specifications in this section. Receiver
+implementation should not invent new codes for slightly different
+situations from the ones described here but it could adapt codes
+already defined.
+
+For instance, a command such as NOOP will
+result as a 250 reply since it does not offer any new information to
+the TCSMP client. A 502 code reply is when the command requests an
+unimplemented action and a refinement of that is the 504 reply for a
+command that is implemented but that requests an unimplemented
+parameter.
+
+The reply text may be longer than a single line; in
+these cases the complete text must be marked so the TCSMP client
+knows when it can stop reading the reply.  This requires a
+special format to indicate a multiple line reply.
+
+The format
+for multi-line replies requires that every line, except the last,
+begin with the reply code, followed immediately by a hyphen, "-"
+(also known as minus), followed by text. The last line will begin
+with the reply code, followed immediately by «SPACE»,
+optionally some text, and «CRLF».
+
+4.2.3. Reply codes by
+function groups
+
+500 Syntax error, command unrecognized. This
+may include errors such as command line too long.
+501 Syntax error
+in parameters or arguments
+502 Command not implemented (see
+section 4.2.2)
+503 Bad sequence of commands
+504 Command
+parameter not implemented (see section 4.2.2)
+515 Puzzle
+generation has failed
+516 Puzzle solution in incorrect
+517 No
+message has been recorder
+
+211 System status, or system help
+reply
+214 Help message
+     (Information on how
+to use the receiver or the meaning of a
+    
+particular non-standard command; this reply is useful only
+  
+  to the human user)
+215 Puzzle reply
+216 Puzzle solution
+is correct
+
+
+
+220 «domain» Service ready
+221
+«domain» Service closing transmission channel
+421 «domain»
+Service not available, closing transmission channel
+        
+(This may be a reply to any command if the service knows it
+        
+must shut down)
+
+250 Requested mail action okay, completed
+251
+User not local; will forward to «forward-path»
+450 Requested
+message action not taken: messagebox unavailable (e.g., messagebox
+busy)
+550 Requested action not taken: mailbox unavailable
+        
+(e.g., mailbox not found, no access, or command rejected
+        
+for policy reasons)
+451 Requested action aborted: error in
+processing
+551 User not local
+452 Requested action not taken:
+insufficient system storage
+552 Requested mail action aborted:
+exceeded storage allocation
+553 Requested action not taken:
+mailbox name not allowed
+354 Start data input; end with
+«CRLF».«CRLF»
+554 Transaction failed
+
+4.2.4 
+Reply codes in numeric order
+
+211 System status, or system help
+reply
+214 Help message
+215 Puzzle reply
+216 Puzzle solution
+is correct
+220 «domain» Service ready
+221 «domain»
+Service closing transmission channel
+250 Requested mail action
+okay, completed
+251 User not local; will forward to
+«forward-path»
+354 Start data input; end with
+«CRLF».«CRLF»
+421 «domain» Service not
+available, closing transmission channel
+        
+(This may be a reply to any command if the service knows it
+        
+must shut down)
+
+450 Requested message action not taken:
+messagebox unavailable (e.g., messagebox busy)
+451 Requested
+action aborted: local error in processing
+452 Requested action not
+taken: insufficient system storage
+
+500 Syntax error, command
+unrecognized
+501 Syntax error in parameters or arguments
+502
+Command not implemented (see section 4.2.2)
+503 Bad sequence of
+commands
+504 Command parameter not implemented (see section
+4.2.2)
+515 Puzzle generation has failed
+516 Puzzle solution in
+incorrect
+517 No message has been recorded
+550 Requested action
+not taken: mailbox unavailable
+551 User not local; please try
+«forward-path»
+552 Requested mail action aborted: exceeded
+storage allocation
+553 Requested action not taken: mailbox name
+not allowed
+554 Transaction failed
+
+4.2.5 Reply code
+502
+
+Reply code 502 SHOULD be used when the command is actually
+recognized by the TCSMP server, but not implemented.  If the
+command is not recognized, code 500 SHOULD be returned.
+
+4.2.6
+Command-reply sequences
+
+Each command is listed with its usual
+possible replies. The prefixes used before the possible replies are
+"I" for intermediate, "S" for success, and "E"
+for error. Since some servers may generate other replies under
+special circumstances, and to allow for future extension, TCSMP
+clients SHOULD, when possible, interpret only the first digit of the
+reply and MUST be prepared to deal with unrecognized reply codes by
+interpreting the first digit only.
+
+TCSMP servers MUST NOT
+transmit reply codes to an TCSMP client that are other than three
+digits or that do not start in a digit between 2 and 5 inclusive.
+
+In
+addition to the codes listed below, any SMTP command can return any
+of the following codes if the corresponding unusual circumstances are
+encountered:
+
+500  For the "command line too long"
+case or if the command name was
+     not
+recognized.
+
+501  Syntax error in command or arguments.
+Commands not accepting arguments (MAIL, RSET, QUIT) SHOULD return a
+501 message if arguments are supplied.
+
+421  Service
+shutting down and closing transmission channel
+
+Specific
+sequences are:
+
+  CONNECTION ESTABLISHMENT
+    
+S: 220
+     E: 554
+  TELO
+    
+S: 250
+     E: 504, 550
+  RCPT
+     
+S: 250, 251
+      E: 550, 551, 552, 553,
+450, 451, 452, 503, 550
+  MAIL
+     
+I: 354
+      E: 451, 554, 503,
+ 
+RSET
+      S: 250
+  APZL
+     
+S: 215
+      E: 515
+  PKEY
+     
+S: 216
+      E: 516,517
+  HELP
+     
+S: 211, 214
+      E: 502, 504
+ 
+NOOP
+      S: 250
+  QUIT
+     
+S: 221
+
+
+4.2.7 Minimum implementation
+
+In order to
+make TCSMP workable, the following commands are required for all
+receiver in order to have a minimum implementation.
+
+ 
+TELO
+  MAIL
+  FROM
+  RCPT
+  APZL
+ 
+PKEY
+  MAIL
+  RSET
+  NOOP
+ 
+QUIT
+
+4.3. Sizes and timeouts
+
+4.3.1. Size limits and
+minimums
+
+This section summarizes the different size limits
+which can be found in the protocol implementation.
+
+command
+line:
+    The maximum total length of a command
+line including the command work and the «CRLF» ending is 1024
+characters.
+
+reply line:
+    The maximum
+total length of a reply line including the three digit code and the
+«CRLF» ending is 1024 characters.
+
+text line:
+  
+ The maximum total length of a text line in a message (during
+MAIL command) with the «CRLF» ending is 1024
+characters.
+
+
+Errors due to exceeding these limits may be
+reported by using the appropriate reply codes. Some examples of reply
+codes are:
+
+500 Line too long
+   or
+501 Path
+too long
+   or
+452 Too many recipients  (see
+below)
+   or
+552 Too much mail data.
+
+4.3.2.
+Timeouts
+
+A TCSMP client and server MUST provide a timeout
+mechanism. It MUST use per-command timeouts rather than a global
+timeout on the entire TCSMP connection. Moreover timeouts MUST be
+local to each TCSMP connection, for instance one TCSMP relay server
+will set at least two timeouts, one on the client side and the other
+on the server part (assuming it is connected to only one server).
+Timeouts SHOULD be easily reconfigurable, preferably without
+recompiling any code. To implement this, a timer is set for each
+TCSMP command and for each internal buffers. The later means that the
+overall timeout is proportional to the internal buffer sizes.
+
+Based
+on extensive experience with TCSMP, the minimum per-command timeout
+values SHOULD be as follow:
+
+Initial 220 Message: 5 minutes
+  
+ A TCSMP client process needs to distinguish between a failed
+TCP connection and a delay in receiving the initial 220 greeting
+message.
+
+   RCPT Command: 5 minutes
+     
+A longer timeout is required if processing of mailing lists.
+
+  
+MAIL Initiation: 2 minutes
+      This is
+while awaiting the "354 Start Input" reply to a MAIL
+     
+command.
+
+   MAIL Termination: 10 minutes.
+     
+This is while awaiting the "250 OK" reply. When the
+receiver gets
+      the final period
+terminating the message data, it typically
+     
+performs processing to deliver the message to a user mailbox.
+
+
+More
+generally, a TCSMP server SHOULD have a timeout of at least 5 minutes
+while it is awaiting the next command from the sender.
+
+When a
+timeout occurs on the client connection, the TCSMP server previously
+connected to the client MUST close connections from servers which
+have been opened by the client. To do that, the TCSMP server MUST
+send a QUIT request just before closing connection.
+
+When a
+timeout occurs on the server side connection, the alive TCSMP server
+on the client side MUST register the timeouts occurred then it will
+respond with a
+421 error reply indicating the domain that felt
+into a timeout on the next command issued by the client. The error
+reply can be multi-line if there is more than one connection has been
+stopped.
+
+4.4. Transparency
+
+Without some provision for
+data transparency, the character sequence "«CRLF».«CRLF»"
+ends the mail text and cannot be sent by the user.
+In general,
+users are not aware of such "forbidden" sequences. To allow
+all user composed text to be transmitted transparently, the following
+procedures are used:
+    - Before sending a line of
+mail text, the SMTP client checks the first character of the line. If
+it is a period, one additional period is inserted at the beginning of
+the line.
+    - When a line of mail text is
+received by the SMTP server, it checks the line. If the line is
+composed of a single period, it is treated as the end of mail
+indicator. If the first character is a period and there are other
+characters on the line, the first character is deleted.
+
+The
+mail data may contain any of the 128 ASCII characters. All characters
+are to be delivered to the recipient’s mailbox, including spaces,
+vertical and horizontal tabs, and other control characters. If the
+transmission channel provides an 8-bit byte (octet) data stream, the
+7-bit ASCII codes are transmitted, right justified, in the octets,
+with the high-order bits cleared to zero. See Section 3.6 for special
+treatment of these conditions in SMTP systems serving a relay
+function.
+In some systems, it may be necessary to transform the
+data as it is received and stored. This may be necessary for hosts
+that use a different character set than ASCII as their local
+character set, that store data in records rather than strings, or
+which use special character sequences as delimiters inside mailboxes.
+If such transformations are necessary, they MUST be reversible,
+especially if they are applied to mail being relayed.
+
+
+
+
+
+4.5.
+Receiving strategy
+
+
+
+
+
+
+
+The
+TCSMP server SHOULD attempt to keep a pending listen on the SMTP port
+26 at all times. This requires the support of multiple incoming TCP
+connections for TCSMP.
+
+
+5. SCENARII
+-----------
+
+5.1.
+A Typical TCSMP Transaction Scenario
+
+This TCSMP example shows
+mail sent by Albert at host home.com to Bernard, Cyril and David at
+host paris.com. Here we assume that host home.com contacts host
+paris.com directly. The mail is accepted for Albert and Cyril. David
+does not have a mailbox at host paris.com.
+
+     
+S: 220 paris.com Time Control Stamped Mail Protocol
+     
+C: TELO paris.com
+      S: 250-paris.com
+greets home.com
+      S: 250 TCSMPv1
+     
+C: FROM «albert@home.com»
+      S:
+250 OK
+      C: RCPT
+«bernard@paris.com»
+      S: 250
+OK
+      C: RCPT «cyril@paris.com»
+     
+S: 250 OK
+      C: RCPT
+«david@paris.com»
+      S: 550
+unknown user
+      C: APZL
+     
+S: 215 paris.com 2,2 DCAIHEECBGDFGBFD
+     
+C: MAIL
+      S: 354 Start mail input;
+end with «CRLF».«CRLF»
+     
+C: Date: Fri, 10 April 2009 02:15:29 +0100
+     
+C: From: Albert A. «albert@home.com»
+     
+C: To: Bernard Guilé «bernard@paris.com»,
+     
+C: Cyril Yette «cyril@paris.com»,
+     
+C: David Eho «david@paris.com»
+      C:
+Subject: Need of Camembert
+      C:
+     
+C: Hi everybody,
+      C: I'm going to
+France next week, would you be
+      C:
+interested in some creamy camembert?
+     
+C: Let me know! Albert.
+      C: .
+     
+S: 250 OK
+      C: PKEY paris.com 2,2
+ABCDEFGBCDEFGHID
+      S: 216 your mail has
+been kept!
+      C: QUIT
+     
+S: 221 paris.com See you next time!
+
+
+
+
+
+
+
+
+
+
+
+
+5.2. 
+Aborted TCSMP Transaction Scenario
+
+     
+S: 220 paris.com Time Control Stamped Mail Protocol
+     
+C: TELO paris.com
+      S: 250-paris.com
+greets home.com
+      S: 250 TCSMPv1
+     
+C: FROM «albert@home.com»
+      S:
+250 OK
+      C: RCPT
+«bernard@paris.com»
+      S: 250
+OK
+      C: RCPT «cyril@paris.com»
+     
+S: 250 OK
+      C: QUIT
+     
+S: 221 paris.com See you next time!
+
+
+
+5.3.  Relayed
+Mail Scenario
+
+This TCSMP example introduces one relay in this
+TCSMP transaction. Albert at host home.com wants to send a mail to
+Bernard, Cyril and David at host paris.com. Albert's TCSMP client is
+configured to use the relay london.com though. In the sequence
+diagram below, C represents the Client (home.com), S represents the
+Server (paris.com) and R represents the Relay (london.com). David is
+unavailable at paris.com.
+C-»R means that the client C sends a
+message to the relay R. C cannot communicates directly with S and
+vice-versa.
+
+    R-»C: 220 london.com Time
+Control Stamped Mail Protocol
+    C-»R: TELO
+london.com
+    R-»C: 250-london.com greets
+home.com
+    R-»C: 250 TCSMPv1
+   
+C-»R: FROM «albert@home.com»
+    R-»C:
+250 OK
+    C-»R: RCPT «bernard@paris.com»
+  
+         S-»R: 220 paris.com
+Time Control Stamped Mail Protocol
+      
+     R-»S: TELO paris.com
+   
+        S-»R: 250-paris.com greets
+london.com
+           
+S-»R: 250 TCSMPv1
+           
+R-»S: FROM «albert@home.com»
+      
+     S-»R: 250 OK
+      
+     R-»S: RCPT «bernard@paris.com»
+     
+      S-»R: 250 OK
+    R-»C:
+250 OK
+    C-»R: RCPT «cyril@paris.com»
+  
+         R-»S: RCPT
+«cyril@paris.com»
+        
+   S-»R: 250 OK
+    R-»C: 250 OK
+  
+ C-»R: RCPT «david@paris.com»
+      
+     R-»S: RCPT «david@paris.com»
+     
+      S-»R: 550 unknown user
+   
+R-»C: 550 unknown user
+    C-»R: APZL
+  
+         R-»S: APZL
+  
+         S-»R: 215 paris.com
+2,2 DCAIHEECBGDFGBFD
+    R-»C: 215 paris.com 2,2
+DCAIHEECBGDFGBFD
+    C-»R: MAIL
+   
+R-»C: 354 Start mail input; end with «CRLF».«CRLF»
+   
+C-»R: Date: Fri, 10 April 2009 02:15:29 +0100
+   
+C-»R: From: Albert A. «albert@home.com»
+   
+C-»R: To: Bernard Guilé «bernard@paris.com»,
+   
+C-»R: Cyril Yette «cyril@paris.com»,
+   
+C-»R: David Eho «david@paris.com»
+   
+C-»R: Subject: Need of Camembert
+    C-»R:
+   
+C-»R: Hi everybody,
+    C-»R: I'm going to
+France next week, would you be
+    C-»R:
+interested in some creamy camembert?
+    C-»R:
+Let me know! Albert.
+    C-»R: .
+   
+R-»C: 250 OK
+    C-»R: PKEY paris.com 2,2
+ABCDEFGBCDEFGHID
+          
+ R-»S: MAIL
+           
+S-»R: 354 Start mail input; end with «CRLF».«CRLF»
+   
+        R-»S: Date: Fri, 10 April
+2009 02:15:29 +0100
+          
+ R-»S: From: Albert A. «albert@home.com»
+   
+        R-»S: To: Bernard Guilé
+«bernard@paris.com»,
+          
+ R-»S: Cyril Yette «cyril@paris.com»,
+   
+        R-»S: David Eho
+«david@paris.com»
+           
+R-»S: Subject: Need of Camembert
+      
+     R-»S:
+      
+     R-»S: Hi everybody,
+   
+        R-»S: I'm going to France
+next week, would you be
+           
+R-»S: interested in some creamy camembert?
+   
+        R-»S: Let me know!
+Albert.
+           
+R-»S: .
+           
+S-»R: 250 OK
+           
+R-»S: PKEY paris.com 2,2 ABCDEFGBCDEFGHID
+     
+      S-»R: 216 your mail has been kept!
+   
+R-»C: 216 your mail has been kept!
+    C-»R:
+QUIT
+    R-»C: 221 london.com See you next
+time!
+           
+R-»S: QUIT
+           
+S-»R: 221 paris.com See you next time!
+
+
+5.4. 
+Relayed Mail Scenario, two destination servers
+
+This TCSMP
+example reuses the architecture of the example 5.3. However, a second
+destination server is added: bruxelles.com.
+Albert at host
+home.com wants now to send a mail to Bernard and Cyril at host
+paris.com and Gérard at host bruxelles.com. Albert's TCSMP client is
+configured to use the relay london.com. In the sequence diagram
+below, C represents the Client (home.com), Sp represents the Server
+of paris.com, Sb represents the server of bruxelles.com and R
+represents the Relay (london.com).
+Like before, C-»R means that
+the client C sends a message to the relay R. C cannot communicates
+directly with Sp and Sb and vice-versa.
+
+   
+R-»C: 220 london.com Time Control Stamped Mail Protocol
+   
+C-»R: TELO london.com
+    R-»C:
+250-london.com greets home.com
+    R-»C: 250
+TCSMPv1
+    C-»R: FROM «albert@home.com»
+   
+R-»C: 250 OK
+    C-»R: RCPT
+«bernard@paris.com»
+           
+Sp-»R: 220 paris.com Time Control Stamped Mail Protocol
+   
+        R-»Sp: TELO paris.com
+   
+        Sp-»R: 250-paris.com greets
+london.com
+           
+Sp-»R: 250 TCSMPv1
+           
+R-»Sp: FROM «albert@home.com»
+      
+     Sp-»R: 250 OK
+      
+     R-»Sp: RCPT «bernard@paris.com»
+     
+      Sp-»R: 250 OK
+   
+R-»C: 250 OK
+    C-»R: RCPT
+«cyril@paris.com»
+           
+R-»Sp: RCPT «cyril@paris.com»
+     
+      Sp-»R: 250 OK
+   
+R-»C: 250 OK
+    C-»R: RCPT
+«gerard@bruxelles.com»
+           
+        Sb-»R: 220 bruxelles.com
+Time Control Stamped Mail Protocol
+      
+             R-»Sb:
+TELO bruxelles.com
+           
+        Sb-»R: 250-bruxelles.com
+greets london.com une fois
+           
+        Sb-»R: 250 TCSMPv1 une
+fois
+              
+     R-»Sb: FROM «albert@home.com»
+   
+              
+ Sb-»R: 250 OK une fois
+
+
+                    R-»Sb:
+RCPT «gerard@bruxelles.com» 
+
+
+
+                    
+   
+R-»C: 250 OK
+    C-»R: APZL
+  
+         R-»Sp: APZL
+  
+               
+ R-»Sb: APZL
+           
+Sp-»R: 215 paris.com 2,2 DCAIHEECBGDFGBFD
+      
+             Sb-»R:
+215 bruxelles.com 2,2 FFFRRRIIITTTEESS
+    R-»C:
+215-paris.com 2,2 DCAIHEECBGDFGBFD
+    R-»C: 215
+bruxelles.com 2,2 FFFRRRIIITTTEESS
+    C-»R:
+MAIL
+    R-»C: 354 Start mail input; end with
+«CRLF».«CRLF»
+    C-»R: Date: Fri,
+10 April 2009 02:15:29 +0100
+    C-»R: From:
+Albert A. «albert@home.com»
+    C-»R: To:
+Bernard Guilé «bernard@paris.com»,
+    C-»R:
+Cyril Yette «cyril@paris.com»,
+    C-»R:
+Gerard Moulefrite «gerard@bruxelles.com»
+   
+C-»R: Subject: Need of Camembert
+    C-»R:
+   
+C-»R: Hi everybody,
+    C-»R: I'm going to
+France next week, would you be
+    C-»R:
+interested in some creamy camembert?
+    C-»R:
+Let me know! Albert.
+    C-»R: .
+   
+R-»C: 250 OK
+    C-»R: PKEY paris.com 2,2
+ABCDEFGBCDEFGHID
+          
+ R-»Sp: MAIL
+           
+Sp-»R: 354 Start mail input; end with «CRLF».«CRLF»
+   
+        R-»Sp: Date: Fri, 10 April
+2009 02:15:29 +0100
+          
+ R-»Sp: From: Albert A. «albert@home.com»
+   
+        R-»Sp: To: Bernard Guilé
+«bernard@paris.com»,
+          
+ R-»Sp: Cyril Yette «cyril@paris.com»,
+   
+        R-»Sp: Gerard Moulefrite
+«gerard@bruxelles.com»
+           
+R-»Sp: Subject: Need of Camembert
+      
+     R-»Sp:
+      
+     R-»Sp: Hi everybody,
+   
+        R-»Sp: I'm going to France
+next week, would you be
+           
+R-»Sp: interested in some creamy camembert?
+   
+        R-»Sp: Let me know!
+Albert.
+           
+R-»Sp: .
+           
+Sp-»R: 250 OK
+           
+R-»Sp: PKEY paris.com 2,2 ABCDEFGBCDEFGHID
+     
+      Sp-»R: 216 your mail has been kept!
+   
+R-»C: 216 your mail has been kept!
+    C-»R:
+PKEY bruxelles.com 2,2 FRITESFRITESFRIT
+      
+             R-»Sb:
+MAIL
+            
+       Sb-»R: 354 Start mail input; end
+with «CRLF».«CRLF»
+       
+            R-»Sb:
+Date: Fri, 10 April 2009 02:15:29 +0100
+      
+             R-»Sb:
+From: Albert A. «albert@home.com»
+      
+             R-»Sb:
+To: Bernard Guilé «bernard@paris.com»,
+   
+              
+ R-»Sb: Cyril Yette «cyril@paris.com»,
+   
+              
+ R-»Sb: Gerard Moulefrite «gerard@bruxelles.com»
+  
+                
+R-»Sb: Subject: Need of Camembert
+         
+          R-»Sb:
+   
+               
+R-»Sb: Hi everybody,
+          
+         R-»Sb: I'm going to
+France next week, would you be
+           
+        R-»Sb: interested in some
+creamy camembert?
+           
+        R-»Sb: Let me know!
+Albert.
+            
+       R-»Sb: .
+      
+             Sb-»R:
+250 OK une fois
+          
+         R-»Sb: PKEY paris.com
+2,2 ABCDEFGBCDEFGHID
+           
+        Sp-»R: 216 your mail has
+been kept! Once!
+    R-»C: 216 your mail has
+been kept!
+    C-»R: QUIT
+   
+R-»C: 221 london.com See you next time!
+      
+     R-»Sp: QUIT
+      
+     Sp-»R: 221 paris.com See you next
+time!
+              
+     R-»Sb: QUIT
+      
+             Sb-»R:
+221 bruxelles.com See you next time! Une fois!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
