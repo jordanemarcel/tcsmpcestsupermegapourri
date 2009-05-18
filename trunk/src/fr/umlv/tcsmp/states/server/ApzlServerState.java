@@ -53,7 +53,7 @@ public class ApzlServerState extends TCSMPState {
 			waitreply = false;
 			responses.addAll(Arrays.asList(TCSMPParser.slipResponseLine(TCSMPParser.decode(bb))));
 			try {
-				currentDomain = domains.get(0);
+				currentDomain = domains.remove(0);
 			}
 			catch (Exception e) {
 				// last domain has been processed
