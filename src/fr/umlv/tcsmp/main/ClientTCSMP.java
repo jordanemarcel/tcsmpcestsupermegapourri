@@ -8,7 +8,7 @@ import fr.umlv.tcsmp.mail.ui.GraphicTCSMPClient;
  * Simple main class to build the main frame UI that helps
  * user to send TCSMP message.
  */
-public class clientTCSMP {
+public class ClientTCSMP {
 
 	public static void main(String[] args) {
 		JFrame f = new JFrame("Write an Email");

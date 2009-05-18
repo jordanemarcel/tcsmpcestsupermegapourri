@@ -5,7 +5,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.tcp.TcpStructure;
 
-public class serverTCSMP {
+public class ServerTCSMP {
 
 	public static void main(String[] args) {
 		if (args.length != 1 && args.length != 2) {
