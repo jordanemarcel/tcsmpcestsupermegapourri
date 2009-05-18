@@ -28,9 +28,6 @@ public class SimpleServerStateTest {
 			else
 				System.out.print(TCSMPParser.decode(bb));
 			break;
-		case RELAYALL:
-			System.out.print("ALL" + " -> " + TCSMPParser.decode(bb));
-			break;
 		}
 		bb.clear(); /* assume bb has been consumed */
 	}

@@ -24,9 +24,6 @@ public class RelayServerStateTest {
 			else
 				System.out.print(TCSMPParser.decode(bb));
 			break;
-		case RELAYALL:
-			System.out.print("ALL" + " -> " + TCSMPParser.decode(bb));
-			break;
 		}
 		bb.clear(); /* assume bb has been consumed */
 	}
@@ -243,8 +240,6 @@ public class RelayServerStateTest {
 		bb.flip();
 		res = p.doIt(bb);
 		
-		if (res.getAction() != ResponseAction.RELAYALL)
-			throw new AssertionError("foo");
 		
 		// RELAY QUIT
 		System.out.print("\t");
