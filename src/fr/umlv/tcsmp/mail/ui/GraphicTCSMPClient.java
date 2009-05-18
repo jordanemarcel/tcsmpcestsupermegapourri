@@ -9,6 +9,7 @@ import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -183,6 +184,8 @@ public class GraphicTCSMPClient {
 					JOptionPane.showMessageDialog(parent, "Unknown host: " + relay, "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (IOException ioe) {
 					JOptionPane.showMessageDialog(parent, ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				} catch (TimeoutException toe) {
+					JOptionPane.showMessageDialog(parent, toe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
