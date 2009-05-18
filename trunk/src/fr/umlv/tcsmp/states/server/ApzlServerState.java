@@ -156,7 +156,11 @@ public class ApzlServerState extends TCSMPState {
 		currentDomain = domains.getFirst();
 
 		// reset cmd
-		bb.position(0);
+//		bb.position(0);
+		
+		bb.clear();
+		bb.put(TCSMPParser.encode("APZL\r\n"));
+		bb.flip();
 
 		// send it to any RCPT
 		return new Response(ResponseAction.RELAYALL);

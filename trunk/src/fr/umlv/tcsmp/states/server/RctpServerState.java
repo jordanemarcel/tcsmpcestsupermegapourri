@@ -137,7 +137,6 @@ public class RctpServerState extends TCSMPState {
 		}
 
 		if (proto.isRelay(domain) == false) {
-			System.out.println("I am the relay for " + domain);
 			if (proto.containsRcpt(user + "@" + domain)) {
 				bb.put(TCSMPParser.encode("451 Duplicated address.\r\n"));
 				bb.flip();
