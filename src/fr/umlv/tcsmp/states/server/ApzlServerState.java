@@ -101,6 +101,8 @@ public class ApzlServerState extends TCSMPState {
 				relayingState = ApzlState.SENDOK;
 			}
 			return new Response(ResponseAction.WRITE);
+		default:
+			/* nothing */
 		}
 	
 		// are we in timeout
