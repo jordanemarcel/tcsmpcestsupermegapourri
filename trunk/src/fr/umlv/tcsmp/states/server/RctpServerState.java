@@ -184,7 +184,10 @@ public class RctpServerState extends TCSMPState {
 	public Response cancel(Protocol proto, ByteBuffer bb) {
 		if (fakeProto != null) {
 			if (fakeProto.getRecpts().size() > 0)
+			{
+				System.out.println("CANCELED RCPT: removing " + fakeProto.getRecpts().get(0));
 				proto.removeRcpt(fakeProto.getRecpts().get(0));
+			}
 			fakeProto = null;
 		}
 		send = true;
