@@ -63,6 +63,7 @@ public abstract class TCSMPState {
 	}
 
 	/**
+	 * Return the timeout state
 	 * @return timeout state
 	 */
 	public int getTimeoutState() { 
@@ -70,7 +71,8 @@ public abstract class TCSMPState {
 	}
 
 	/**
-	 * @param timeout state timeoutState to set
+	 * Set the timeout state.
+	 * @param timeoutState state timeoutState to set
 	 */
 	public void setTimeoutState(int timeoutState) {
 		this.timeoutState = timeoutState;

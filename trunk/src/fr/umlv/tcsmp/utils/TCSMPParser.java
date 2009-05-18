@@ -63,7 +63,7 @@ public class TCSMPParser {
 	
 	/**
 	 * Decode a ByteBuffer into a String, using the good charset
-	 * @param ByteBuffer to decode
+	 * @param bb ByteBuffer to decode
 	 * @return the decoded String
 	 */
 	public static String decode(ByteBuffer bb) {
@@ -78,7 +78,7 @@ public class TCSMPParser {
 	
 	/**
 	 * Encode a String into an array of bytes, using the good charset
-	 * @param the String to encode
+	 * @param victim the String to encode
 	 * @return the encoded byte buffer
 	 */
 	public static ByteBuffer encode(String victim) {
@@ -86,6 +86,8 @@ public class TCSMPParser {
 	}
 
 	/**
+	 * Parse a domain String
+	 * @param mail String respresenting a mail address to be parsed
 	 * @return the domain associated to the email address. 
 	 */
 	public static String parseDomain(String mail) throws ParseException {
