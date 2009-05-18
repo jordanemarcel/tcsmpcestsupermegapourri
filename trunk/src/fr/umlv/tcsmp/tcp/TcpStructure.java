@@ -263,7 +263,7 @@ public class TcpStructure {
 			case CLOSE:
 				this.debug("Close socket");
 				key.cancel();
-				socketChannel.close();
+				this.closeSocket(socketChannel);
 				return;
 			}
 		} catch (ClosedChannelException e) {
@@ -284,11 +284,7 @@ public class TcpStructure {
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
-			try {
-				socketChannel.close();
-			} catch (IOException e1) {
-				System.err.println(e);
-			}
+			this.closeSocket(socketChannel);
 		}
 	}
 
@@ -354,10 +350,10 @@ public class TcpStructure {
 				socketChannel.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
 				return;
 			case CLOSE:
-				socketChannel.close();
+				this.closeSocket(socketChannel);
 				return;
 			default:
-				socketChannel.close();
+				this.closeSocket(socketChannel);
 			return;
 			}
 		} catch (IOException e) {
@@ -389,11 +385,7 @@ public class TcpStructure {
 			this.handleResponse(key, response);
 		} catch (IOException e) {
 			System.err.println(e);
-			try {
-				socketChannel.close();
-			} catch (IOException e1) {
-				System.err.println(e1);
-			}
+			this.closeSocket(socketChannel);
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
@@ -420,11 +412,7 @@ public class TcpStructure {
 			this.handleResponse(key, response);
 		} catch (IOException e) {
 			System.err.println(e);
-			try {
-				socketChannel.close();
-			} catch (IOException e1) {
-				System.err.println(e1);
-			}
+			this.closeSocket(socketChannel);
 			byteBuffer.clear();
 			Response cancelResponse = protocol.cancel(byteBuffer);
 			this.handleResponse(key, cancelResponse);
@@ -443,7 +431,7 @@ public class TcpStructure {
 		try {
 			if(socketChannel.finishConnect()==false) {
 				this.debug("Closing!");
-				socketChannel.close();
+				this.closeSocket(socketChannel);
 				return;
 			}
 			this.removePendingConnection(key);
@@ -456,11 +444,7 @@ public class TcpStructure {
 				throw new ConnectException();
 			}
 			this.debug(e);
-			try {
-				socketChannel.close();
-			} catch (IOException e1) {
-				System.err.println(e1);
-			}
+			this.closeSocket(socketChannel);
 			ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 			Protocol protocol = keyAttachment.getProtocol();
 			byteBuffer.clear();
@@ -479,11 +463,7 @@ public class TcpStructure {
 			if(pendingConnection.isTimedOut()) {
 				this.debug("TIME OUT!!!!");
 				if(givenProtocol.getProtocolMode()==ProtocolMode.CLIENT) {
-					try {
-						pendingConnection.getSelectionKey().channel().close();
-					} catch (IOException e1) {
-						System.err.println(e1);
-					}
+					this.closeSocket((SocketChannel)pendingConnection.getSelectionKey().channel());
 					throw new TimeoutException("Connection timed out! Aborted.");
 				}
 				SelectionKey selectionKey = pendingConnection.getSelectionKey();
@@ -527,6 +507,18 @@ public class TcpStructure {
 			return SelectionKey.OP_WRITE;
 		default:
 			throw new IllegalArgumentException("No Ops for " + responseAction.name());
+		}
+	}
+
+	private void closeSession(Protocol sessionProtocol) {
+
+	}
+
+	private void closeSocket(SocketChannel socketChannel) {
+		try {
+			socketChannel.close();
+		} catch (IOException e1) {
+			System.err.println(e1);
 		}
 	}
 
