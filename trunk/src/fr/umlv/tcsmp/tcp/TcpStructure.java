@@ -37,14 +37,14 @@ public class TcpStructure {
 	/** Default TCP Application layer buffer size */
 	public static int BUFFER_SIZE = 1024;
 	/** Default timeout for the selector */
-	private static long SELECTOR_TIMEOUT = 30000;
+	private static long SELECTOR_TIMEOUT = 1024;
 	/** Selector of the TCP structure */
 	private final Selector selector;
 	/** DNS Resolver of the TCP structure */
 	private final DNSResolver dnsResolver;
 	/** Protocol given to the TCP structure */
 	private Protocol givenProtocol;
-	//TODO javadoc
+	/** List that contains all the pending sockets that are waiting for connection */
 	private final ArrayList<PendingConnection> pendingConnectionList = 
 		new ArrayList<PendingConnection>();
 	/** Map that associates a Protocol (session) with a SocketData (list of connected
@@ -242,24 +242,6 @@ public class TcpStructure {
 				this.debug("CONTINUEREAD");
 				key.interestOps(SelectionKey.OP_READ);
 				return;
-//			case RELAYALL:
-//				this.debug("RELAYALL");
-//				Collection<SocketChannel> allClient = protocolDomainMap.get(protocol).getClients();
-//				for(SocketChannel client: allClient) {
-//					if(client==socketChannel) {
-//						this.debug("client is socketchannel");
-//						key.interestOps(SelectionKey.OP_WRITE);
-//					} else {
-//						this.debug("client is not socketchannel");
-//						client.register(selector, TcpStructure.getResponseOps(responseAction), new KeyAttachment(keyAttachment));
-//					}
-//				}
-//				if(socketChannel==socketData.getOriginalClient()) {
-//					this.debug("Socket is original client");
-//					this.debug("cancelling key...");
-//					key.cancel();
-//				}
-//				return;
 			case CLOSE:
 				key.cancel();
 				if(socketChannel==originalClient) {
@@ -530,8 +512,6 @@ public class TcpStructure {
 			return SelectionKey.OP_READ;
 		case WRITE:
 			return SelectionKey.OP_WRITE;
-//		case RELAYALL:
-//			return SelectionKey.OP_WRITE;
 		default:
 			throw new IllegalArgumentException("No Ops for " + responseAction.name());
 		}

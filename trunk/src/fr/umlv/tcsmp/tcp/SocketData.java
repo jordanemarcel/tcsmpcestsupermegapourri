@@ -51,7 +51,10 @@ public class SocketData {
 		domainSocketMap.put(domain, socketChannel);
 	}
 	
-	//TODO javadoc
+	/**
+	 * Sets the original client (uses by the Client MODE)
+	 * @param originalClient
+	 */
 	public void setOriginalClient(SocketChannel originalClient) {
 		this.originalClient = originalClient;
 	}
