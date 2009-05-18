@@ -53,7 +53,7 @@ public class ApzlClientState extends TCSMPState {
 					case 515:
 					default:
 						// NOOP TODO maybe record error msg?
-						proto.addErrorFor("Unknown" + i/2, list.get(i) + " " + list.get(i+1));
+						proto.addErrorFor("APZL", "Unknown" + i/2, list.get(i) + " " + list.get(i+1));
 						break;
 					}
 				}
@@ -83,10 +83,10 @@ public class ApzlClientState extends TCSMPState {
 	public Response cancel(Protocol proto, ByteBuffer bb) {
 		bb.clear();
 		if (resp == ResponseAction.WRITE) {
-			proto.addMainError("Communication error while APZL'ing.");
+			proto.addMainError("APZL", "Communication error while APZL'ing.");
 		}
 		else {
-			proto.addMainError("Communication error while getting APZL response(s).");
+			proto.addMainError("APZL", "Communication error while getting APZL response(s).");
 		}
 		return new Response(ResponseAction.CLOSE);
 	}

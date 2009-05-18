@@ -55,7 +55,7 @@ public class RctpClientState extends TCSMPState {
 			case 552:
 			case 553:
 			default://TODO check? + record error somewhere maybe
-				proto.addErrorFor(proto.getRecpts().get(index), list.get(0) + " " + list.get(1));
+				proto.addErrorFor("RCPT", proto.getRecpts().get(index), list.get(0) + " " + list.get(1));
 				index++;
 				// Don't remove, use error to known if something went wrong
 				// proto.getRecpts().remove(index);
@@ -85,10 +85,10 @@ public class RctpClientState extends TCSMPState {
 	public Response cancel(Protocol proto, ByteBuffer bb) {
 		bb.clear();
 		if (resp == ResponseAction.WRITE) {
-			proto.addMainError("Communication error while RCPT'ing.");
+			proto.addMainError("RCPT", "Communication error while RCPT'ing.");
 		}
 		else {
-			proto.addMainError("Communication error while getting RCPT response.");
+			proto.addMainError("RCPT", "Communication error while getting RCPT response.");
 		}
 		return new Response(ResponseAction.CLOSE);
 	}

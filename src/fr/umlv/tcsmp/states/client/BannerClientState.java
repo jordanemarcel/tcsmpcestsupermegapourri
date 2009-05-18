@@ -42,7 +42,7 @@ public class BannerClientState extends TCSMPState {
 						quiteState = new QuitClientState();
 						proto.setState(quiteState);
 					}
-					proto.addMainError(commandArgs.get(i) + " " + commandArgs.get(i+1));
+					proto.addMainError("Banner", commandArgs.get(i) + " " + commandArgs.get(i+1));
 					break;
 				}
 			}
@@ -57,7 +57,7 @@ public class BannerClientState extends TCSMPState {
 	@Override
 	public Response cancel(Protocol proto, ByteBuffer bb) {
 		bb.clear();
-		proto.addMainError("Communication error while getting the banner.");
+		proto.addMainError("Banner", "Communication error while getting the banner.");
 		return new Response(ResponseAction.CLOSE);
 	}
 }

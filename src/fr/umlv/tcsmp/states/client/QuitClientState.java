@@ -51,10 +51,10 @@ public class QuitClientState extends TCSMPState {
 	public Response cancel(Protocol proto, ByteBuffer bb) {
 		bb.clear();
 		if (resp == ResponseAction.WRITE) {
-			proto.addMainError("Communication error while QUIT'ing.");
+			proto.addMainError("QUIT", "Communication error while QUIT'ing.");
 		}
 		else {
-			proto.addMainError("Communication error while getting QUIT response.");
+			proto.addMainError("QUIT", "Communication error while getting QUIT response.");
 		}
 		return new Response(ResponseAction.CLOSE);
 	}

@@ -87,7 +87,7 @@ public class PkeyClientState extends TCSMPState {
 				break;
 			case 516:
 			default:
-				proto.addErrorFor(currentDomain, list.get(0) + " " + list.get(1));
+				proto.addErrorFor("PKEY", currentDomain, list.get(0) + " " + list.get(1));
 				processedDomains.put(currentDomain, true);
 				checkIfFinished(proto);
 				break;
@@ -106,10 +106,10 @@ public class PkeyClientState extends TCSMPState {
 	public Response cancel(Protocol proto, ByteBuffer bb) {
 		bb.clear();
 		if (resp == ResponseAction.WRITE) {
-			proto.addMainError("Communication error while PKEY'ing.");
+			proto.addMainError("PKEY", "Communication error while PKEY'ing.");
 		}
 		else {
-			proto.addMainError("Communication error while getting PKEY response.");
+			proto.addMainError("PKEY", "Communication error while getting PKEY response.");
 		}
 		return new Response(ResponseAction.CLOSE);
 	}
