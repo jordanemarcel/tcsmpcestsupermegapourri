@@ -53,6 +53,7 @@ public class ApzlServerState extends TCSMPState {
 			// first call, we have to read response from the current domain
 			if (responses == null) {			
 				responses = new ArrayList<String>();
+				bb.clear();
 				return new Response(currentDomain, ResponseAction.READ);
 			}
 
@@ -63,6 +64,7 @@ public class ApzlServerState extends TCSMPState {
 				domains.remove(currentDomain);
 				try {
 					currentDomain = domains.getFirst();
+					bb.clear();
 					return new Response(currentDomain, ResponseAction.READ);
 				} catch (Exception e) {
 					// seems there is no more domains, reply response to the
@@ -178,6 +180,7 @@ public class ApzlServerState extends TCSMPState {
 			domains.remove(currentDomain);
 			try {
 				currentDomain = domains.getFirst();
+				bb.clear();
 				return new Response(currentDomain, ResponseAction.READ);
 			} catch (Exception e) {
 				// seems there is no more domains, reply response to the
