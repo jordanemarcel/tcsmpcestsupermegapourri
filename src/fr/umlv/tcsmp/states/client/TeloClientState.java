@@ -16,6 +16,7 @@ public class TeloClientState extends TCSMPState {
 
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (resp == null) {
+			bb.clear();
 			// Request has not yet been sent
 			bb.put(TCSMPParser.encode("TELO "));
 			// TODO the domain is the server's, not the client's

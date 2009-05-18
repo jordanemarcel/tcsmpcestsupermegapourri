@@ -33,6 +33,7 @@ public class MailClientState extends TCSMPState {
 			// MAIL Request was not send yet
 			if (resp == null) {
 				// Mail has not yet been sent
+				bb.clear();
 				bb.put(TCSMPParser.encode("MAIL\r\n"));
 				bb.flip();
 				resp = ResponseAction.WRITE;
@@ -71,6 +72,7 @@ public class MailClientState extends TCSMPState {
 			// MAIL request was sent
 			if (resp == null) {
 				// Mail has not yet been sent
+				bb.clear();
 				bb.put(encodedMail);
 				offset += bb.limit();
 				bb.flip();
