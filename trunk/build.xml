@@ -13,7 +13,7 @@
    	<property name="main.client.class" value="fr.umlv.tcsmp.main.ClientTCSMP"/>
 	<property name="main.tpop.class" value="fr.umlv.tcsmp.main.ServerTPOP"/>
 	<property name="main.tcsmp.class" value="fr.umlv.tcsmp.main.ServerTCSMP"/>
-   	<property name="javadoc.dir" value="doc"/>
+    <property name="javadoc.dir" value="docs/doc"/>
    
    	<target name="prepare">
    		<mkdir dir="${classes.dir}"/>
