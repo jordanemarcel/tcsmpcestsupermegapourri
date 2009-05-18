@@ -9,7 +9,7 @@ public class ServerTCSMP {
 
 	public static void main(String[] args) {
 		if (args.length != 1 && args.length != 2) {
-			System.err.println("usage: java serverTPOP domainfile [dnsaddr]");
+			System.err.println("usage: java serverTCSMP domainfile [dnsaddr]");
 			System.exit(1);
 		}
 
