@@ -1,7 +1,5 @@
 package fr.umlv.tcsmp.main;
 
-import java.io.IOException;
-
 import fr.umlv.tcsmp.dns.TCSMPResolver;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
@@ -14,7 +12,7 @@ public class serverTCSMP {
 			System.err.println("usage: java serverTPOP domainfile [dnsaddr]");
 			System.exit(1);
 		}
-		
+
 		try {
 			TCSMPResolver tr = new TCSMPResolver(args[0]);
 			if (args.length == 2)
@@ -22,9 +20,8 @@ public class serverTCSMP {
 			TcpStructure tcpStructure = new TcpStructure(new TCSMPResolver(args[0]));
 			Protocol protocol = new Protocol(ProtocolMode.SERVER, 2626);
 			tcpStructure.processProtocol(protocol);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
 }
