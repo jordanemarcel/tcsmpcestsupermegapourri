@@ -216,7 +216,7 @@ public class Puzzle {
 	 * Constructs a new Puzzle with the given width and height. Its wheels are in the given.
 	 * @param width the number of wheel in width
 	 * @param height the number of wheel in height
-	 * @param wheelList the list of wheel use to build the puzzle. Have to contains
+	 * @param wheels the list of wheel use to build the puzzle. Have to contains
 	 * width*height wheels
 	 */
 	public Puzzle(int width,int height,Wheel[][] wheels){
@@ -249,7 +249,7 @@ public class Puzzle {
 	/**
 	 * Returns the list of wheel of the puzzle. WARNING this list can be modify but you should
 	 * not do that.
-	 * @return
+	 * @return the list of wheels of the puzzle
 	 */
 	public List<Wheel> getWheels() {
 		return wheels;
@@ -364,7 +364,7 @@ public class Puzzle {
 	/**
 	 * Returns a string which contains char of all wheels. The puzzle is read from left to right and from top to bottom
 	 * and each wheel is read in clockwise.
-	 * @return
+	 * @return a String corresponding to the puzzle according to the TCSMP RFC
 	 */
 	public String lineString() {
 		StringBuilder globalsb = new StringBuilder();
