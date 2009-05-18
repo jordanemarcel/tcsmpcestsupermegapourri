@@ -142,7 +142,6 @@ public class Protocol {
 	public boolean isRelay() {
 		try {
 			for (String rcpt: message.getRcpts()) {
-				System.out.println(rcpt);
 				if (isRelay(TCSMPParser.parseDomain(rcpt)))
 					return true;
 			}
