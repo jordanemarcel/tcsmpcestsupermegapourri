@@ -15,6 +15,7 @@ public class QuitClientState extends TCSMPState {
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (resp == null) {
 			// Request has not yet been sent
+			bb.clear();
 			bb.put(TCSMPParser.encode("QUIT\r\n"));
 			bb.flip();
 			resp = ResponseAction.WRITE;

@@ -18,6 +18,7 @@ public class ApzlClientState extends TCSMPState {
 	@Override
 	public Response processCommand(Protocol proto, ByteBuffer bb) {
 		if (resp == null) {
+			bb.clear();
 			// Request has not yet been sent
 			bb.put(TCSMPParser.encode("APZL\r\n"));
 

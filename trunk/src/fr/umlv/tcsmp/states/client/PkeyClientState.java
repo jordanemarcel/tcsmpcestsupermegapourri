@@ -55,6 +55,8 @@ public class PkeyClientState extends TCSMPState {
 
 			String s =  "PKEY " + currentDomain + " " + puzzle.getWidth() + "," + puzzle.getHeight() +
 				" " + puzzle.lineString() + "\r\n";
+			
+			bb.clear();
 			bb.put(TCSMPParser.encode(s));
 
 			bb.flip();
