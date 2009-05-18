@@ -39,7 +39,7 @@ public class SmtpHandler extends TCSMPHandler {
 				continue;
 			}
 
-			mail.sendMail(message.getFrom(), rcpt, "Fook", message.getLongMail());
+			mail.sendMail(message.getFrom(), rcpt, null, message.getLongMail());
 			mail.closeConn();
 		}
 	}
