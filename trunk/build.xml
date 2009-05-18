@@ -6,13 +6,13 @@
    	<property name="src.dir" value="src"/>
    	<property name="classes.dir" value="bin"/>
    	<property name="jar.dir" value="."/>
-   	<property name="client.name" value="ClientMail"/>
-   	<property name="tpop.name" value="TPOP"/>
-   	<property name="tcsmp.name" value="TCSMPserver"/>
+   	<property name="client.name" value="clientTCSMP"/>
+   	<property name="tpop.name" value="serverTPOP"/>
+   	<property name="tcsmp.name" value="serverTCSMP"/>
 	
-   	<property name="main.client.class" value="fr.umlv.tcsmp.main.clientTCSMP"/>
-	<property name="main.tpop.class" value="fr.umlv.tcsmp.main.serverTPOP"/>
-	<property name="main.tcsmp.client.class" value="fr.umlv.tcsmp.main.serverTCSMP"/>
+   	<property name="main.client.class" value="fr.umlv.tcsmp.main.ClientTCSMP"/>
+	<property name="main.tpop.class" value="fr.umlv.tcsmp.main.ServerTPOP"/>
+	<property name="main.tcsmp.class" value="fr.umlv.tcsmp.main.ServerTCSMP"/>
    	<property name="javadoc.dir" value="doc"/>
    
    	<target name="prepare">
