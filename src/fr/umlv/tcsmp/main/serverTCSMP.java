@@ -10,15 +10,17 @@ import fr.umlv.tcsmp.tcp.TcpStructure;
 public class serverTCSMP {
 
 	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.err.println("usage: java serverTPOP domainfile");
+		if (args.length != 1 && args.length != 2) {
+			System.err.println("usage: java serverTPOP domainfile [dnsaddr]");
 			System.exit(1);
 		}
 		
 		try {
-			TcpStructure tcpStructure = new TcpStructure(new TCSMPResolver(args[1]));
-			Protocol protocol = new Protocol(ProtocolMode.SERVER, 26);
-			protocol.addDomain(args[0]);
+			TCSMPResolver tr = new TCSMPResolver(args[0]);
+			if (args.length == 2)
+				tr.setServer(args[1]);
+			TcpStructure tcpStructure = new TcpStructure(new TCSMPResolver(args[0]));
+			Protocol protocol = new Protocol(ProtocolMode.SERVER, 2626);
 			tcpStructure.processProtocol(protocol);
 		} catch (IOException e) {
 			e.printStackTrace();

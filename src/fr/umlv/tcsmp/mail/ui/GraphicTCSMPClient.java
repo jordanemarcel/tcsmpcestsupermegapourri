@@ -149,7 +149,7 @@ public class GraphicTCSMPClient {
 				}
 				System.out.println("Relay: " + relay);
 
-				Protocol p = new Protocol(ProtocolMode.CLIENT);
+				Protocol p = new Protocol(ProtocolMode.CLIENT, 2626);
 				for(String s: toList) {
 					p.addRcpt(s);
 				}
