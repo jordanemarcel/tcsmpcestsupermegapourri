@@ -51,7 +51,6 @@ public class TCSMPResolver implements DNSResolver {
 				String a [] = line.split("=");
 				if (a.length == 2)
 					hosts.put(a[0], InetAddress.getByName(a[1]));
-				System.out.println(a[0]);
 			}
 			br.close();
 		} catch(Exception e) {}
