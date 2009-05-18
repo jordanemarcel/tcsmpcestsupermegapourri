@@ -1,7 +1,5 @@
 package fr.umlv.tcsmp.test;
 
-import java.io.IOException;
-
 import fr.umlv.tcsmp.dns.DNSResolver;
 import fr.umlv.tcsmp.dns.TCSMPResolver;
 import fr.umlv.tcsmp.handlers.MboxHandler;
@@ -23,7 +21,7 @@ public class TcpStructurePlatformTest {
 			}
 			protocol.setMessageHandler(new MboxHandler("/tmp"));
 			tcpStructure.processProtocol(protocol);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

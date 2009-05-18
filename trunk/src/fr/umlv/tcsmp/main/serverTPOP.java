@@ -1,7 +1,5 @@
 package fr.umlv.tcsmp.main;
 
-import java.io.IOException;
-
 import fr.umlv.tcsmp.dns.TCSMPResolver;
 import fr.umlv.tcsmp.handlers.TCSMPHandler;
 import fr.umlv.tcsmp.proto.Protocol;
@@ -31,7 +29,7 @@ public class serverTPOP {
 			protocol.addDomain(args[0]);
 			protocol.setMessageHandler(handler);
 			tcpStructure.processProtocol(protocol);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
