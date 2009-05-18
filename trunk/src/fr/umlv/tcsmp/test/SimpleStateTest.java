@@ -1,15 +1,17 @@
-package fr.umlv.tcsmp.junit;
+package fr.umlv.tcsmp.test;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+import fr.umlv.tcsmp.handlers.PrintHandler;
 import fr.umlv.tcsmp.handlers.SmtpHandler;
 import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.proto.Response;
+import fr.umlv.tcsmp.proto.ResponseAction;
 import fr.umlv.tcsmp.utils.TCSMPParser;
 
-public class ServerStateTest {
+public class SimpleStateTest {
 
 	private static boolean printBB(Response res, ByteBuffer bb) {
 		switch (res.getAction()) {
@@ -30,21 +32,37 @@ public class ServerStateTest {
 	}
 	
 	private static boolean writeReadwrite(Protocol serverProtocol, ByteBuffer serverBB, Protocol clientProtocol, ByteBuffer clientBB) {
-		// WRITE
+		// server goes in WRITE 
 		if (printBB(serverProtocol.doIt(serverBB), serverBB)) {
 			return true;
 		}
 		clientBB.put(serverBB);
 		serverBB.clear();
 		clientBB.flip();
-		serverProtocol.doIt(serverBB);
+		// server goes in READ
+		if (serverProtocol.doIt(serverBB).getAction() == ResponseAction.CLOSE) {
+			return true;
+		}
 		
-		// READ
+		// client goes in WRITE
 		if (printBB(clientProtocol.doIt(clientBB), clientBB)) {
 			return true;
 		}
-		// WRITE
-		clientProtocol.doIt(clientBB);
+
+		
+//		if (clientProtocol.getState().getClass() == PkeyClientState.class) {
+//			// simulate write failure
+//			if (clientProtocol.cancel(clientBB).getAction() == ResponseAction.CLOSE) {
+//				return true;
+//			}
+//		}
+//		else
+		{
+			// client goes in READ
+			if (clientProtocol.doIt(clientBB).getAction() == ResponseAction.CLOSE) {
+				return true;
+			}
+		}
 		serverBB.put(clientBB);
 		clientBB.clear();
 		serverBB.flip();
@@ -59,17 +77,19 @@ public class ServerStateTest {
 		/* SERVER */
 		Protocol serverProtocol = new Protocol(ProtocolMode.SERVER);
 		serverProtocol.addDomain("etudiant.univ-mlv.fr");
-		serverProtocol.setMessageHandler(new SmtpHandler());
-		
+		serverProtocol.setMessageHandler(new PrintHandler());
 		/* CLIENT */
 		Protocol clientProtocol = new Protocol(ProtocolMode.CLIENT);
 		clientProtocol.setFrom("toto@titi.com");
 		clientProtocol.setClientDomain("titi.com");
 		clientProtocol.addRcpt("clecigne@etudiant.univ-mlv.fr");
-//		clientProtocol.addRcpt("jmarce01@etudiant.univ-mlv.fr");
-//		clientProtocol.addRcpt("rmasso02@etudiant.univ-mlv.fr");
+//		clientProtocol.addRcpt("jojo@biniou.com");
+//		clientProtocol.addRcpt("clem@biniou.com");
 		// XXX .
 		clientProtocol.mail("P'tain, ca dechire du caribou.\r\n.\r\n");
+		
+		// init client banner state
+		clientProtocol.doIt(clientBB);
 		
 		while(!writeReadwrite(serverProtocol, serverBB, clientProtocol, clientBB)) {};
 		

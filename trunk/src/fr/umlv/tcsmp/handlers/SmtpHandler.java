@@ -11,7 +11,7 @@ import fr.umlv.tcsmp.smtp.Mail;
  * This handler can be used to relay Message to
  * a real SMTP server. 
  */
-public class SmtpHandler implements TCSMPHandler {
+public class SmtpHandler extends TCSMPHandler {
 
 	private final String smtpServer;
 
