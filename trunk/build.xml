@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+   <project name="TCSMP" default="all" basedir="." >
+    <description>
+       TCSMP implementation
+    </description>
+   	<property name="src.dir" value="src"/>
+   	<property name="classes.dir" value="bin"/>
+   	<property name="jar.dir" value="."/>
+   	<property name="client.name" value="ClientMail"/>
+   	<property name="tpop.name" value="TPOP"/>
+   	<property name="tcsmp.name" value="TCSMPserver"/>
+	
+   	<property name="main.client.class" value="fr.umlv.tcsmp.main.clientTCSMP"/>
+	<property name="main.tpop.class" value="fr.umlv.tcsmp.main.serverTPOP"/>
+	<property name="main.tcsmp.client.class" value="fr.umlv.tcsmp.main.serverTCSMP"/>
+   	<property name="javadoc.dir" value="doc"/>
+   
+   	<target name="prepare">
+   		<mkdir dir="${classes.dir}"/>
+   	</target>
+   	
+   	<target name="compile" depends="prepare">
+    	<javac srcdir="${src.dir}" destdir="${classes.dir}" debug="true" ></javac>
+        </target>
+   	
+	
+	
+   	<target name = "jar" depends="compile">
+   	   		<jar destfile="${jar.dir}/${tpop.name}.jar" basedir="${classes.dir}">
+   	   			<manifest>
+   	   				<attribute name="Main-Class" value="${main.tpop.class}"/>
+   	   			</manifest>
+   	   		</jar>
+                        <jar destfile="${jar.dir}/${client.name}.jar" basedir="${classes.dir}">
+                                <manifest>
+                                        <attribute name="Main-Class" value="${main.client.class}"/>
+                                </manifest>
+                        </jar>
+			<jar destfile="${jar.dir}/${tcsmp.name}.jar" basedir="${classes.dir}">
+                                <manifest>
+                                        <attribute name="Main-Class" value="${main.tcsmp.class}"/>
+                                </manifest>
+                        </jar>
+
+   	</target>
+   	
+	
+	
+	
+   	<target name="run-client" depends="jar">
+   		<java jar="${jar.dir}/${client.name}.jar" fork="true"/>
+   	</target>
+   	<target name="run-tcsmp" depends="jar">
+                <java jar="${jar.dir}/${tcsmp.name}.jar" fork="true"/>
+        </target>
+        <target name="run-tpop" depends="jar">
+                <java jar="${jar.dir}/${tpo.name}.jar" fork="true"/>
+        </target>
+	<target name="run" depends="jar">
+		<echo message="use : run-client or run-tpop or run-tcsmp" />
+        </target>
+
+
+
+	
+   	<target name="javadoc" depends="compile"
+   	   description="Create Javadoc API documentation">
+   	    <mkdir dir="${javadoc.dir}"/>
+            <javadoc classpath="${remix.jar}" 
+   	    sourcepath="${src.dir}" 
+   	    destdir="${javadoc.dir}" 
+   	    packagenames="*">
+   	    </javadoc>
+   	</target>
+   	
+
+   	<target name = "clean">
+   		<delete dir="${javadoc.dir}"/>
+   		<delete dir="${classes.dir}"/>
+   		<delete file="${jar.dir}/${client.name}.jar"/>
+   		<delete file="${jar.dir}/${tcsmp.name}.jar"/>
+   		<delete file="${jar.dir}/${tpop.name}.jar"/>
+   	</target>
+
+   	
+   	<target name = "all" depends="clean,compile,jar"/>
+   </project>
