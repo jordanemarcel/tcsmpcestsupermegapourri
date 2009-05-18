@@ -1,3 +1,0 @@
-Ajouter à la RFC :
-	- le serveur qui génère un message d'erreur suite à un APZL doit mettre son nom de domaine
-	(pour être capable de déterminer qui a chié)
