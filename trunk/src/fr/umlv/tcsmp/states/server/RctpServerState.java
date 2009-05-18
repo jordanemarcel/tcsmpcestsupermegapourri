@@ -52,6 +52,7 @@ public class RctpServerState extends TCSMPState {
 					return new Response(ResponseAction.WRITE);
 				}
 				else {
+					bb.clear();
 					return new Response(currentRCPTDomain, ResponseAction.READ);
 				}
 			}
@@ -67,6 +68,7 @@ public class RctpServerState extends TCSMPState {
 				return new Response(currentRCPTDomain, ResponseAction.WRITE);
 			}
 
+			bb.clear();
 			return new Response(currentRCPTDomain, ResponseAction.READ);
 		}
 
