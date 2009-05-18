@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import fr.umlv.tcsmp.dns.DNSResolver;
 import fr.umlv.tcsmp.proto.Protocol;
@@ -31,6 +32,8 @@ import fr.umlv.tcsmp.utils.TCSMPParser;
  * what its next action should be.
  */
 public class TcpStructure {
+	/** Used for debug */
+	private static boolean debug = true;
 	/** Default TCP Application layer buffer size */
 	private static int BUFFER_SIZE = 1024;
 	/** Default timeout for the selector */
@@ -64,27 +67,29 @@ public class TcpStructure {
 	 * if it acts as a client or as a server.
 	 * @param protocol - the protocol that handles the Application layer of the TCP Structure
 	 * @throws IOException - if something goes wrong
+	 * @throws TimeoutException 
 	 */
-	public void processProtocol(Protocol protocol) throws IOException {
+	public void processProtocol(Protocol protocol) throws IOException, TimeoutException {
 		this.givenProtocol = protocol;
 		switch (protocol.getProtocolMode()) {
 		case CLIENT:
-			System.out.println("* TcpStructure: CLIENT Mode");
+			this.debug("CLIENT Mode");
 			this.startClient(protocol.getProtocolPort());
 			break;
 		case SERVER:
-			System.out.println("* TcpStructure: SERVER Mode");
+			this.debug("SERVER Mode");
 			this.startServer(protocol.getProtocolPort());
 			break;
 		}
 	}
-	
+
 	/**
 	 * Starts the structure in Client mode.
 	 * @param port - port the client is going to connect on
 	 * @throws IOException - if the connection goes wrong
+	 * @throws TimeoutException 
 	 */
-	private void startClient(int port) throws IOException {
+	private void startClient(int port) throws IOException, TimeoutException {
 		TcpStructure.SELECTOR_TIMEOUT = 1000;
 		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(TcpStructure.BUFFER_SIZE);
 		KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, givenProtocol);
@@ -92,20 +97,21 @@ public class TcpStructure {
 		keyAttachment.setCurrentResponse(response);
 		protocolDomainMap.put(givenProtocol, new SocketData(null));
 		String address = givenProtocol.getDefaultRelay();
-		System.out.println(address);
+		this.debug(address);
 		InetAddress inet = InetAddress.getByName(address);
-		System.out.println(inet);
+		this.debug(inet);
 		this.connectNewClient(inet, keyAttachment);
 		this.handleSelector();
-		System.out.println("* TcpStructure: End of Transmission");
+		this.debug("End of Transmission");
 	}
 
 	/**
 	 * Starts the structure in Server mode.
 	 * @param port - port that the server opens
 	 * @throws IOException - if the server goes wrong
+	 * @throws TimeoutException 
 	 */
-	private void startServer(int port) throws IOException {
+	private void startServer(int port) throws IOException, TimeoutException {
 		ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 		InetSocketAddress localIsa = new InetSocketAddress(port);
 		serverSocketChannel.socket().bind(localIsa);
@@ -113,13 +119,14 @@ public class TcpStructure {
 		serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 		this.handleSelector();
 	}
-	
+
 	/**
 	 * Starts the selector. If the TCP Structure is in Client mode, stops when
 	 * no more socket is connected. In Server mode, loop infinitely.
 	 * @throws IOException - if the selector goes wrong
+	 * @throws TimeoutException 
 	 */
-	private void handleSelector() throws IOException {
+	private void handleSelector() throws IOException, TimeoutException {
 		while(selector.keys().size()>0 || givenProtocol.getProtocolMode()==ProtocolMode.SERVER) {
 			this.closeTimedOutPendingConnection();
 			selector.select(SELECTOR_TIMEOUT);
@@ -141,9 +148,9 @@ public class TcpStructure {
 			}
 			selectionKeys.clear();
 		}
-		System.out.println("FINISH");
+		this.debug("FINISH");
 	}
-	
+
 	/**
 	 * This method checks if the keys of the selector that have not been selected
 	 * are timed out. If so, it calls the doIt() method of the key's protocol.
@@ -186,75 +193,75 @@ public class TcpStructure {
 		try {
 			switch (responseAction) {
 			case READ: case WRITE:
-				System.out.println("* TcpStructure: READ/WRITE");
+				this.debug("READ/WRITE");
 				if(responseAction==ResponseAction.READ) {
-					System.out.println("Next: READ");
+					this.debug("Next: READ");
 				} else {
-					System.out.println("Next: WRITE");
+					this.debug("Next: WRITE");
 				}
 				if(domain==null) {
-					System.out.println("* TcpStructure: Domain null");
+					this.debug("Domain null");
 					if(socketChannel==originalClient) {
-						System.out.println("* TcpStructure: Original client");
+						this.debug("Original client");
 						key.interestOps(TcpStructure.getResponseOps(responseAction));
 						return;
 					} else {
-						System.out.println("* TcpStructure: Not original client");
-						System.out.println("* TcpStructure: cancelling key...");
+						this.debug("Not original client");
+						this.debug("cancelling key...");
 						key.cancel();
 						originalClient.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
 						return;
 					}
 				} else {
-					System.out.println("* TcpStructure: Domain non null - " + domain);
+					this.debug("Domain non null - " + domain);
 					SocketChannel client = socketData.getSocket(domain);
 					if(socketChannel==client) {
-						System.out.println("* TcpStructure: Socket is last client");
+						this.debug("Socket is last client");
 						key.interestOps(TcpStructure.getResponseOps(responseAction));
 						return;
 					} else {
-						System.out.println("* TcpStructure: Socket is not last client");
+						this.debug("Socket is not last client");
 						if(client==null) {
-							System.out.println("* TcpStructure: Client is null");
+							this.debug("Client is null");
 							keyAttachment.setCurrentResponse(response);
 							InetAddress domainAddress = dnsResolver.resolv(domain);
 							this.connectNewClient(domainAddress, keyAttachment);
 							key.cancel();
-							System.out.println("* TcpStructure: cancelling key...");
+							this.debug("cancelling key...");
 							return;
 						} else {
-							System.out.println("* TcpStructure: Client is not null");
+							this.debug("Client is not null");
 							client.register(selector, TcpStructure.getResponseOps(responseAction), keyAttachment);
 							key.cancel();
-							System.out.println("* TcpStructure: cancelling key...");
+							this.debug("cancelling key...");
 							return;
 						}
 					}
 				}
 			case CONTINUEREAD:
-				System.out.println("* TcpStructure: CONTINUEREAD");
+				this.debug("CONTINUEREAD");
 				key.interestOps(SelectionKey.OP_READ);
 				return;
 			case RELAYALL:
-				System.out.println("* TcpStructure: RELAYALL");
+				this.debug("RELAYALL");
 				Collection<SocketChannel> allClient = protocolDomainMap.get(protocol).getClients();
 				for(SocketChannel client: allClient) {
 					if(client==socketChannel) {
-						System.out.println("* TcpStructure: client is socketchannel");
+						this.debug("client is socketchannel");
 						key.interestOps(SelectionKey.OP_WRITE);
 					} else {
-						System.out.println("* TcpStructure: client is not socketchannel");
+						this.debug("client is not socketchannel");
 						client.register(selector, TcpStructure.getResponseOps(responseAction), new KeyAttachment(keyAttachment));
 					}
 				}
 				if(socketChannel==socketData.getOriginalClient()) {
-					System.out.println("* TcpStructure: Socket is original client");
-					System.out.println("* TcpStructure: cancelling key...");
+					this.debug("Socket is original client");
+					this.debug("cancelling key...");
 					key.cancel();
 				}
 				return;
 			case CLOSE:
-				System.out.println("* TcpStructure: Close socket");
+				this.debug("Close socket");
 				key.cancel();
 				socketChannel.close();
 				return;
@@ -305,26 +312,26 @@ public class TcpStructure {
 				socketData.setOriginalClient(client);
 			}
 			if(client.connect(remoteIsa)) {
-				System.out.println("* TcpStructure: Immediate connection");
+				this.debug("Immediate connection");
 				socketData.putSocket(client, keyAttachment.getCurrentResponse().getDest());
 				client.register(selector, TcpStructure.getResponseOps(currentResponse.getAction()), keyAttachment);
 			} else {
-				System.out.println("* TcpStructure: Non Immediate connection");
+				this.debug("Non Immediate connection");
 				SelectionKey selectionKey = client.register(selector, SelectionKey.OP_CONNECT, keyAttachment);
 				PendingConnection pendingConnection = new PendingConnection(selectionKey);
 				pendingConnectionList.add(pendingConnection);
 			}
 		} catch(IllegalArgumentException iae) {
 			System.err.println(iae);
-			System.err.println("* TcpStructure: Could not connect to the client");
-			throw new IOException("* TcpStructure: Can't establish a connection with the client :-(");
+			System.err.println("Could not connect to the client");
+			throw new IOException("Can't establish a connection with the client :-(");
 		} catch (IOException e) {
 			System.err.println(e);
-			System.err.println("* TcpStructure: Could not connect to the client");
-			throw new IOException("* TcpStructure: Can't establish a connection with the client :-(");
+			System.err.println("Could not connect to the client");
+			throw new IOException("Can't establish a connection with the client :-(");
 		}
 	}
-			
+
 	/**
 	 * Selector method: accepts a new connection
 	 * @param key - selected key
@@ -334,7 +341,7 @@ public class TcpStructure {
 		Protocol newServerProtocol = givenProtocol.newProtocol();
 		try {
 			SocketChannel socketChannel = serverSocketChannel.accept();
-			System.out.println("* TcpStructure: New connection from: " + socketChannel.socket().getRemoteSocketAddress());
+			this.debug("New connection from: " + socketChannel.socket().getRemoteSocketAddress());
 			ByteBuffer byteBuffer = ByteBuffer.allocateDirect(TcpStructure.BUFFER_SIZE);
 			KeyAttachment keyAttachment = new KeyAttachment(byteBuffer, newServerProtocol);
 			SocketData socketData = new SocketData(socketChannel);
@@ -351,7 +358,7 @@ public class TcpStructure {
 				return;
 			default:
 				socketChannel.close();
-				return;
+			return;
 			}
 		} catch (IOException e) {
 			System.err.println("Could not accept a new connection");
@@ -369,15 +376,15 @@ public class TcpStructure {
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 		Protocol protocol = keyAttachment.getProtocol();
-		System.out.println("* TcpStructure: Reading from " + socketChannel.socket().getRemoteSocketAddress());
+		this.debug("Reading from " + socketChannel.socket().getRemoteSocketAddress());
 		try {
 			int size = socketChannel.read(byteBuffer);
 			if(size==-1) {
 				throw new IOException("Socket closed");
 			}
-			System.out.println(size);
+			this.debug(size);
 			byteBuffer.flip();
-			System.out.println(TCSMPParser.decode(byteBuffer));
+			this.debug(TCSMPParser.decode(byteBuffer));
 			Response response = protocol.doIt(byteBuffer);
 			this.handleResponse(key, response);
 		} catch (IOException e) {
@@ -402,9 +409,9 @@ public class TcpStructure {
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
 		ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
 		Protocol protocol = keyAttachment.getProtocol();
-		System.out.println("* TcpStructure: Writing to " + socketChannel.socket().getRemoteSocketAddress());
+		this.debug("Writing to " + socketChannel.socket().getRemoteSocketAddress());
 		try {
-			System.out.println(TCSMPParser.decode(byteBuffer));
+			this.debug(TCSMPParser.decode(byteBuffer));
 			while(byteBuffer.hasRemaining()) {
 				socketChannel.write(byteBuffer);
 			}
@@ -432,15 +439,15 @@ public class TcpStructure {
 	private void doConnect(SelectionKey key) throws ConnectException {
 		SocketChannel socketChannel = (SocketChannel)key.channel();
 		KeyAttachment keyAttachment = (KeyAttachment)key.attachment();
-		System.out.println("* TcpStructure: Preparing to connect..");
+		this.debug("Preparing to connect..");
 		try {
 			if(socketChannel.finishConnect()==false) {
-				System.out.println("* TcpStructure: Closing!");
+				this.debug("Closing!");
 				socketChannel.close();
 				return;
 			}
 			this.removePendingConnection(key);
-			System.out.println("* TcpStructure: Connected!");
+			this.debug("Connected!");
 			SocketData socketData = protocolDomainMap.get(keyAttachment.getProtocol());
 			socketData.putSocket(socketChannel, keyAttachment.getCurrentResponse().getDest());
 			key.interestOps(TcpStructure.getResponseOps(keyAttachment.getCurrentResponse().getAction()));
@@ -448,7 +455,7 @@ public class TcpStructure {
 			if(givenProtocol.getProtocolMode()==ProtocolMode.CLIENT) {
 				throw new ConnectException();
 			}
-			System.out.println(e);
+			this.debug(e);
 			try {
 				socketChannel.close();
 			} catch (IOException e1) {
@@ -461,14 +468,24 @@ public class TcpStructure {
 			this.handleResponse(key, cancelResponse);
 		}
 	}
-	
-	//TODO javadoc
-	private void closeTimedOutPendingConnection() {
+
+	/**
+	 * Checks in the pending connection list if a socketChannel is timed out
+	 * If so, it closes the socketChannel
+	 * @throws TimeoutException
+	 */
+	private void closeTimedOutPendingConnection() throws TimeoutException {
 		for(PendingConnection pendingConnection: pendingConnectionList) {
 			if(pendingConnection.isTimedOut()) {
-				System.out.println(pendingConnectionList.size());
-				System.out.println("TIME OUT!!!!");
-				System.out.println(pendingConnectionList.size());
+				this.debug("TIME OUT!!!!");
+				if(givenProtocol.getProtocolMode()==ProtocolMode.CLIENT) {
+					try {
+						pendingConnection.getSelectionKey().channel().close();
+					} catch (IOException e1) {
+						System.err.println(e1);
+					}
+					throw new TimeoutException("Connection timed out! Aborted.");
+				}
 				SelectionKey selectionKey = pendingConnection.getSelectionKey();
 				KeyAttachment keyAttachment = (KeyAttachment)selectionKey.attachment();
 				ByteBuffer byteBuffer = keyAttachment.getByteBuffer();
@@ -479,8 +496,11 @@ public class TcpStructure {
 			}
 		}
 	}
-	
-	//TODO javadoc
+
+	/**
+	 * If a connection succeeds, it has to be removed from the pending connection list
+	 * @param selectionKey - the selection key associated with the pending connection to remove
+	 */
 	private void removePendingConnection(SelectionKey selectionKey) {
 		Iterator<PendingConnection> it = pendingConnectionList.iterator();
 		while(it.hasNext()) {
@@ -489,14 +509,6 @@ public class TcpStructure {
 				it.remove();
 			}
 		}
-//		for( PendingConnection pendingConnection: pendingConnectionList) {
-//			if(pendingConnection.getSelectionKey()==selectionKey) {
-//				pendingConnectionList.remove(pendingConnection);
-//				//remove = true;
-//				//System.out.println("Key removed!");
-//				//break;
-//			}
-//		}
 	}
 
 	/**
@@ -515,6 +527,16 @@ public class TcpStructure {
 			return SelectionKey.OP_WRITE;
 		default:
 			throw new IllegalArgumentException("No Ops for " + responseAction.name());
+		}
+	}
+
+	/**
+	 * Use for debug purpose only
+	 * @param message - the debug message
+	 */
+	private void debug(Object message) {
+		if(debug) {
+			System.out.println(" *** Tcp Structure: " + message);
 		}
 	}
 
