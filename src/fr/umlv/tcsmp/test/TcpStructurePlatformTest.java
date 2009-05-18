@@ -1,4 +1,4 @@
-package fr.umlv.tcsmp.junit;
+package fr.umlv.tcsmp.test;
 
 import java.io.IOException;
 

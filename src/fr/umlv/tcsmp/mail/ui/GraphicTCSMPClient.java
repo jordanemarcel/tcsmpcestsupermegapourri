@@ -29,15 +29,7 @@ import fr.umlv.tcsmp.tcp.TcpStructure;
 
 public class GraphicTCSMPClient {
 
-	public static void main(String[] args) {
-		JFrame f = new JFrame("Write an Email");
-		f.setSize(400,600);
-		f.setContentPane(GraphicTCSMPClient.createMainPanel(f));
-		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		f.setVisible(true);
-	}
-
-	private static JPanel createMainPanel(final JFrame parent){
+	public static JPanel createMainPanel(final JFrame parent){
 
 		JPanel main = new JPanel(new BorderLayout());
 		JPanel header = new JPanel(new GridLayout(6,2));
