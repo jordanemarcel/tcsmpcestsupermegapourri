@@ -34,8 +34,8 @@ public class TCSMPResolver implements DNSResolver {
 		this("127.0.0.1", null);
 	}
 
-	public TCSMPResolver(String server) {
-		this(server, null);
+	public TCSMPResolver(String path) {
+		this(null, path);
 	}
 	
 	public TCSMPResolver(String server, String path) {
@@ -51,6 +51,7 @@ public class TCSMPResolver implements DNSResolver {
 				String a [] = line.split("=");
 				if (a.length == 2)
 					hosts.put(a[0], InetAddress.getByName(a[1]));
+				System.out.println(a[0]);
 			}
 			br.close();
 		} catch(Exception e) {}

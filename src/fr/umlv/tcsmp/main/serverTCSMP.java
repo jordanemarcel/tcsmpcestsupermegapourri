@@ -17,7 +17,7 @@ public class serverTCSMP {
 			TCSMPResolver tr = new TCSMPResolver(args[0]);
 			if (args.length == 2)
 				tr.setServer(args[1]);
-			TcpStructure tcpStructure = new TcpStructure(new TCSMPResolver(args[0]));
+			TcpStructure tcpStructure = new TcpStructure(tr);
 			Protocol protocol = new Protocol(ProtocolMode.SERVER, 2626);
 			tcpStructure.processProtocol(protocol);
 		} catch (Exception e) {
