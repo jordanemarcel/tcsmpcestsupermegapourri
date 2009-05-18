@@ -6,7 +6,7 @@ import fr.umlv.tcsmp.proto.Protocol;
 import fr.umlv.tcsmp.proto.ProtocolMode;
 import fr.umlv.tcsmp.tcp.TcpStructure;
 
-public class serverTPOP {
+public class ServerTPOP {
 
 	public static void main(String[] args) {
 
