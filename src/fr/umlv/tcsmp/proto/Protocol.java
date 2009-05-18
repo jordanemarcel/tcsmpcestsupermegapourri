@@ -228,8 +228,6 @@ public class Protocol {
 	}
 
 	public void setState(TCSMPState state) {
-		// clear timeout of the previous state
-		this.state.timeoutClear();
 		this.state = state;
 	}
 

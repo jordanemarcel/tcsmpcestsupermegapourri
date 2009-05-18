@@ -22,7 +22,7 @@ public abstract class TCSMPState {
 
 	private int timeoutState;
 	private int timeoutTime;
-	private Timer currentTimer;
+	private long lastTime;
 
 	public TCSMPState() {
 		timeoutTime = 0;
@@ -31,7 +31,7 @@ public abstract class TCSMPState {
 
 	public TCSMPState(int tout) {
 		this();
-		currentTimer = createTimer(createTimerTask(), tout);
+		lastTime = System.currentTimeMillis();
 		timeoutTime = tout;
 	}
 
@@ -54,57 +54,18 @@ public abstract class TCSMPState {
 		
 		throw new AssertionError("Invalid timeout state in timeoutResponse() call");
 	}
-
-
-	private static Timer createTimer(TimerTask task, int tout) {
-		Timer t = new Timer();
-		t.schedule(task, tout);
-		return t;
-	}
 	
 	/**
 	 * Rearm the timeout
 	 */
 	public void timeoutReset() {
-		if (timeoutTime == 0)
-			return;
-		
-		try {
-			currentTimer.cancel();
-			currentTimer = createTimer(createTimerTask(), timeoutTime);
-		}
-		catch (Exception e) {
-		}
-	}
-	
-	/**
-	 * Clear the timeout.
-	 */
-	public void timeoutClear() {
-		if (timeoutTime == 0)
-			return;
-		
-		try {
-			currentTimer.cancel();
-			currentTimer.purge();
-		}
-		catch (Exception e) {
-		}
-	}
-	
-	private TimerTask createTimerTask() {
-		return new TimerTask() {
-			@Override
-			public void run() {
-				timeoutState = TIMEOUT_WRITE;
-			}
-		};
+		lastTime = System.currentTimeMillis();
 	}
 
 	/**
 	 * @return timeout state
 	 */
-	public int getTimeoutState() {
+	public int getTimeoutState() { 
 		return timeoutState;
 	}
 
@@ -119,7 +80,19 @@ public abstract class TCSMPState {
 	 * is Timeout ?
 	 */
 	public boolean isTimeout() {
-		return timeoutState != TIMEOUT_NONE;
+		if (timeoutTime == 0)
+			return false;
+		
+		if (timeoutState != TIMEOUT_NONE)
+			return true;
+		
+		long time = System.currentTimeMillis();
+		if (time - lastTime > timeoutTime) {
+			timeoutState = TIMEOUT_WRITE;
+			return true;
+		}
+		lastTime = time;
+		return false;
 	}
 	
 	/**
