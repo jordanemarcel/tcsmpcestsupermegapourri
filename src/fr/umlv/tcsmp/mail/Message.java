@@ -30,11 +30,11 @@ public class Message {
 	}
 
 	public void setFrom(String from) {
-		this.from = from.toLowerCase();
+		this.from = from.toLowerCase().trim();
 	}
 
 	public void addRctp(String rcpt) {
-		this.rcpts.add(rcpt.toLowerCase());
+		this.rcpts.add(rcpt.toLowerCase().trim());
 	}
 
 	public ArrayList<String> getMail() {

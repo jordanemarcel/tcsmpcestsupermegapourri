@@ -185,7 +185,6 @@ public class RctpServerState extends TCSMPState {
 		if (fakeProto != null) {
 			if (fakeProto.getRecpts().size() > 0)
 			{
-				System.out.println("CANCELED RCPT: removing " + fakeProto.getRecpts().get(0));
 				proto.removeRcpt(fakeProto.getRecpts().get(0));
 			}
 			fakeProto = null;
