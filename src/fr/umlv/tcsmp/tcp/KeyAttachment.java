@@ -32,7 +32,10 @@ public class KeyAttachment {
 	 * @param keyAttachment - the KeyAttachement to copy
 	 */
 	public KeyAttachment(KeyAttachment keyAttachment) {
-		this.byteBuffer = keyAttachment.getByteBuffer().duplicate();
+		this.byteBuffer = ByteBuffer.allocate(TcpStructure.BUFFER_SIZE);
+		this.byteBuffer.put(keyAttachment.getByteBuffer());
+		this.byteBuffer.flip();
+		keyAttachment.getByteBuffer().flip();
 		this.protocol = keyAttachment.getProtocol();
 		this.currentResponse = keyAttachment.currentResponse;
 	}

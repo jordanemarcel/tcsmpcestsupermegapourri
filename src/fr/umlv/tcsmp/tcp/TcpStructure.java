@@ -35,7 +35,7 @@ public class TcpStructure {
 	/** Used for debug */
 	private static boolean debug = true;
 	/** Default TCP Application layer buffer size */
-	private static int BUFFER_SIZE = 1024;
+	public static int BUFFER_SIZE = 1024;
 	/** Default timeout for the selector */
 	private static long SELECTOR_TIMEOUT = 30000;
 	/** Selector of the TCP structure */
