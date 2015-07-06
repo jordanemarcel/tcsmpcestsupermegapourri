@@ -1,0 +1,1 @@
+This is the implementation of the world famous TCSMP protocol by the GoFb (Gang of Four belge) in Java.
